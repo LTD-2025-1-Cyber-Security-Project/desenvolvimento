@@ -1,0 +1,1 @@
+pyinstaller --onefile --add-data "checklist_data.json:." --add-data "templates:templates" run.py
