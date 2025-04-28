@@ -1,0 +1,4 @@
+No sistema que desenvolvi, o login e senha padrão são:
+
+E-mail: admin@admin.com
+Senha: admin

@@ -1,0 +1,39 @@
+INTERFACE GRÁFICA:
+Design elegante, profissional e intuitivo com cores institucionais das prefeituras
+Sistema de navegação por abas para separar diferentes funcionalidades
+Logos oficiais e identidade visual condizente com órgãos públicos
+Responsividade adequada para diferentes tamanhos de tela
+
+FUNCIONALIDADES PRINCIPAIS:
+Envio de e-mails individuais para funcionários específicos
+Envio em massa para múltiplos destinatários (centenas/milhares de funcionários)
+Agendamento de e-mails automáticos recorrentes em horários específicos
+Importação/exportação de listas de destinatários via CSV/Excel
+Sistema de templates de mensagens personalizáveis
+Histórico completo de e-mails enviados com status de entrega
+
+CONFIGURAÇÕES DO SISTEMA:
+Painel para configurações SMTP com suporte a diferentes servidores
+Opções de configuração de assinaturas personalizadas por departamento
+Configurações de segurança e criptografia de e-mails
+Opções para definir horários de envio automático com frequência diária/semanal/mensal
+Sistema de backup automático das configurações e templates
+
+GERENCIAMENTO DE USUÁRIOS:
+Sistema de login com diferentes níveis de permissão
+Cadastro de funcionários organizados por departamentos/setores
+Criação de grupos de envio personalizados e listas de distribuição
+Importação da base de dados de funcionários dos sistemas já existentes
+
+MANUAL/INSTRUÇÕES:
+Módulo de ajuda integrado com instruções detalhadas
+Tutoriais interativos para novos usuários
+Documentação técnica para administradores do sistema
+FAQs e suporte para problemas comuns
+
+CARACTERÍSTICAS TÉCNICAS:
+Código bem organizado, modular e bem documentado
+Interface MVC para facilitar manutenção e atualizações
+Sistema de logs para monitoramento e diagnóstico
+Tratamento de erros robusto com mensagens informativas
+Otimização para uso eficiente de recursos do sistema
