@@ -1,0 +1,8 @@
+Flask
+Markdown
+bleach
+pyinstaller
+pyinstaller-hooks-contrib
+
+# pyinstaller --onefile --add-data "templates:templates" --add-data "static:static" --add-data "checklist_data.json:." run.py
+# pyinstaller --onefile run.py
