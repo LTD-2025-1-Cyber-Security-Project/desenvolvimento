@@ -1,0 +1,3060 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal de Tecnologia da Prefeitura - LTD Estácio</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- <link rel="stylesheet" href="/css/styles.css" /> -->
+    <style>
+      :root {
+        --primary: #0056b3;
+        --secondary: #00b3a6;
+        --accent: #7b2cbf;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --success: #28a745;
+        --info: #17a2b8;
+        --warning: #ffc107;
+        --danger: #dc3545;
+        --gradient: linear-gradient(135deg, var(--primary), var(--accent));
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #f0f2f5;
+        color: var(--dark);
+        overflow-x: hidden;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      /* Header e Navegação */
+      header {
+        background: var(--gradient);
+        color: white;
+        padding: 1rem 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 1.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+      }
+
+      .logo i {
+        margin-right: 10px;
+        font-size: 2rem;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+      }
+
+      nav ul li {
+        margin-left: 1.5rem;
+      }
+
+      nav ul li a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+      }
+
+      nav ul li a:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .mobile-menu-btn {
+        display: none;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+
+      /* Hero Section */
+      .hero {
+        background: url("/api/placeholder/1200/600") center/cover;
+        color: white;
+        text-align: center;
+        padding: 100px 0;
+        position: relative;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+      }
+
+      .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .hero p {
+        font-size: 1.2rem;
+        max-width: 800px;
+        margin: 0 auto 2rem;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 0.8rem 2rem;
+        background: var(--primary);
+        color: white;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+      }
+
+      .btn:hover {
+        background: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 2px solid white;
+        margin-left: 1rem;
+      }
+
+      .btn-outline:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Seções */
+      section {
+        padding: 80px 0;
+      }
+
+      .section-header {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+
+      .section-header h2 {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+        position: relative;
+        display: inline-block;
+      }
+
+      .section-header h2::after {
+        content: "";
+        position: absolute;
+        width: 50%;
+        height: 3px;
+        background: var(--gradient);
+        bottom: -10px;
+        left: 25%;
+      }
+
+      .section-header p {
+        color: #666;
+        font-size: 1.1rem;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+
+      /* Cards */
+      .cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+      }
+
+      .card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+      }
+
+      .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .card-image {
+        height: 200px;
+        background: var(--light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: var(--primary);
+      }
+
+      .card-content {
+        padding: 20px;
+      }
+
+      .card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        color: var(--primary);
+      }
+
+      .card p {
+        color: #666;
+        margin-bottom: 20px;
+      }
+
+      .card .btn {
+        margin-top: 10px;
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+      }
+
+      /* Sobre o LTD */
+      .about-container {
+        display: flex;
+        gap: 50px;
+        align-items: center;
+      }
+
+      .about-image {
+        flex: 1;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .about-image img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .about-content {
+        flex: 1;
+      }
+
+      .about-content h2 {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin-bottom: 20px;
+      }
+
+      .about-content p {
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+
+      .feature-list {
+        margin-top: 30px;
+      }
+
+      .feature-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .feature-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        margin-right: 15px;
+        font-size: 1.2rem;
+      }
+
+      /* Apps Section */
+      .apps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .app-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .app-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .app-icon {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin-bottom: 15px;
+      }
+
+      .app-card h3 {
+        margin-bottom: 10px;
+        color: var(--dark);
+      }
+
+      .app-card p {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        min-height: 80px;
+      }
+
+      /* CyberSec */
+      .cybersec-container {
+        background: var(--dark);
+        color: white;
+        border-radius: 10px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .cybersec-header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .cybersec-header h3 {
+        font-size: 2rem;
+        margin-bottom: 15px;
+        color: var(--info);
+      }
+
+      .cybersec-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+      }
+
+      .cybersec-item {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .cybersec-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-5px);
+      }
+
+      .cybersec-icon {
+        font-size: 2rem;
+        color: var(--info);
+        margin-bottom: 15px;
+      }
+
+      /* Tecnologias */
+      .tech-container {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .tech-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .tech-item {
+        background: var(--light);
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        flex: 0 0 calc(20% - 20px);
+        transition: all 0.3s ease;
+      }
+
+      .tech-item:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-5px);
+      }
+
+      .tech-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+      }
+
+      /* Contato */
+      .contact-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 50px;
+      }
+
+      .contact-form {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-control:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.3);
+      }
+
+      textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+      }
+
+      .contact-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .contact-info h3 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: var(--primary);
+      }
+
+      .contact-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .contact-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 1.2rem;
+      }
+
+      .contact-text {
+        flex: 1;
+      }
+
+      .contact-text h4 {
+        margin-bottom: 5px;
+        color: var(--dark);
+      }
+
+      .contact-text p {
+        color: #666;
+      }
+
+      /* Footer */
+      footer {
+        background: var(--dark);
+        color: white;
+        padding: 50px 0 20px;
+      }
+
+      .footer-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+      }
+
+      .footer-col h3 {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+        position: relative;
+        padding-bottom: 10px;
+      }
+
+      .footer-col h3::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 50px;
+        height: 2px;
+        background: var(--secondary);
+      }
+
+      .footer-col p {
+        margin-bottom: 15px;
+        line-height: 1.6;
+      }
+
+      .footer-links {
+        list-style: none;
+      }
+
+      .footer-links li {
+        margin-bottom: 12px;
+      }
+
+      .footer-links a {
+        color: #bbb;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+      }
+
+      .footer-links a i {
+        margin-right: 10px;
+        color: var(--secondary);
+      }
+
+      .footer-links a:hover {
+        color: white;
+        padding-left: 5px;
+      }
+
+      .social-links {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .social-links a {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+      }
+
+      .social-links a:hover {
+        background: var(--secondary);
+        transform: translateY(-3px);
+      }
+
+      .footer-bottom {
+        text-align: center;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      /* Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7);
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 30px;
+        width: 70%;
+        max-width: 700px;
+        border-radius: 10px;
+        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+        position: relative;
+        animation: modalFadeIn 0.3s;
+      }
+
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .close-modal {
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        font-size: 1.5rem;
+        color: #aaa;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .close-modal:hover {
+        color: var(--dark);
+      }
+
+      .modal-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .modal-body {
+        margin-bottom: 20px;
+      }
+
+      .modal-footer {
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+        text-align: right;
+      }
+
+      /* Responsividade */
+      @media (max-width: 992px) {
+        .about-container {
+          flex-direction: column;
+        }
+
+        .contact-container {
+          grid-template-columns: 1fr;
+        }
+
+        .tech-item {
+          flex: 0 0 calc(33.333% - 20px);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .hero h1 {
+          font-size: 2.5rem;
+        }
+
+        .section-header h2 {
+          font-size: 2rem;
+        }
+
+        .tech-item {
+          flex: 0 0 calc(50% - 20px);
+        }
+
+        .mobile-menu-btn {
+          display: block;
+        }
+
+        nav ul {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: var(--primary);
+          flex-direction: column;
+          padding: 20px;
+          box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        nav ul.active {
+          display: flex;
+        }
+
+        nav ul li {
+          margin: 10px 0;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .hero h1 {
+          font-size: 2rem;
+        }
+
+        .section-header h2 {
+          font-size: 1.8rem;
+        }
+
+        .btn {
+          display: block;
+          width: 100%;
+          margin: 10px 0;
+        }
+
+        .tech-item {
+          flex: 0 0 calc(100% - 20px);
+        }
+
+        .modal-content {
+          width: 95%;
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <div class="container header-container">
+        <div class="logo">
+          <i class="fas fa-city"></i>
+          <span>TechPrefeitura</span>
+        </div>
+        <button class="mobile-menu-btn">
+          <i class="fas fa-bars"></i>
+        </button>
+        <nav>
+          <ul id="menu">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#sobre">Sobre</a></li>
+            <li><a href="#quem-somos">Quem Somos</a></li>
+            <li><a href="#apps">Apps</a></li>
+            <li><a href="#cybersec">CyberSec</a></li>
+            <li><a href="#tecnologias">Tecnologias</a></li>
+            <li><a href="#contato">Contato</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="container hero-content">
+        <h1>Laboratório de Tecnologia e Desenvolvimento</h1>
+        <p>
+          Uma parceria entre a Estácio e as Prefeituras de São José e
+          Florianópolis para inovação tecnológica no setor público
+        </p>
+        <div>
+          <a href="#apps" class="btn">Nossos Aplicativos</a>
+          <a href="#sobre" class="btn btn-outline">Saiba Mais</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sobre o LTD -->
+    <section id="sobre">
+      <div class="container">
+        <div class="section-header">
+          <h2>Sobre o LTD</h2>
+          <p>
+            Conheça o Laboratório de Tecnologia e Desenvolvimento da Estácio
+          </p>
+        </div>
+        <div class="about-container">
+          <div class="about-image">
+            <img
+              src="/dist/images/ltd.png"
+              alt="Laboratório de Tecnologia e Desenvolvimento"
+            />
+          </div>
+          <div class="about-content">
+            <h2>Inovação e Desenvolvimento</h2>
+            <p>
+              O Laboratório de Tecnologia e Desenvolvimento (LTD) da Estácio é
+              um espaço onde os estudantes podem transformar conhecimento
+              teórico em soluções práticas, através de projetos realizados em
+              parceria com as prefeituras de São José e Florianópolis.
+            </p>
+            <p>
+              Nosso objetivo é proporcionar aos alunos experiência prática no
+              desenvolvimento de soluções tecnológicas que atendam às
+              necessidades do setor público, ao mesmo tempo em que contribuímos
+              para a modernização e eficiência da administração municipal.
+            </p>
+            <div class="feature-list">
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-database"></i>
+                </div>
+                <div>
+                  <h4>Banco de dados</h4>
+                  <p>
+                    Desenvolvimento e otimização de sistemas de banco de dados
+                  </p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                  <h4>Cybersegurança</h4>
+                  <p>
+                    Proteção de dados e sistemas contra ameaças cibernéticas
+                  </p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-code"></i>
+                </div>
+                <div>
+                  <h4>Programação</h4>
+                  <p>Desenvolvimento de software e aplicações web</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-robot"></i>
+                </div>
+                <div>
+                  <h4>Inteligência Artificial</h4>
+                  <p>Aplicações práticas de IA para o setor público</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quem Somos -->
+    <section id="quem-somos" style="background-color: #f8f9fa">
+      <div class="container">
+        <div class="section-header">
+          <h2>Quem Somos</h2>
+          <p>Conheça nossos cursos e o perfil dos alunos envolvidos no LTD</p>
+        </div>
+        <div class="cards-container">
+          <div class="card">
+            <div class="card-image">
+              <i class="fas fa-laptop-code"></i>
+            </div>
+            <div class="card-content">
+              <h3>Sistemas de Informação</h3>
+              <p>
+                O curso de Sistemas de Informação forma profissionais capazes de
+                administrar o fluxo de informações geradas e distribuídas por
+                redes de computadores dentro e fora das organizações.
+              </p>
+              <p>
+                Os alunos desenvolvem competências em programação, banco de
+                dados, redes, análise de sistemas, gestão de TI e segurança da
+                informação.
+              </p>
+              <a href="#" class="btn open-modal" data-modal="sistemas-info"
+                >Saiba Mais</a
+              >
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-image">
+              <i class="fas fa-cogs"></i>
+            </div>
+            <div class="card-content">
+              <h3>Engenharia de Software</h3>
+              <p>
+                O curso de Engenharia de Software forma profissionais
+                especializados no desenvolvimento de sistemas computacionais,
+                com foco em métodos e técnicas para criação de software de alta
+                qualidade.
+              </p>
+              <p>
+                Os alunos desenvolvem habilidades em arquitetura de software,
+                metodologias ágeis, qualidade e testes.
+              </p>
+              <a href="#" class="btn open-modal" data-modal="eng-software"
+                >Saiba Mais</a
+              >
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-image">
+              <i class="fas fa-users-cog"></i>
+            </div>
+            <div class="card-content">
+              <h3>Nossa Equipe</h3>
+              <p>
+                O LTD conta com estudantes de diversos semestres, desde
+                iniciantes até veteranos próximos à formatura, criando um
+                ambiente de troca de conhecimentos e aprendizado colaborativo.
+              </p>
+              <p>
+                A diversidade de conhecimentos permite o desenvolvimento de
+                projetos multidisciplinares de grande impacto.
+              </p>
+              <a href="#" class="btn open-modal" data-modal="equipe"
+                >Conhecer Equipe</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      // Detectar sistema operacional do usuário
+      function detectOS() {
+        const userAgent = window.navigator.userAgent;
+        if (userAgent.includes("Macintosh") || userAgent.includes("Mac OS X")) {
+          return "macos";
+        } else if (userAgent.includes("Windows")) {
+          return "windows";
+        } else if (userAgent.includes("Linux")) {
+          return "linux";
+        } else {
+          return "unknown";
+        }
+      }
+
+      // Obter a extensão do arquivo apropriada para o sistema operacional
+      function getFileExtension() {
+        const os = detectOS();
+        if (os === "macos") {
+          return ".app";
+        } else if (os === "windows") {
+          return ".exe";
+        } else {
+          return ""; // Para Linux ou sistemas desconhecidos, sem extensão
+        }
+      }
+
+      // Adicionar a extensão ao nome do arquivo para exibição
+      function formatFileName(baseFileName) {
+        const extension = getFileExtension();
+        if (extension) {
+          return `${baseFileName}${extension}`;
+        }
+        return baseFileName;
+      }
+    </script>
+
+    <section id="apps">
+      <div class="container">
+        <div class="section-header">
+          <h2>Aplicativos Disponíveis</h2>
+          <p>Softwares desenvolvidos pelos alunos para uso da prefeitura</p>
+        </div>
+
+        <!-- Filtro de Aplicativos -->
+        <div class="filter-container">
+          <div class="search-box">
+            <input
+              type="text"
+              id="app-search"
+              placeholder="Buscar aplicativo..."
+            />
+            <button id="search-btn"><i class="fas fa-search"></i></button>
+          </div>
+          <div class="filter-btns">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="seguranca">
+              Segurança
+            </button>
+            <button class="filter-btn" data-filter="produtividade">
+              Produtividade
+            </button>
+            <button class="filter-btn" data-filter="treinamento">
+              Treinamento
+            </button>
+            <button class="filter-btn" data-filter="ia">IA</button>
+          </div>
+        </div>
+
+        <div class="download-status" id="download-status">
+          <!-- Mensagens de status de download aparecerão aqui -->
+        </div>
+
+        <div class="apps-grid">
+          <div class="app-card" data-category="ia produtividade">
+            <div class="app-icon">
+              <i class="fas fa-robot"></i>
+            </div>
+            <h3>neuraai-assistant</h3>
+            <p>
+              Assistente virtual baseado em inteligência artificial para
+              atendimento ao cidadão e suporte aos servidores municipais.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v2.1.0</span>
+              <span class="app-size">45 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/neuraai-assistant"
+                class="btn download-btn"
+                data-app="neuraai-assistant"
+                >Download</a
+              >
+              <button
+                class="btn-outline info-btn"
+                data-info="neuraai-assistant"
+              >
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="ia produtividade">
+            <div class="app-icon">
+              <i class="fas fa-file-alt"></i>
+            </div>
+            <h3>Currículo-Chatbot</h3>
+            <p>
+              Ferramenta para análise automática de currículos e triagem inicial
+              de candidatos para processos seletivos municipais.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v1.3.2</span>
+              <span class="app-size">32 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/curriculo-chatbot"
+                class="btn download-btn"
+                data-app="curriculo-chatbot"
+                >Download</a
+              >
+              <button
+                class="btn-outline info-btn"
+                data-info="curriculo-chatbot"
+              >
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="produtividade">
+            <div class="app-icon">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <h3>ISO-Checklist</h3>
+            <p>
+              Aplicativo para verificação de conformidade com normas ISO em
+              processos e serviços municipais.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v2.0.1</span>
+              <span class="app-size">18 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/iso-checklist"
+                class="btn download-btn"
+                data-app="iso-checklist"
+                >Download</a
+              >
+              <button class="btn-outline info-btn" data-info="iso-checklist">
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="produtividade">
+            <div class="app-icon">
+              <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <h3>Templates-Email</h3>
+            <p>
+              Conjunto de modelos profissionais para comunicação oficial via
+              e-mail, garantindo padronização da comunicação.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v1.5.0</span>
+              <span class="app-size">15 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/templates-email"
+                class="btn download-btn"
+                data-app="templates-email"
+                >Download</a
+              >
+              <button class="btn-outline info-btn" data-info="templates-email">
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="seguranca">
+            <div class="app-icon">
+              <i class="fas fa-bug"></i>
+            </div>
+            <h3>Analisador-Malware</h3>
+            <p>
+              Ferramenta para detecção e proteção contra software malicioso nos
+              sistemas da prefeitura.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v3.2.1</span>
+              <span class="app-size">56 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/analisador-malware"
+                class="btn download-btn"
+                data-app="analisador-malware"
+                >Download</a
+              >
+              <button
+                class="btn-outline info-btn"
+                data-info="analisador-malware"
+              >
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="seguranca">
+            <div class="app-icon">
+              <i class="fas fa-key"></i>
+            </div>
+            <h3>Gerador-Senhas</h3>
+            <p>
+              Aplicativo seguro para criação e gerenciamento de senhas fortes
+              para sistemas municipais, aumentando a segurança digital.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v2.0.3</span>
+              <span class="app-size">12 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/gerador-senhas"
+                class="btn download-btn"
+                data-app="gerador-senhas"
+                >Download</a
+              >
+              <button class="btn-outline info-btn" data-info="gerador-senhas">
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="seguranca treinamento">
+            <div class="app-icon">
+              <i class="fas fa-phish"></i>
+            </div>
+            <h3>Simulador-Phishing</h3>
+            <p>
+              Ferramenta educativa para treinar servidores a identificar e
+              evitar ataques de phishing, através de simulações controladas.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v1.8.5</span>
+              <span class="app-size">38 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/simulador-phishing"
+                class="btn download-btn"
+                data-app="simulador-phishing"
+                >Download</a
+              >
+              <button
+                class="btn-outline info-btn"
+                data-info="simulador-phishing"
+              >
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="produtividade">
+            <div class="app-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Análise de Dados (Dashboard)</h3>
+            <p>
+              Plataforma para visualização e análise de dados municipais,
+              auxiliando na tomada de decisões baseadas em evidências.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v2.4.0</span>
+              <span class="app-size">65 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/analise-dados-dashboard"
+                class="btn download-btn"
+                data-app="analise-dados-dashboard"
+                >Download</a
+              >
+              <button
+                class="btn-outline info-btn"
+                data-info="analise-dados-dashboard"
+              >
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="produtividade">
+            <div class="app-icon">
+              <i class="fas fa-cogs"></i>
+            </div>
+            <h3>Robôs (RPA) para Automação</h3>
+            <p>
+              Soluções de Automação de Processos por Robôs para otimizar tarefas
+              repetitivas e burocráticas da administração municipal.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v1.9.3</span>
+              <span class="app-size">42 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/rpa-automacao"
+                class="btn download-btn"
+                data-app="rpa-automacao"
+                >Download</a
+              >
+              <button class="btn-outline info-btn" data-info="rpa-automacao">
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="produtividade">
+            <div class="app-icon">
+              <i class="fas fa-file-contract"></i>
+            </div>
+            <h3>Ofícios</h3>
+            <p>
+              Sistema para geração e gestão eletrônica de ofícios e documentos
+              oficiais da prefeitura, com modelos padronizados.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v2.1.4</span>
+              <span class="app-size">25 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/oficios"
+                class="btn download-btn"
+                data-app="oficios"
+                >Download</a
+              >
+              <button class="btn-outline info-btn" data-info="oficios">
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="ia treinamento">
+            <div class="app-icon">
+              <i class="fas fa-brain"></i>
+            </div>
+            <h3>Guia sobre IA para Servidores</h3>
+            <p>
+              Manual completo sobre o uso de Inteligência Artificial na
+              administração pública, com exemplos práticos e recomendações.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v1.2.0</span>
+              <span class="app-size">28 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/guia-ia-servidores"
+                class="btn download-btn"
+                data-app="guia-ia-servidores"
+                >Download</a
+              >
+              <button
+                class="btn-outline info-btn"
+                data-info="guia-ia-servidores"
+              >
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="treinamento seguranca">
+            <div class="app-icon">
+              <i class="fas fa-laptop"></i>
+            </div>
+            <h3>Treinamento sobre Boas Práticas Digitais</h3>
+            <p>
+              Curso interativo para capacitar servidores em segurança da
+              informação e uso eficiente de recursos digitais.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v1.5.2</span>
+              <span class="app-size">48 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/treinamento-praticas-digitais"
+                class="btn download-btn"
+                data-app="treinamento-praticas-digitais"
+                >Download</a
+              >
+              <button
+                class="btn-outline info-btn"
+                data-info="treinamento-praticas-digitais"
+              >
+                Detalhes
+              </button>
+            </div>
+          </div>
+
+          <div class="app-card" data-category="treinamento produtividade">
+            <div class="app-icon">
+              <i class="fas fa-database"></i>
+            </div>
+            <h3>Guia Rápido - Tratamento de Dados</h3>
+            <p>
+              Manual prático sobre boas práticas no tratamento de dados pessoais
+              conforme a LGPD, adaptado para a realidade municipal.
+            </p>
+            <div class="app-details">
+              <span class="app-version">v1.3.1</span>
+              <span class="app-size">22 MB</span>
+            </div>
+            <div class="app-actions">
+              <a
+                href="/apps/guia-tratamento-dados"
+                class="btn download-btn"
+                data-app="guia-tratamento-dados"
+                >Download</a
+              >
+              <button
+                class="btn-outline info-btn"
+                data-info="guia-tratamento-dados"
+              >
+                Detalhes
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paginação -->
+        <div class="pagination">
+          <button class="prev-page" disabled>
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span class="page-info"
+            >Página <span id="current-page">1</span> de
+            <span id="total-pages">1</span></span
+          >
+          <button class="next-page" disabled>
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal de Detalhes do App -->
+    <div id="app-details-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-header">
+          <h3 id="modal-app-title">Detalhes do Aplicativo</h3>
+        </div>
+        <div class="modal-body">
+          <div class="app-info-container">
+            <div class="app-screenshot">
+              <img
+                id="app-screenshot"
+                src="/api/placeholder/400/250"
+                alt="Screenshot do aplicativo"
+              />
+            </div>
+            <div class="app-info">
+              <div class="info-item">
+                <span class="info-label">Versão:</span>
+                <span id="info-version">1.0.0</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Tamanho:</span>
+                <span id="info-size">0 MB</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Desenvolvido por:</span>
+                <span id="info-developer">Equipe LTD Estácio</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Data de atualização:</span>
+                <span id="info-date">01/04/2025</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Categoria:</span>
+                <span id="info-category">Produtividade</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Requisitos:</span>
+                <span id="info-requirements">Windows 10 ou superior</span>
+              </div>
+            </div>
+          </div>
+          <div class="app-description">
+            <h4>Descrição</h4>
+            <p id="app-description-text">Descrição detalhada do aplicativo.</p>
+          </div>
+          <div class="app-features">
+            <h4>Principais Funcionalidades</h4>
+            <ul id="app-features-list">
+              <!-- Recursos serão inseridos via JavaScript -->
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a id="modal-download-btn" href="#" class="btn">Download</a>
+          <button class="btn-outline close-modal-btn">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estilos adicionais para a seção de apps -->
+    <!-- <link rel="stylesheet" href="/css/apps.css" /> -->
+    <style>
+      /* Estilos do Filtro de Apps */
+      .filter-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      .search-box {
+        display: flex;
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 15px;
+      }
+
+      .search-box input {
+        flex: 1;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-right: none;
+        border-radius: 4px 0 0 4px;
+        font-size: 1rem;
+      }
+
+      .search-box button {
+        padding: 10px 15px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+      }
+
+      .filter-btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .filter-btn {
+        padding: 8px 15px;
+        background: #f0f0f0;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+      }
+
+      .filter-btn.active {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* Estilos dos Cards de App */
+      .apps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+      }
+
+      .app-card {
+        position: relative;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .app-icon {
+        width: 70px;
+        height: 70px;
+        background: var(--gradient);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        margin-bottom: 20px;
+      }
+
+      .app-card h3 {
+        font-size: 1.4rem;
+        margin-bottom: 12px;
+        color: var(--dark);
+      }
+
+      .app-card p {
+        color: #666;
+        margin-bottom: 20px;
+        flex-grow: 1;
+      }
+
+      .app-details {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        color: #888;
+        font-size: 0.9rem;
+      }
+
+      .app-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .app-actions .btn {
+        flex: 1;
+        padding: 10px;
+        text-align: center;
+        border-radius: 6px;
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        padding: 8px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+
+      .btn-outline:hover {
+        background: rgba(0, 86, 179, 0.1);
+      }
+
+      /* Status de Download */
+      .download-status {
+        margin-bottom: 20px;
+        padding: 0;
+      }
+
+      .status-message {
+        padding: 12px 15px;
+        margin-bottom: 15px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        animation: slideIn 0.3s forwards;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .status-message.success {
+        background-color: rgba(40, 167, 69, 0.15);
+        border-left: 4px solid var(--success);
+        color: var(--success);
+      }
+
+      .status-message.error {
+        background-color: rgba(220, 53, 69, 0.15);
+        border-left: 4px solid var(--danger);
+        color: var(--danger);
+      }
+
+      .status-message.info {
+        background-color: rgba(23, 162, 184, 0.15);
+        border-left: 4px solid var(--info);
+        color: var(--info);
+      }
+
+      .status-message i {
+        margin-right: 10px;
+        font-size: 1.2rem;
+      }
+
+      .status-message .close-status {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.7;
+      }
+
+      .status-message .close-status:hover {
+        opacity: 1;
+      }
+
+      /* Paginação */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 40px;
+      }
+
+      .pagination button {
+        background: white;
+        border: 1px solid #ddd;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .pagination button:not([disabled]):hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      .pagination button[disabled] {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .page-info {
+        margin: 0 15px;
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      /* Modal de Detalhes */
+      .app-info-container {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 25px;
+      }
+
+      .app-screenshot {
+        flex: 0 0 400px;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .app-screenshot img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .app-info {
+        flex: 1;
+      }
+
+      .info-item {
+        margin-bottom: 12px;
+      }
+
+      .info-label {
+        font-weight: 600;
+        margin-right: 8px;
+        color: #555;
+      }
+
+      .app-description,
+      .app-features {
+        margin-bottom: 20px;
+      }
+
+      .app-description h4,
+      .app-features h4 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        color: var(--primary);
+      }
+
+      .app-features ul {
+        padding-left: 20px;
+      }
+
+      .app-features li {
+        margin-bottom: 8px;
+      }
+
+      @media (max-width: 992px) {
+        .app-info-container {
+          flex-direction: column;
+        }
+
+        .app-screenshot {
+          flex: 0 0 auto;
+          max-width: 100%;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .filter-container {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .search-box {
+          max-width: 100%;
+          margin-bottom: 15px;
+        }
+
+        .filter-btns {
+          justify-content: center;
+        }
+      }
+    </style>
+
+    <!-- Script para funcionalidade da seção de apps -->
+    <script>
+      // Banco de dados de aplicativos com detalhes
+      const appDatabase = {
+        "neuraai-assistant": {
+          title: "neuraai-assistant",
+          version: "v2.1.0",
+          size: "45 MB",
+          developer: "Equipe de IA - LTD Estácio",
+          date: "15/03/2025",
+          category: "Inteligência Artificial, Produtividade",
+          requirements: "Windows 10/11, 4GB RAM, 100MB espaço livre",
+          description:
+            "Assistente virtual avançado baseado em inteligência artificial para atendimento automático ao cidadão e suporte aos servidores municipais. Integra-se com os sistemas da prefeitura para fornecer respostas precisas sobre serviços, processos e informações municipais.",
+          features: [
+            "Interface conversacional em linguagem natural",
+            "Atendimento 24/7 aos cidadãos",
+            "Suporte para múltiplos departamentos",
+            "Aprendizado contínuo com base nas interações",
+            "Integração com sistemas municipais existentes",
+            "Painel administrativo para monitoramento",
+          ],
+        },
+        "curriculo-chatbot": {
+          title: "Currículo-Chatbot",
+          version: "v1.3.2",
+          size: "32 MB",
+          developer: "Núcleo de RH Digital - LTD Estácio",
+          date: "10/02/2025",
+          category: "Inteligência Artificial, Recursos Humanos",
+          requirements: "Windows 10/11, 4GB RAM, 80MB espaço livre",
+          description:
+            "Ferramenta baseada em IA para análise automática de currículos e triagem inicial de candidatos em processos seletivos municipais. Otimiza o tempo dos recrutadores e padroniza o processo de seleção de funcionários.",
+          features: [
+            "Extração automática de informações de currículos em PDF, DOC e DOCX",
+            "Análise de compatibilidade com requisitos da vaga",
+            "Ranqueamento de candidatos por relevância",
+            "Geração de relatórios detalhados",
+            "Agendamento automático de entrevistas",
+            "Histórico de interações com candidatos",
+          ],
+        },
+        "iso-checklist": {
+          title: "ISO-Checklist",
+          version: "v2.0.1",
+          size: "18 MB",
+          developer: "Equipe de Qualidade - LTD Estácio",
+          date: "05/01/2025",
+          category: "Produtividade, Gestão de Qualidade",
+          requirements: "Windows 8/10/11, 2GB RAM, 50MB espaço livre",
+          description:
+            "Aplicativo para verificação e auditoria de conformidade com normas ISO em processos e serviços municipais. Facilita o monitoramento contínuo dos padrões de qualidade e a preparação para certificações oficiais.",
+          features: [
+            "Checklists personalizáveis para diversas normas ISO",
+            "Fotografias e evidências anexáveis a cada item",
+            "Alertas de não-conformidades",
+            "Relatórios de auditoria exportáveis",
+            "Acompanhamento de planos de ação corretiva",
+            "Dashboard de índices de conformidade",
+          ],
+        },
+        "templates-email": {
+          title: "Templates-Email",
+          version: "v1.5.0",
+          size: "15 MB",
+          developer: "Equipe de Comunicação - LTD Estácio",
+          date: "20/02/2025",
+          category: "Produtividade, Comunicação",
+          requirements: "Windows 7/8/10/11, 2GB RAM, 40MB espaço livre",
+          description:
+            "Conjunto de modelos profissionais para comunicação oficial via e-mail, garantindo padronização visual e textual. Integra-se com os principais clientes de e-mail para facilitar a comunicação interna e externa.",
+          features: [
+            "Mais de 50 modelos profissionais prontos para uso",
+            "Editor visual com arrastar e soltar",
+            "Personalização de cores e logos institucionais",
+            "Verificação ortográfica e de formalidade",
+            "Integração com Outlook e Gmail",
+            "Formulários de resposta automática",
+          ],
+        },
+        "analisador-malware": {
+          title: "Analisador-Malware",
+          version: "v3.2.1",
+          size: "56 MB",
+          developer: "Equipe de Cibersegurança - LTD Estácio",
+          date: "25/03/2025",
+          category: "Segurança, Proteção Digital",
+          requirements: "Windows 10/11, 8GB RAM, 200MB espaço livre",
+          description:
+            "Ferramenta avançada para detecção, análise e proteção contra software malicioso nos sistemas da prefeitura. Utiliza aprendizado de máquina para identificar ameaças novas e desconhecidas.",
+          features: [
+            "Análise comportamental de arquivos suspeitos",
+            "Detecção de ameaças zero-day",
+            "Quarentena automática de arquivos infectados",
+            "Verificação de anexos de e-mail",
+            "Monitoramento em tempo real",
+            "Relatórios detalhados de ameaças",
+          ],
+        },
+        "gerador-senhas": {
+          title: "Gerador-Senhas",
+          version: "v2.0.3",
+          size: "12 MB",
+          developer: "Equipe de Cibersegurança - LTD Estácio",
+          date: "05/02/2025",
+          category: "Segurança, Produtividade",
+          requirements: "Windows 7/8/10/11, 2GB RAM, 30MB espaço livre",
+          description:
+            "Aplicativo seguro para criação e gerenciamento de senhas fortes para sistemas municipais, aumentando a segurança digital da prefeitura. Possui cofre criptografado para armazenamento e sincronização segura entre dispositivos.",
+          features: [
+            "Geração de senhas seguras e personalizáveis",
+            "Armazenamento criptografado de credenciais",
+            "Verificação de força e unicidade de senhas",
+            "Alertas de senhas vazadas em bancos de dados públicos",
+            "Sincronização segura entre dispositivos",
+            "Preenchimento automático em sistemas da prefeitura",
+          ],
+        },
+        "simulador-phishing": {
+          title: "Simulador-Phishing",
+          version: "v1.8.5",
+          size: "38 MB",
+          developer: "Equipe de Conscientização em Segurança - LTD Estácio",
+          date: "12/03/2025",
+          category: "Segurança, Treinamento",
+          requirements: "Windows 10/11, 4GB RAM, 100MB espaço livre",
+          description:
+            "Ferramenta educativa para treinar servidores a identificar e evitar ataques de phishing, através de simulações controladas. Inclui campanhas periódicas e métricas de desempenho para acompanhamento da evolução da conscientização.",
+          features: [
+            "Simulação realista de ataques de phishing",
+            "Campanhas de conscientização programáveis",
+            "Material educativo personalizado",
+            "Métricas detalhadas por departamento",
+            "Acompanhamento individual de servidores",
+            "Relatórios de progresso para gestores",
+          ],
+        },
+        "analise-dados-dashboard": {
+          title: "Análise de Dados (Dashboard)",
+          version: "v2.4.0",
+          size: "65 MB",
+          developer: "Equipe de Business Intelligence - LTD Estácio",
+          date: "18/03/2025",
+          category: "Análise de Dados, Gestão",
+          requirements: "Windows 10/11, 8GB RAM, 150MB espaço livre",
+          description:
+            "Plataforma completa para visualização e análise de dados municipais, auxiliando na tomada de decisões baseadas em evidências. Integra dados de diferentes secretarias em um único painel interativo e personalizável.",
+          features: [
+            "Dashboards interativos e personalizáveis",
+            "Integração com múltiplas fontes de dados",
+            "Visualizações em tempo real",
+            "Análise preditiva para tendências futuras",
+            "Exportação de relatórios em diversos formatos",
+            "Compartilhamento seguro com diferentes níveis de acesso",
+          ],
+        },
+        "rpa-automacao": {
+          title: "Robôs (RPA) para Automação",
+          version: "v1.9.3",
+          size: "42 MB",
+          developer: "Núcleo de Automação - LTD Estácio",
+          date: "01/02/2025",
+          category: "Produtividade, Automação",
+          requirements: "Windows 10/11, 6GB RAM, 120MB espaço livre",
+          description:
+            "Soluções de Automação de Processos por Robôs (RPA) para otimizar tarefas repetitivas e burocráticas da administração municipal. Automatiza processos como lançamentos contábeis, geração de relatórios e integração entre sistemas legados.",
+          features: [
+            "Automação de processos sem código",
+            "Integração com sistemas legados",
+            "Agendamento de tarefas periódicas",
+            "Processamento de documentos por OCR",
+            "Monitoramento centralizado de bots",
+            "Registro detalhado de ações para auditoria",
+          ],
+        },
+        oficios: {
+          title: "Ofícios",
+          version: "v2.1.4",
+          size: "25 MB",
+          developer: "Equipe de Documentação - LTD Estácio",
+          date: "08/02/2025",
+          category: "Produtividade, Gestão Documental",
+          requirements: "Windows 8/10/11, 4GB RAM, 80MB espaço livre",
+          description:
+            "Sistema para geração e gestão eletrônica de ofícios e documentos oficiais da prefeitura, com modelos padronizados. Inclui controle de versões, assinatura digital e fluxo de aprovação para documentos oficiais.",
+          features: [
+            "Modelos padronizados para diferentes tipos de documentos",
+            "Fluxo de aprovação configurável",
+            "Assinatura digital integrada",
+            "Controle de versões e histórico",
+            "Numeração automática por departamento",
+            "Integração com sistema de protocolo",
+          ],
+        },
+        "guia-ia-servidores": {
+          title: "Guia sobre IA para Servidores",
+          version: "v1.2.0",
+          size: "28 MB",
+          developer: "Grupo de IA Aplicada - LTD Estácio",
+          date: "15/01/2025",
+          category: "Inteligência Artificial, Treinamento",
+          requirements: "Windows 8/10/11, 4GB RAM, 60MB espaço livre",
+          description:
+            "Manual completo e interativo sobre o uso de Inteligência Artificial na administração pública, com exemplos práticos e recomendações. Orienta servidores sobre como implementar e aproveitar soluções de IA em seu trabalho diário.",
+          features: [
+            "Conteúdo interativo com exemplos práticos",
+            "Casos de uso específicos para administração pública",
+            "Tutoriais passo a passo para implementação",
+            "Vídeos explicativos e demonstrações",
+            "Avaliações de conhecimento integradas",
+            "Atualizações automáticas com novos conteúdos",
+          ],
+        },
+        "treinamento-praticas-digitais": {
+          title: "Treinamento sobre Boas Práticas Digitais",
+          version: "v1.5.2",
+          size: "48 MB",
+          developer: "Núcleo de Capacitação Digital - LTD Estácio",
+          date: "20/02/2025",
+          category: "Segurança, Treinamento",
+          requirements: "Windows 10/11, 4GB RAM, 100MB espaço livre",
+          description:
+            "Curso interativo para capacitar servidores em segurança da informação e uso eficiente de recursos digitais. Através de módulos gamificados, os servidores aprendem desde conceitos básicos até práticas avançadas de segurança.",
+          features: [
+            "Módulos de aprendizado gamificados",
+            "Simulações de situações reais",
+            "Certificação por níveis de proficiência",
+            "Acompanhamento de progresso individual",
+            "Competições entre departamentos",
+            "Emissão de certificados digitais",
+          ],
+        },
+        "guia-tratamento-dados": {
+          title: "Guia Rápido - Tratamento de Dados",
+          version: "v1.3.1",
+          size: "22 MB",
+          developer: "Comitê de LGPD - LTD Estácio",
+          date: "05/03/2025",
+          category: "Segurança, Conformidade Legal",
+          requirements: "Windows 8/10/11, 2GB RAM, 50MB espaço livre",
+          description:
+            "Manual prático e interativo sobre boas práticas no tratamento de dados pessoais conforme a LGPD, adaptado para a realidade municipal. Orienta servidores sobre procedimentos seguros para coleta, armazenamento e processamento de dados sensíveis.",
+          features: [
+            "Guia passo a passo para conformidade com a LGPD",
+            "Modelos de termos de consentimento",
+            "Checklists de verificação de conformidade",
+            "Fluxogramas de decisão para tratamento de dados",
+            "Avaliação de riscos de privacidade",
+            "Estudos de caso aplicados à administração pública",
+          ],
+        },
+      };
+
+      // Inicializar a funcionalidade quando o documento estiver carregado
+      document.addEventListener("DOMContentLoaded", function () {
+        // Elementos DOM
+        const appSearch = document.getElementById("app-search");
+        const searchBtn = document.getElementById("search-btn");
+        const filterBtns = document.querySelectorAll(".filter-btn");
+        const appCards = document.querySelectorAll(".app-card");
+        const downloadBtns = document.querySelectorAll(".download-btn");
+        const infoBtns = document.querySelectorAll(".info-btn");
+        const modal = document.getElementById("app-details-modal");
+        const closeModalBtns = document.querySelectorAll(
+          ".close-modal, .close-modal-btn"
+        );
+        const downloadStatus = document.getElementById("download-status");
+
+        // Paginação
+        const prevPageBtn = document.querySelector(".prev-page");
+        const nextPageBtn = document.querySelector(".next-page");
+        const currentPageEl = document.getElementById("current-page");
+        const totalPagesEl = document.getElementById("total-pages");
+
+        // Variáveis de estado
+        let currentFilter = "all";
+        let currentPage = 1;
+        let itemsPerPage = 8;
+        let filteredApps = [...appCards];
+
+        // Função para mostrar mensagem de status
+        function showStatusMessage(message, type) {
+          const statusId = "status-" + Date.now();
+          const statusHtml = `
+                <div class="status-message ${type}" id="${statusId}">
+                    <i class="fas fa-${
+                      type === "success"
+                        ? "check-circle"
+                        : type === "error"
+                        ? "exclamation-circle"
+                        : "info-circle"
+                    }"></i>
+                    <span>${message}</span>
+                    <i class="fas fa-times close-status" data-status-id="${statusId}"></i>
+                </div>
+            `;
+
+          downloadStatus.insertAdjacentHTML("beforeend", statusHtml);
+
+          // Auto remover após 5 segundos
+          setTimeout(() => {
+            const statusEl = document.getElementById(statusId);
+            if (statusEl) {
+              statusEl.style.opacity = "0";
+              setTimeout(() => statusEl.remove(), 300);
+            }
+          }, 5000);
+
+          // Adicionar evento de fechar
+          document
+            .querySelector(`#${statusId} .close-status`)
+            .addEventListener("click", function () {
+              const statusEl = document.getElementById(this.dataset.statusId);
+              statusEl.style.opacity = "0";
+              setTimeout(() => statusEl.remove(), 300);
+            });
+        }
+
+        // Função para filtrar aplicativos
+        function filterApps() {
+          const searchTerm = appSearch.value.toLowerCase();
+
+          filteredApps = [...appCards].filter((card) => {
+            const cardTitle = card
+              .querySelector("h3")
+              .textContent.toLowerCase();
+            const cardDesc = card.querySelector("p").textContent.toLowerCase();
+            const cardCategory = card.dataset.category.toLowerCase();
+
+            const matchesSearch =
+              cardTitle.includes(searchTerm) || cardDesc.includes(searchTerm);
+            const matchesFilter =
+              currentFilter === "all" || cardCategory.includes(currentFilter);
+
+            return matchesSearch && matchesFilter;
+          });
+
+          // Atualizar paginação
+          const totalPages = Math.ceil(filteredApps.length / itemsPerPage);
+          totalPagesEl.textContent = totalPages;
+          currentPage = 1;
+          currentPageEl.textContent = currentPage;
+
+          updatePageButtons();
+          renderCurrentPage();
+        }
+
+        // Função para renderizar a página atual
+        function renderCurrentPage() {
+          const startIndex = (currentPage - 1) * itemsPerPage;
+          const endIndex = startIndex + itemsPerPage;
+
+          appCards.forEach((card) => (card.style.display = "none"));
+
+          filteredApps.slice(startIndex, endIndex).forEach((card) => {
+            card.style.display = "flex";
+          });
+
+          if (filteredApps.length === 0) {
+            showStatusMessage(
+              "Nenhum aplicativo encontrado com os filtros atuais.",
+              "info"
+            );
+          }
+        }
+
+        // Atualizar botões de paginação
+        function updatePageButtons() {
+          const totalPages = Math.ceil(filteredApps.length / itemsPerPage);
+
+          prevPageBtn.disabled = currentPage === 1;
+          nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // Função para ir para a página anterior
+        function goToPrevPage() {
+          if (currentPage > 1) {
+            currentPage--;
+            currentPageEl.textContent = currentPage;
+            updatePageButtons();
+            renderCurrentPage();
+          }
+        }
+
+        // Função para ir para a próxima página
+        function goToNextPage() {
+          const totalPages = Math.ceil(filteredApps.length / itemsPerPage);
+          if (currentPage < totalPages) {
+            currentPage++;
+            currentPageEl.textContent = currentPage;
+            updatePageButtons();
+            renderCurrentPage();
+          }
+        }
+
+        // Função para abrir o modal de detalhes
+        function openAppDetailsModal(appId) {
+          const appData = appDatabase[appId];
+
+          if (!appData) {
+            showStatusMessage(
+              "Informações do aplicativo não encontradas.",
+              "error"
+            );
+            return;
+          }
+
+          // Preencher o modal com os dados do aplicativo
+          document.getElementById("modal-app-title").textContent =
+            appData.title;
+          document.getElementById("info-version").textContent = appData.version;
+          document.getElementById("info-size").textContent = appData.size;
+          document.getElementById("info-developer").textContent =
+            appData.developer;
+          document.getElementById("info-date").textContent = appData.date;
+          document.getElementById("info-category").textContent =
+            appData.category;
+          document.getElementById("info-requirements").textContent =
+            appData.requirements;
+          document.getElementById("app-description-text").textContent =
+            appData.description;
+
+          // Adicionar recursos
+          const featuresList = document.getElementById("app-features-list");
+          featuresList.innerHTML = "";
+          appData.features.forEach((feature) => {
+            const li = document.createElement("li");
+            li.textContent = feature;
+            featuresList.appendChild(li);
+          });
+
+          // Atualizar link de download
+          document.getElementById("modal-download-btn").href = `/apps/${appId}`;
+          document
+            .getElementById("modal-download-btn")
+            .setAttribute("data-app", appId);
+
+          // Abrir o modal
+          modal.style.display = "block";
+        }
+
+        // Função para iniciar o download
+        function startDownload(appId) {
+          const downloadStatusEl = document.getElementById("download-status");
+
+          // Mostrar mensagem de iniciando download
+          const statusId = "status-" + Date.now();
+          const statusHtml = `
+        <div class="status-message info" id="${statusId}">
+            <i class="fas fa-info-circle"></i>
+            <span>Iniciando download de ${appId}...</span>
+            <i class="fas fa-times close-status" data-status-id="${statusId}"></i>
+        </div>
+    `;
+
+          downloadStatusEl.insertAdjacentHTML("beforeend", statusHtml);
+
+          // Determinar a extensão do arquivo baseada no sistema operacional
+          const os = detectOS();
+          let fileExtension = "";
+
+          if (os === "windows") {
+            fileExtension = ".exe";
+          }
+
+          // Criar o link de download invisível para forçar o download do arquivo
+          const downloadLink = document.createElement("a");
+          downloadLink.href = `/apps/${appId}`;
+          downloadLink.download = `${appId}${fileExtension}`;
+          downloadLink.style.display = "none";
+          document.body.appendChild(downloadLink);
+
+          // Simular clique para iniciar o download
+          downloadLink.click();
+
+          // Remover o link após o clique
+          setTimeout(() => {
+            document.body.removeChild(downloadLink);
+
+            // Atualizar a mensagem de status para sucesso após um atraso simulado
+            setTimeout(() => {
+              const statusEl = document.getElementById(statusId);
+              if (statusEl) {
+                statusEl.classList.remove("info");
+                statusEl.classList.add("success");
+                statusEl.querySelector("i").className = "fas fa-check-circle";
+
+                // Mensagem sem extensão ou com extensão apenas para Windows
+                let downloadedFileName = appId;
+                if (os === "windows") {
+                  downloadedFileName += fileExtension;
+                }
+
+                statusEl.querySelector(
+                  "span"
+                ).textContent = `Download de ${downloadedFileName} iniciado com sucesso!`;
+
+                // Auto remover após 5 segundos
+                setTimeout(() => {
+                  statusEl.style.opacity = "0";
+                  setTimeout(() => statusEl.remove(), 300);
+                }, 5000);
+              }
+            }, 1500);
+          }, 100);
+
+          // Adicionar evento para fechar mensagem de status manualmente
+          document
+            .querySelector(`#${statusId} .close-status`)
+            .addEventListener("click", function () {
+              const statusEl = document.getElementById(this.dataset.statusId);
+              if (statusEl) {
+                statusEl.style.opacity = "0";
+                setTimeout(() => statusEl.remove(), 300);
+              }
+            });
+
+          return false; // Prevenir comportamento padrão do link
+        }
+        // Atualizar os event listeners dos botões de download
+        document.addEventListener("DOMContentLoaded", function () {
+          // Botões de download na lista de apps
+          document.querySelectorAll(".download-btn").forEach((btn) => {
+            btn.addEventListener("click", function (e) {
+              e.preventDefault();
+              startDownload(this.dataset.app);
+            });
+          });
+
+          // Botão de download no modal
+          document
+            .getElementById("modal-download-btn")
+            .addEventListener("click", function (e) {
+              e.preventDefault();
+              modal.style.display = "none";
+              startDownload(this.dataset.app);
+            });
+        });
+        // Event Listeners
+        // Pesquisa
+        searchBtn.addEventListener("click", filterApps);
+        appSearch.addEventListener("keyup", function (e) {
+          if (e.key === "Enter") {
+            filterApps();
+          }
+        });
+
+        // Filtros
+        filterBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            filterBtns.forEach((b) => b.classList.remove("active"));
+            this.classList.add("active");
+            currentFilter = this.dataset.filter;
+            filterApps();
+          });
+        });
+
+        // Botões de download
+        downloadBtns.forEach((btn) => {
+          btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            startDownload(this.dataset.app);
+          });
+        });
+
+        // Botões de informação
+        infoBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const appCard = this.closest(".app-card");
+            const downloadBtn = appCard.querySelector(".download-btn");
+            const appId = downloadBtn.dataset.app;
+            openAppDetailsModal(appId);
+          });
+        });
+
+        // Modal
+        closeModalBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            modal.style.display = "none";
+          });
+        });
+
+        // Fechar modal ao clicar fora
+        window.addEventListener("click", function (e) {
+          if (e.target === modal) {
+            modal.style.display = "none";
+          }
+        });
+
+        // Botão de download no modal
+        document
+          .getElementById("modal-download-btn")
+          .addEventListener("click", function (e) {
+            e.preventDefault();
+            modal.style.display = "none";
+            startDownload(this.dataset.app);
+          });
+
+        // Paginação
+        prevPageBtn.addEventListener("click", goToPrevPage);
+        nextPageBtn.addEventListener("click", goToNextPage);
+
+        // Inicialização
+        filterApps();
+
+        // Ajustar número de itens por página baseado no tamanho da tela
+        function adjustItemsPerPage() {
+          if (window.innerWidth >= 1200) {
+            itemsPerPage = 8;
+          } else if (window.innerWidth >= 768) {
+            itemsPerPage = 6;
+          } else {
+            itemsPerPage = 4;
+          }
+          filterApps();
+        }
+
+        // Ajustar na inicialização e redimensionamento
+        adjustItemsPerPage();
+        window.addEventListener("resize", adjustItemsPerPage);
+      });
+    </script>
+    <!-- CyberSec Section -->
+    <section id="cybersec" style="background-color: #f8f9fa">
+      <div class="container">
+        <div class="section-header">
+          <h2>Segurança da Informação</h2>
+          <p>
+            Práticas e ferramentas para proteção dos sistemas e dados municipais
+          </p>
+        </div>
+        <div class="cybersec-container">
+          <div class="cybersec-header">
+            <h3>CyberSec</h3>
+            <p>
+              Soluções de segurança desenvolvidas pelo LTD para proteger a
+              infraestrutura digital da prefeitura
+            </p>
+          </div>
+          <div class="cybersec-content">
+            <div class="cybersec-item">
+              <div class="cybersec-icon">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <h4>Proteção contra Malware</h4>
+              <p>
+                Sistemas de detecção e prevenção de software malicioso, com
+                monitoramento em tempo real e resposta a incidentes.
+              </p>
+            </div>
+            <div class="cybersec-item">
+              <div class="cybersec-icon">
+                <i class="fas fa-user-shield"></i>
+              </div>
+              <h4>Segurança de Acesso</h4>
+              <p>
+                Implementação de autenticação em múltiplos fatores e
+                gerenciamento seguro de credenciais para os sistemas municipais.
+              </p>
+            </div>
+            <div class="cybersec-item">
+              <div class="cybersec-icon">
+                <i class="fas fa-lock"></i>
+              </div>
+              <h4>Criptografia de Dados</h4>
+              <p>
+                Soluções para garantir a confidencialidade e integridade de
+                dados sensíveis durante armazenamento e transmissão.
+              </p>
+            </div>
+            <div class="cybersec-item">
+              <div class="cybersec-icon">
+                <i class="fas fa-search"></i>
+              </div>
+              <h4>Análise de Vulnerabilidades</h4>
+              <p>
+                Identificação proativa de falhas de segurança em sistemas,
+                aplicativos e infraestrutura de TI.
+              </p>
+            </div>
+            <div class="cybersec-item">
+              <div class="cybersec-icon">
+                <i class="fas fa-fire-extinguisher"></i>
+              </div>
+              <h4>Resposta a Incidentes</h4>
+              <p>
+                Procedimentos e ferramentas para lidar rapidamente com violações
+                de segurança e minimizar danos.
+              </p>
+            </div>
+            <div class="cybersec-item">
+              <div class="cybersec-icon">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              <h4>Conscientização e Treinamento</h4>
+              <p>
+                Programas educativos para servidores sobre ameaças digitais e
+                práticas seguras de uso de tecnologia.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tecnologias Section -->
+    <section id="tecnologias">
+      <div class="container">
+        <div class="section-header">
+          <h2>Tecnologias Utilizadas no LTD</h2>
+          <p>Ferramentas e linguagens aplicadas em nossos projetos</p>
+        </div>
+        <div class="tech-container">
+          <div class="tech-list">
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fab fa-python"></i>
+              </div>
+              <h4>Python</h4>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fab fa-java"></i>
+              </div>
+              <h4>Java</h4>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fab fa-js"></i>
+              </div>
+              <h4>JavaScript</h4>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fab fa-react"></i>
+              </div>
+              <h4>React</h4>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fab fa-node"></i>
+              </div>
+              <h4>Node.js</h4>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fas fa-database"></i>
+              </div>
+              <h4>SQL</h4>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fab fa-aws"></i>
+              </div>
+              <h4>AWS</h4>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fab fa-docker"></i>
+              </div>
+              <h4>Docker</h4>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fas fa-robot"></i>
+              </div>
+              <h4>TensorFlow</h4>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fas fa-network-wired"></i>
+              </div>
+              <h4>Redes</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contato -->
+    <section id="contato" style="background-color: #f8f9fa">
+      <div class="container">
+        <div class="section-header">
+          <h2>Entre em Contato</h2>
+          <p>
+            Estamos à disposição para atender às necessidades tecnológicas da
+            sua secretaria
+          </p>
+        </div>
+        <div class="contact-container">
+          <div class="contact-form">
+            <h3>Enviar Mensagem</h3>
+            <form id="contactForm">
+              <div class="form-group">
+                <label for="name">Nome</label>
+                <input type="text" id="name" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="department">Departamento</label>
+                <input
+                  type="text"
+                  id="department"
+                  class="form-control"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="message">Mensagem</label>
+                <textarea id="message" class="form-control" required></textarea>
+              </div>
+              <button type="submit" class="btn">Enviar Mensagem</button>
+            </form>
+          </div>
+          <div class="contact-info">
+            <h3>Informações de Contato</h3>
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <div class="contact-text">
+                <h4>Endereço</h4>
+                <p>Campus Estácio, São José/SC</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="fas fa-phone"></i>
+              </div>
+              <div class="contact-text">
+                <h4>Telefone</h4>
+                <p>(48) 1234-5678</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="contact-text">
+                <h4>E-mail</h4>
+                <p>ltd@estacio.edu.br</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="contact-text">
+                <h4>Horário de Funcionamento</h4>
+                <p>Segunda a Sexta: 08h às 18h</p>
+              </div>
+            </div>
+            <div class="social-links">
+              <a href="#"><i class="fab fa-facebook-f"></i></a>
+              <a href="#"><i class="fab fa-twitter"></i></a>
+              <a href="#"><i class="fab fa-instagram"></i></a>
+              <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-container">
+          <div class="footer-col">
+            <h3>Sobre o LTD</h3>
+            <p>
+              O Laboratório de Tecnologia e Desenvolvimento (LTD) da Estácio é
+              uma iniciativa de ensino prático que une academia e serviço
+              público para desenvolver soluções tecnológicas inovadoras.
+            </p>
+            <div class="social-links">
+              <a href="#"><i class="fab fa-facebook-f"></i></a>
+              <a href="#"><i class="fab fa-twitter"></i></a>
+              <a href="#"><i class="fab fa-instagram"></i></a>
+              <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h3>Links Rápidos</h3>
+            <ul class="footer-links">
+              <li>
+                <a href="#home"><i class="fas fa-chevron-right"></i> Home</a>
+              </li>
+              <li>
+                <a href="#sobre"><i class="fas fa-chevron-right"></i> Sobre</a>
+              </li>
+              <li>
+                <a href="#quem-somos"
+                  ><i class="fas fa-chevron-right"></i> Quem Somos</a
+                >
+              </li>
+              <li>
+                <a href="#apps"><i class="fas fa-chevron-right"></i> Apps</a>
+              </li>
+              <li>
+                <a href="#cybersec"
+                  ><i class="fas fa-chevron-right"></i> CyberSec</a
+                >
+              </li>
+              <li>
+                <a href="#tecnologias"
+                  ><i class="fas fa-chevron-right"></i> Tecnologias</a
+                >
+              </li>
+              <li>
+                <a href="#contato"
+                  ><i class="fas fa-chevron-right"></i> Contato</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h3>Cursos Relacionados</h3>
+            <ul class="footer-links">
+              <li>
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Sistemas de
+                  Informação</a
+                >
+              </li>
+              <li>
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Engenharia de
+                  Software</a
+                >
+              </li>
+              <li>
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Ciência da Computação</a
+                >
+              </li>
+              <li>
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Análise e Des. de
+                  Sistemas</a
+                >
+              </li>
+              <li>
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Segurança da
+                  Informação</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h3>Parcerias</h3>
+            <ul class="footer-links">
+              <li>
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Prefeitura de São
+                  José</a
+                >
+              </li>
+              <li>
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Prefeitura de
+                  Florianópolis</a
+                >
+              </li>
+              <li>
+                <a href="#"><i class="fas fa-chevron-right"></i> Estácio</a>
+              </li>
+              <li>
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Empresas Parceiras</a
+                >
+              </li>
+              <li>
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Oportunidades de
+                  Estágio</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>
+            &copy; 2025 Laboratório de Tecnologia e Desenvolvimento | Estácio.
+            Todos os direitos reservados.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="sistemas-info" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-header">
+          <h3>Sistemas de Informação</h3>
+        </div>
+        <div class="modal-body">
+          <h4>O que o curso oferece:</h4>
+          <p>
+            O curso de Sistemas de Informação forma profissionais capazes de
+            administrar o fluxo de informações geradas e distribuídas por redes
+            de computadores dentro e fora das organizações. O profissional
+            projeta, implementa e gerencia sistemas informatizados, garantindo
+            que as necessidades de informação dos usuários sejam atendidas.
+          </p>
+
+          <h4>Conhecimentos adquiridos:</h4>
+          <ul>
+            <li>Desenvolvimento de software e aplicações web</li>
+            <li>Gerenciamento de bancos de dados</li>
+            <li>Redes de computadores e segurança da informação</li>
+            <li>Análise de sistemas e requisitos</li>
+            <li>Gestão de projetos de TI</li>
+            <li>Inteligência de negócios e análise de dados</li>
+            <li>Governança de TI</li>
+          </ul>
+
+          <h4>Mercado de trabalho:</h4>
+          <p>
+            O profissional de Sistemas de Informação pode atuar em empresas de
+            desenvolvimento de software, departamentos de TI de organizações
+            públicas e privadas, consultorias em tecnologia, startups, ou como
+            empreendedor digital.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn close-modal-btn">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="eng-software" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-header">
+          <h3>Engenharia de Software</h3>
+        </div>
+        <div class="modal-body">
+          <h4>O que o curso oferece:</h4>
+          <p>
+            O curso de Engenharia de Software forma profissionais especializados
+            no desenvolvimento de sistemas computacionais, com foco em métodos,
+            técnicas e ferramentas para a criação de software de alta qualidade,
+            confiável e eficiente.
+          </p>
+
+          <h4>Conhecimentos adquiridos:</h4>
+          <ul>
+            <li>Arquitetura e design de software</li>
+            <li>Metodologias ágeis e tradicionais de desenvolvimento</li>
+            <li>Engenharia de requisitos</li>
+            <li>Qualidade e testes de software</li>
+            <li>DevOps e integração contínua</li>
+            <li>Padrões de projeto e refatoração</li>
+            <li>Gerenciamento de configuração e mudanças</li>
+          </ul>
+
+          <h4>Mercado de trabalho:</h4>
+          <p>
+            O Engenheiro de Software pode atuar como desenvolvedor, arquiteto de
+            software, analista de requisitos, testador, gerente de projetos de
+            TI, ou especialista em qualidade de software, em empresas de
+            diversos portes e setores.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn close-modal-btn">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="equipe" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-header">
+          <h3>Nossa Equipe</h3>
+        </div>
+        <div class="modal-body">
+          <h4>Composição da equipe:</h4>
+          <p>
+            O Laboratório de Tecnologia e Desenvolvimento (LTD) conta com uma
+            equipe diversificada de estudantes em diferentes estágios de
+            formação, desde calouros até veteranos próximos à formatura.
+          </p>
+
+          <h4>Estrutura de trabalho:</h4>
+          <p>
+            Os alunos mais experientes atuam como líderes técnicos e mentores
+            dos iniciantes, criando um ambiente de aprendizado colaborativo.
+            Essa dinâmica permite que os projetos sejam desenvolvidos com
+            qualidade, ao mesmo tempo em que proporciona desenvolvimento
+            profissional para todos os envolvidos.
+          </p>
+
+          <h4>Áreas de atuação:</h4>
+          <ul>
+            <li>Desenvolvimento Full Stack</li>
+            <li>Ciência de Dados e Análise</li>
+            <li>Segurança da Informação</li>
+            <li>Inteligência Artificial e Machine Learning</li>
+            <li>Automação de Processos</li>
+            <li>UX/UI Design</li>
+            <li>Gestão de Projetos de TI</li>
+          </ul>
+
+          <h4>Supervisão:</h4>
+          <p>
+            Todos os projetos são supervisionados por professores especialistas
+            em suas respectivas áreas, garantindo a qualidade técnica e a
+            aplicação correta dos conceitos teóricos.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn close-modal-btn">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Menu Mobile
+      const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
+      const menu = document.getElementById("menu");
+
+      mobileMenuBtn.addEventListener("click", () => {
+        menu.classList.toggle("active");
+      });
+
+      // Smooth Scroll
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          const targetId = this.getAttribute("href");
+          if (targetId === "#") return;
+
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 70,
+              behavior: "smooth",
+            });
+          }
+
+          // Fechar menu mobile se estiver aberto
+          if (menu.classList.contains("active")) {
+            menu.classList.remove("active");
+          }
+        });
+      });
+
+      // Modals
+      const modals = document.querySelectorAll(".modal");
+      const modalOpenBtns = document.querySelectorAll(".open-modal");
+      const modalCloseBtns = document.querySelectorAll(
+        ".close-modal, .close-modal-btn"
+      );
+
+      modalOpenBtns.forEach((btn) => {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          const modalId = this.getAttribute("data-modal");
+          document.getElementById(modalId).style.display = "block";
+        });
+      });
+
+      modalCloseBtns.forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const modal = this.closest(".modal");
+          modal.style.display = "none";
+        });
+      });
+
+      window.addEventListener("click", function (e) {
+        modals.forEach((modal) => {
+          if (e.target === modal) {
+            modal.style.display = "none";
+          }
+        });
+      });
+
+      // Form Submission
+      const contactForm = document.getElementById("contactForm");
+      if (contactForm) {
+        contactForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Aqui você adicionaria o código para enviar o formulário
+          // Por enquanto, vamos apenas simular uma mensagem de sucesso
+
+          const formData = new FormData(contactForm);
+          let formValues = {};
+
+          for (let [key, value] of formData.entries()) {
+            formValues[key] = value;
+          }
+
+          console.log("Formulário enviado:", formValues);
+
+          // Limpar formulário
+          contactForm.reset();
+
+          // Mostrar mensagem de sucesso
+          alert(
+            "Mensagem enviada com sucesso! Em breve entraremos em contato."
+          );
+        });
+      }
+
+      // Destacar seção atual no menu durante scroll
+      window.addEventListener("scroll", function () {
+        const sections = document.querySelectorAll("section");
+        const scrollPosition = window.scrollY;
+
+        sections.forEach((section) => {
+          const sectionTop = section.offsetTop - 100;
+          const sectionHeight = section.offsetHeight;
+          const sectionId = section.getAttribute("id");
+
+          if (
+            scrollPosition >= sectionTop &&
+            scrollPosition < sectionTop + sectionHeight
+          ) {
+            document.querySelectorAll("nav ul li a").forEach((link) => {
+              link.classList.remove("active");
+              if (link.getAttribute("href") === `#${sectionId}`) {
+                link.classList.add("active");
+              }
+            });
+          }
+        });
+      });
+
+      // Animação ao carregar a página
+      document.addEventListener("DOMContentLoaded", function () {
+        const animatedElements = document.querySelectorAll(
+          ".card, .app-card, .cybersec-item, .tech-item"
+        );
+
+        animatedElements.forEach((element, index) => {
+          setTimeout(() => {
+            element.style.opacity = "1";
+            element.style.transform = "translateY(0)";
+          }, 100 * index);
+        });
+      });
+
+      // Função para download dos aplicativos
+      document.querySelectorAll(".btn[download]").forEach((btn) => {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          const appName =
+            this.closest(".app-card").querySelector("h3").textContent;
+
+          // Aqui você adicionaria o código para iniciar o download
+          // Por enquanto, vamos apenas simular uma mensagem
+
+          alert(
+            `Download de ${appName} iniciado. Obrigado por utilizar nossos aplicativos!`
+          );
+        });
+      });
+    </script>
+  </body>
+</html>
