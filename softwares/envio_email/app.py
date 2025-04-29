@@ -150,7 +150,7 @@ class SistemaEmail:
             'prefeitura_padrao': 'sj',
             'smtp': {
                 'sj': {
-                    'servidor': 'smtp.saojose.sc.gov.br',
+                    'servidor': 'smtp.gmail.com',
                     'porta': 587,
                     'usuario': '',
                     'senha': '',
@@ -158,7 +158,7 @@ class SistemaEmail:
                     'ssl': False
                 },
                 'floripa': {
-                    'servidor': 'smtp.pmf.sc.gov.br',
+                    'servidor': 'smtp.gmail.com',
                     'porta': 587,
                     'usuario': '',
                     'senha': '',
@@ -194,7 +194,7 @@ class SistemaEmail:
                 'hora': '23:00'
             }
         }
-    
+
     def inicializar_banco_dados(self):
         """Inicializa o banco de dados SQLite."""
         try:
@@ -1960,18 +1960,30 @@ class SistemaEmail:
     
     def criar_form_smtp(self, frame, prefeitura):
         """Cria o formulário de configuração SMTP para a prefeitura especificada."""
+        # Inicializa os dicionários se não existirem
+        if not hasattr(self, 'entry_servidor_smtp'):
+            self.entry_servidor_smtp = {}
+        if not hasattr(self, 'entry_porta_smtp'):
+            self.entry_porta_smtp = {}
+        if not hasattr(self, 'entry_usuario_smtp'):
+            self.entry_usuario_smtp = {}
+        if not hasattr(self, 'entry_senha_smtp'):
+            self.entry_senha_smtp = {}
+        if not hasattr(self, 'tls_var'):
+            self.tls_var = {}
+        if not hasattr(self, 'ssl_var'):
+            self.ssl_var = {}
+        
         # Servidor
         ttk.Label(frame, text="Servidor SMTP:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
         
-        self.entry_servidor_smtp = {}
         self.entry_servidor_smtp[prefeitura] = ttk.Entry(frame, width=30)
         self.entry_servidor_smtp[prefeitura].grid(row=0, column=1, sticky=tk.EW, padx=5, pady=5)
-        self.entry_servidor_smtp[prefeitura].insert(0, self.config.get('smtp', {}).get(prefeitura, {}).get('servidor', ''))
+        self.entry_servidor_smtp[prefeitura].insert(0, self.config.get('smtp', {}).get(prefeitura, {}).get('servidor', 'smtp.gmail.com'))
         
         # Porta
         ttk.Label(frame, text="Porta:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
         
-        self.entry_porta_smtp = {}
         self.entry_porta_smtp[prefeitura] = ttk.Entry(frame, width=10)
         self.entry_porta_smtp[prefeitura].grid(row=1, column=1, sticky=tk.W, padx=5, pady=5)
         self.entry_porta_smtp[prefeitura].insert(0, str(self.config.get('smtp', {}).get(prefeitura, {}).get('porta', 587)))
@@ -1979,7 +1991,6 @@ class SistemaEmail:
         # Usuário
         ttk.Label(frame, text="Usuário:").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
         
-        self.entry_usuario_smtp = {}
         self.entry_usuario_smtp[prefeitura] = ttk.Entry(frame, width=30)
         self.entry_usuario_smtp[prefeitura].grid(row=2, column=1, sticky=tk.EW, padx=5, pady=5)
         self.entry_usuario_smtp[prefeitura].insert(0, self.config.get('smtp', {}).get(prefeitura, {}).get('usuario', ''))
@@ -1987,7 +1998,6 @@ class SistemaEmail:
         # Senha
         ttk.Label(frame, text="Senha:").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
         
-        self.entry_senha_smtp = {}
         self.entry_senha_smtp[prefeitura] = ttk.Entry(frame, width=30, show="*")
         self.entry_senha_smtp[prefeitura].grid(row=3, column=1, sticky=tk.EW, padx=5, pady=5)
         self.entry_senha_smtp[prefeitura].insert(0, self.config.get('smtp', {}).get(prefeitura, {}).get('senha', ''))
@@ -1998,9 +2008,6 @@ class SistemaEmail:
         frame_seguranca = ttk.Frame(frame)
         frame_seguranca.grid(row=4, column=1, sticky=tk.EW, padx=5, pady=5)
         
-        self.tls_var = {}
-        self.ssl_var = {}
-        
         self.tls_var[prefeitura] = tk.BooleanVar(value=self.config.get('smtp', {}).get(prefeitura, {}).get('tls', True))
         check_tls = ttk.Checkbutton(frame_seguranca, text="Usar TLS", variable=self.tls_var[prefeitura])
         check_tls.pack(side=tk.LEFT, padx=5)
@@ -2008,7 +2015,11 @@ class SistemaEmail:
         self.ssl_var[prefeitura] = tk.BooleanVar(value=self.config.get('smtp', {}).get(prefeitura, {}).get('ssl', False))
         check_ssl = ttk.Checkbutton(frame_seguranca, text="Usar SSL", variable=self.ssl_var[prefeitura])
         check_ssl.pack(side=tk.LEFT, padx=5)
-    
+        
+        # Adicionando botão de teste na própria tela de configuração
+        btn_testar = ttk.Button(frame, text="Testar Conexão", command=self.testar_conexao_smtp)
+        btn_testar.grid(row=5, column=1, sticky=tk.E, padx=5, pady=10)
+
     def criar_aba_logs(self):
         """Cria a aba para visualização de logs do sistema."""
         frame_logs = ttk.Frame(self.notebook, padding=10)
@@ -5193,6 +5204,8 @@ class SistemaEmail:
             
             if not servidor or not usuario or not senha:
                 logger.error("Configurações SMTP incompletas")
+                messagebox.showerror("Erro de Configuração", 
+                                "Configurações SMTP incompletas. Por favor, verifique as configurações.")
                 return False
             
             # Cria a mensagem
@@ -5216,55 +5229,26 @@ class SistemaEmail:
                         msg.attach(part)
             
             # Conecta ao servidor SMTP
-            if usar_ssl:
-                context = ssl.create_default_context()
-                server = smtplib.SMTP_SSL(servidor, porta, context=context)
-            else:
-                server = smtplib.SMTP(servidor, porta)
-                
-                if usar_tls:
-                    server.starttls()
-            
-            # Login
-            server.login(usuario, senha)
-            
-            # Envia o e-mail
-            server.send_message(msg)
-            
-            # Fecha a conexão
-            server.quit()
-            
-            # Registra o envio no banco de dados
-            conn = sqlite3.connect(DB_FILE)
-            cursor = conn.cursor()
-            
-            cursor.execute('''
-            INSERT INTO emails_enviados (usuario_id, assunto, conteudo, destinatarios, status)
-            VALUES (?, ?, ?, ?, ?)
-            ''', (
-                self.usuario_atual['id'], assunto, conteudo, 
-                ', '.join(destinatarios), 'enviado'
-            ))
-            
-            # Registra no log
-            cursor.execute('''
-            INSERT INTO logs (usuario_id, acao, descricao)
-            VALUES (?, ?, ?)
-            ''', (
-                self.usuario_atual['id'], "ENVIO_EMAIL", 
-                f"E-mail enviado para {', '.join(destinatarios)}"
-            ))
-            
-            conn.commit()
-            conn.close()
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Erro ao enviar e-mail: {e}")
-            
-            # Registra a falha no banco de dados
             try:
+                if usar_ssl:
+                    context = ssl.create_default_context()
+                    server = smtplib.SMTP_SSL(servidor, porta, context=context, timeout=10)
+                else:
+                    server = smtplib.SMTP(servidor, porta, timeout=10)
+                    
+                    if usar_tls:
+                        server.starttls()
+                
+                # Login
+                server.login(usuario, senha)
+                
+                # Envia o e-mail
+                server.send_message(msg)
+                
+                # Fecha a conexão
+                server.quit()
+                
+                # Registra o envio no banco de dados
                 conn = sqlite3.connect(DB_FILE)
                 cursor = conn.cursor()
                 
@@ -5273,7 +5257,7 @@ class SistemaEmail:
                 VALUES (?, ?, ?, ?, ?)
                 ''', (
                     self.usuario_atual['id'], assunto, conteudo, 
-                    ', '.join(destinatarios), f'falha: {e}'
+                    ', '.join(destinatarios), 'enviado'
                 ))
                 
                 # Registra no log
@@ -5281,17 +5265,67 @@ class SistemaEmail:
                 INSERT INTO logs (usuario_id, acao, descricao)
                 VALUES (?, ?, ?)
                 ''', (
-                    self.usuario_atual['id'], "ERRO_ENVIO", 
-                    f"Falha ao enviar e-mail para {', '.join(destinatarios)}: {e}"
+                    self.usuario_atual['id'], "ENVIO_EMAIL", 
+                    f"E-mail enviado para {', '.join(destinatarios)}"
                 ))
                 
                 conn.commit()
                 conn.close()
-            except Exception as db_error:
-                logger.error(f"Erro ao registrar falha de envio: {db_error}")
-            
+                
+                return True
+                
+            except smtplib.SMTPAuthenticationError:
+                mensagem = ("Falha na autenticação.\n\n"
+                        "Se você está usando Gmail com senha de aplicativo, verifique se:\n"
+                        "1. A senha de aplicativo está correta\n"
+                        "2. O servidor está configurado como smtp.gmail.com\n"
+                        "3. A porta está configurada como 587\n"
+                        "4. A opção TLS está ativada")
+                logger.error("Erro de autenticação SMTP")
+                messagebox.showerror("Erro de Autenticação", mensagem)
+                return False
+                
+            except smtplib.SMTPException as smtp_e:
+                logger.error(f"Erro SMTP: {smtp_e}")
+                messagebox.showerror("Erro SMTP", f"Falha no envio: {smtp_e}")
+                return False
+                
+            except Exception as e:
+                logger.error(f"Erro ao enviar e-mail: {e}")
+                
+                # Registra a falha no banco de dados
+                try:
+                    conn = sqlite3.connect(DB_FILE)
+                    cursor = conn.cursor()
+                    
+                    cursor.execute('''
+                    INSERT INTO emails_enviados (usuario_id, assunto, conteudo, destinatarios, status)
+                    VALUES (?, ?, ?, ?, ?)
+                    ''', (
+                        self.usuario_atual['id'], assunto, conteudo, 
+                        ', '.join(destinatarios), f'falha: {e}'
+                    ))
+                    
+                    # Registra no log
+                    cursor.execute('''
+                    INSERT INTO logs (usuario_id, acao, descricao)
+                    VALUES (?, ?, ?)
+                    ''', (
+                        self.usuario_atual['id'], "ERRO_ENVIO", 
+                        f"Falha ao enviar e-mail para {', '.join(destinatarios)}: {e}"
+                    ))
+                    
+                    conn.commit()
+                    conn.close()
+                except Exception as db_error:
+                    logger.error(f"Erro ao registrar falha de envio: {db_error}")
+                
+                return False
+        except Exception as e:
+            logger.error(f"Erro geral ao enviar e-mail: {e}")
+            messagebox.showerror("Erro", f"Falha ao enviar e-mail: {e}")
             return False
-    
+
     def registrar_envio_massa(self, destinatarios, assunto, conteudo, enviados, falhas):
         """Registra o envio em massa no banco de dados."""
         try:
@@ -8257,17 +8291,54 @@ class SistemaEmail:
         try:
             prefeitura = self.prefeitura_atual
             
-            # Obtém as configurações SMTP
-            servidor = self.entry_servidor_smtp[prefeitura].get()
-            porta = self.entry_porta_smtp[prefeitura].get()
-            usuario = self.entry_usuario_smtp[prefeitura].get()
-            senha = self.entry_senha_smtp[prefeitura].get()
-            usar_tls = self.tls_var[prefeitura].get()
-            usar_ssl = self.ssl_var[prefeitura].get()
+            # Verifica se os dicionários de entrada estão criados corretamente
+            if not hasattr(self, 'entry_servidor_smtp') or not hasattr(self, 'entry_porta_smtp') or \
+            not hasattr(self, 'entry_usuario_smtp') or not hasattr(self, 'entry_senha_smtp') or \
+            not hasattr(self, 'tls_var') or not hasattr(self, 'ssl_var'):
+                messagebox.showerror("Erro", "Interface de configuração SMTP não foi inicializada corretamente.")
+                return
+                
+            # Verifica se as chaves do dicionário existem
+            if prefeitura not in self.entry_servidor_smtp or prefeitura not in self.entry_porta_smtp or \
+            prefeitura not in self.entry_usuario_smtp or prefeitura not in self.entry_senha_smtp or \
+            prefeitura not in self.tls_var or prefeitura not in self.ssl_var:
+                messagebox.showerror("Erro", f"Configuração para a prefeitura '{prefeitura}' não encontrada.")
+                return
+            
+            # Obtém as configurações SMTP com verificação de segurança
+            servidor = self.entry_servidor_smtp[prefeitura].get() if prefeitura in self.entry_servidor_smtp else ""
+            porta = self.entry_porta_smtp[prefeitura].get() if prefeitura in self.entry_porta_smtp else ""
+            usuario = self.entry_usuario_smtp[prefeitura].get() if prefeitura in self.entry_usuario_smtp else ""
+            senha = self.entry_senha_smtp[prefeitura].get() if prefeitura in self.entry_senha_smtp else ""
+            usar_tls = self.tls_var[prefeitura].get() if prefeitura in self.tls_var else True
+            usar_ssl = self.ssl_var[prefeitura].get() if prefeitura in self.ssl_var else False
             
             if not servidor or not porta or not usuario or not senha:
                 messagebox.showwarning("Aviso", "Preencha todos os campos obrigatórios de configuração SMTP.")
                 return
+            
+            # Verifica se é Gmail e ajusta automaticamente as configurações se necessário
+            if '@gmail.com' in usuario.lower() and servidor.lower() != 'smtp.gmail.com':
+                if messagebox.askyesno("Configuração Gmail", 
+                                    "Você está usando um email do Gmail com um servidor diferente. \n"
+                                    "Deseja ajustar automaticamente para o servidor do Gmail?"):
+                    servidor = 'smtp.gmail.com'
+                    porta = '587'
+                    usar_tls = True
+                    usar_ssl = False
+                    
+                    # Atualiza os campos na interface
+                    self.entry_servidor_smtp[prefeitura].delete(0, tk.END)
+                    self.entry_servidor_smtp[prefeitura].insert(0, servidor)
+                    
+                    self.entry_porta_smtp[prefeitura].delete(0, tk.END)
+                    self.entry_porta_smtp[prefeitura].insert(0, porta)
+                    
+                    self.tls_var[prefeitura].set(True)
+                    self.ssl_var[prefeitura].set(False)
+            
+            # Mostra as configurações que estão sendo usadas para o teste (para debug)
+            print(f"Testando SMTP: servidor={servidor}, porta={porta}, usuario={usuario}, TLS={usar_tls}, SSL={usar_ssl}")
             
             # Inicia o teste em uma thread separada para não bloquear a interface
             threading.Thread(target=self.realizar_teste_smtp, args=(
@@ -8279,8 +8350,13 @@ class SistemaEmail:
             
         except Exception as e:
             logger.error(f"Erro ao iniciar teste SMTP: {e}")
-            messagebox.showerror("Erro", f"Falha ao iniciar teste de conexão: {e}")
-    
+            messagebox.showerror("Erro", f"Falha ao iniciar teste de conexão: {str(e)}")
+            # Mostra detalhes adicionais para debug
+            print(f"Erro detalhado: {e}")
+            print(f"Tipo de erro: {type(e)}")
+            import traceback
+            traceback.print_exc()
+
     def realizar_teste_smtp(self, servidor, porta, usuario, senha, usar_tls, usar_ssl):
         """Realiza o teste de conexão SMTP."""
         try:
