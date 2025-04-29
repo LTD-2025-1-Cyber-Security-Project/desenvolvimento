@@ -4,9 +4,13 @@
 ![Licença](https://img.shields.io/badge/licença-Proprietária-red)
 ![Python](https://img.shields.io/badge/Python-3.7+-yellow)
 
-<p align="center">
-  <img src="resources/logo_app.png" alt="Logo do Sistema" width="200"/>
-</p>
+
+
+
+  
+
+
+
 
 ## 📋 Sumário
 - [Visão Geral](#-visão-geral)
@@ -17,6 +21,7 @@
   - [Para Desenvolvedores](#para-desenvolvedores)
 - [Configuração](#-configuração)
 - [Uso do Sistema](#-uso-do-sistema)
+  - [Credenciais de Acesso](#credenciais-de-acesso)
 - [Organização do Código](#-organização-do-código)
 - [Módulos e Componentes](#-módulos-e-componentes)
 - [Segurança](#-segurança)
@@ -184,15 +189,25 @@ Para facilitar o envio de e-mails para equipes específicas:
 
 ## 📝 Uso do Sistema
 
+### Credenciais de Acesso
+
+O sistema vem com contas de administrador pré-configuradas para cada prefeitura. Use estas credenciais para o primeiro acesso:
+
+**Prefeitura de São José:**
+- Email: admin.sj@saojose.sc.gov.br
+- Senha: admin@sj123
+
+**Prefeitura de Florianópolis:**
+- Email: admin.floripa@pmf.sc.gov.br  
+- Senha: admin@fpolis2505
+
+Após o primeiro acesso, recomenda-se alterar as senhas padrão por motivos de segurança.
+
 ### Login
 
-Após a instalação, você precisará fazer login com suas credenciais:
-
 1. Selecione a prefeitura (São José ou Florianópolis)
-2. Digite seu e-mail e senha
+2. Digite seu e-mail e senha conforme as credenciais fornecidas
 3. Clique em "Entrar"
-
-Para o primeiro acesso, utilize as credenciais de administrador fornecidas pela equipe de TI.
 
 ### Envio de E-mail Individual
 
