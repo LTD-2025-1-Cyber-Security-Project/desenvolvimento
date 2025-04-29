@@ -1,4 +1,9 @@
 No sistema que desenvolvi, o login e senha padrão são:
 
-E-mail: admin@admin.com
-Senha: admin
+Sao Jose
+Email: admin.sj@saojose.sc.gov.br
+Senha: admin@sj123
+
+Fpolis
+Email: admin.floripa@pmf.sc.gov.br
+Senha: admin@fpolis2505

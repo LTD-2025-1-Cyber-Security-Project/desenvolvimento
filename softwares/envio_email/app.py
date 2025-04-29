@@ -199,144 +199,36 @@ class SistemaEmail:
             }
         }
 
+    # 2. Inicialização do banco de dados com usuários separados para cada prefeitura
     def inicializar_banco_dados(self):
         """Inicializa o banco de dados SQLite."""
         try:
             conn = sqlite3.connect(DB_FILE)
             cursor = conn.cursor()
             
-            # Tabela de usuários
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS usuarios (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nome TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE,
-                senha TEXT NOT NULL,
-                prefeitura TEXT NOT NULL,
-                cargo TEXT,
-                departamento TEXT,
-                telefone TEXT,
-                nivel_acesso INTEGER NOT NULL DEFAULT 1,
-                data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                ultimo_acesso TIMESTAMP
-            )
-            ''')
+            # [Código existente para criação de tabelas...]
             
-            # Tabela de funcionários
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS funcionarios (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nome TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE,
-                cargo TEXT,
-                departamento TEXT,
-                telefone TEXT,
-                prefeitura TEXT NOT NULL,
-                ativo INTEGER NOT NULL DEFAULT 1
-            )
-            ''')
-            
-            # Tabela de grupos
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS grupos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nome TEXT NOT NULL,
-                descricao TEXT,
-                prefeitura TEXT NOT NULL
-            )
-            ''')
-            
-            # Tabela de relacionamento entre grupos e funcionários
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS grupo_funcionario (
-                grupo_id INTEGER,
-                funcionario_id INTEGER,
-                PRIMARY KEY (grupo_id, funcionario_id),
-                FOREIGN KEY (grupo_id) REFERENCES grupos (id),
-                FOREIGN KEY (funcionario_id) REFERENCES funcionarios (id)
-            )
-            ''')
-            
-            # Tabela de templates
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS templates (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nome TEXT NOT NULL,
-                assunto TEXT NOT NULL,
-                conteudo TEXT NOT NULL,
-                prefeitura TEXT NOT NULL,
-                departamento TEXT,
-                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                ultima_modificacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-            ''')
-            
-            # Tabela de e-mails enviados
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS emails_enviados (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                usuario_id INTEGER NOT NULL,
-                assunto TEXT NOT NULL,
-                conteudo TEXT NOT NULL,
-                destinatarios TEXT NOT NULL,
-                data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                status TEXT NOT NULL,
-                FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
-            )
-            ''')
-            
-            # Tabela de e-mails agendados
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS emails_agendados (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                usuario_id INTEGER NOT NULL,
-                assunto TEXT NOT NULL,
-                conteudo TEXT NOT NULL,
-                destinatarios TEXT NOT NULL,
-                data_agendada TIMESTAMP NOT NULL,
-                recorrencia TEXT, -- diario, semanal, mensal, nenhuma
-                anexos TEXT, -- JSON com lista de caminhos de anexos
-                recorrencia_opcoes TEXT, -- JSON com opções de recorrência
-                status TEXT NOT NULL DEFAULT 'pendente',
-                FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
-            )
-            ''')
-            
-            # Verifica se a coluna 'anexos' existe na tabela 'emails_agendados'
-            # Se não existir, adiciona a coluna
-            cursor.execute("PRAGMA table_info(emails_agendados)")
-            colunas = [info[1] for info in cursor.fetchall()]
-            
-            if 'anexos' not in colunas:
-                logger.info("Adicionando coluna 'anexos' à tabela 'emails_agendados'")
-                cursor.execute("ALTER TABLE emails_agendados ADD COLUMN anexos TEXT")
-            
-            if 'recorrencia_opcoes' not in colunas:
-                logger.info("Adicionando coluna 'recorrencia_opcoes' à tabela 'emails_agendados'")
-                cursor.execute("ALTER TABLE emails_agendados ADD COLUMN recorrencia_opcoes TEXT")
-            
-            # Tabela de logs
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                usuario_id INTEGER,
-                acao TEXT NOT NULL,
-                descricao TEXT,
-                data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
-            )
-            ''')
-            
-            # Verifica se existe um usuário administrador, se não, cria um
-            cursor.execute("SELECT COUNT(*) FROM usuarios WHERE nivel_acesso = 3")
+            # Verifica se existem usuários administradores para cada prefeitura
+            # Admin São José
+            cursor.execute("SELECT COUNT(*) FROM usuarios WHERE nivel_acesso = 3 AND prefeitura = 'sj'")
             if cursor.fetchone()[0] == 0:
-                # Cria usuário admin com senha padrão 'admin'
+                # Cria usuário admin para São José
                 senha_hash = hashlib.sha256('admin'.encode()).hexdigest()
                 cursor.execute('''
                 INSERT INTO usuarios (nome, email, senha, prefeitura, cargo, departamento, nivel_acesso)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', ('Administrador', 'admin@admin.com', senha_hash, 'sj', 'Administrador', 'TI', 3))
+                ''', ('Administrador SJ', 'admin.sj@saojose.sc.gov.br', senha_hash, 'sj', 'Administrador', 'TI', 3))
             
+            # Admin Florianópolis
+            cursor.execute("SELECT COUNT(*) FROM usuarios WHERE nivel_acesso = 3 AND prefeitura = 'floripa'")
+            if cursor.fetchone()[0] == 0:
+                # Cria usuário admin para Florianópolis
+                senha_hash = hashlib.sha256('admin'.encode()).hexdigest()
+                cursor.execute('''
+                INSERT INTO usuarios (nome, email, senha, prefeitura, cargo, departamento, nivel_acesso)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', ('Administrador Floripa', 'admin.floripa@pmf.sc.gov.br', senha_hash, 'floripa', 'Administrador', 'TI', 3))
+                
             conn.commit()
             conn.close()
             logger.info("Banco de dados inicializado com sucesso")
@@ -439,31 +331,140 @@ class SistemaEmail:
         style.configure('Menu.TLabel', background=self.cores['primaria'], foreground='black')
         style.configure('Menu.TButton', background=self.cores['destaque'], foreground='black')
     
-    
+    # 3. Adaptação da tela de login para destacar a prefeitura selecionada
+    # def criar_tela_login(self):
+    #     """Cria a tela de login."""
+    #     # Limpa a tela
+    #     for widget in self.frame_principal.winfo_children():
+    #         widget.destroy()
+
+    #     # Configura estilo
+    #     style = ttk.Style()
+    #     style.configure('TFrame', background=self.cores['fundo'])
+    #     style.configure('TLabel', background=self.cores['fundo'], foreground=self.cores['texto'])
+    #     style.configure('TButton', background=self.cores['primaria'], foreground='white')
+        
+    #     # Frame de login
+    #     frame_login = ttk.Frame(self.frame_principal, padding=20)
+    #     frame_login.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        
+    #     # Logo
+    #     try:
+    #         if self.prefeitura_atual == 'sj':
+    #             logo_path = os.path.join(RESOURCES_DIR, 'sj.png')
+    #             prefeitura_titulo = "São José"
+    #         else:
+    #             logo_path = os.path.join(RESOURCES_DIR, 'floripa.png')
+    #             prefeitura_titulo = "Florianópolis"
+                
+    #         # Se o arquivo não existir, cria um placeholder
+    #         if not os.path.exists(logo_path):
+    #             # Cria um diretório se não existir
+    #             os.makedirs(os.path.dirname(logo_path), exist_ok=True)
+                
+    #             # Cria uma imagem placeholder
+    #             img = Image.new('RGB', (200, 100), color=(255, 255, 255))
+    #             img.save(logo_path)
+            
+    #         logo_img = Image.open(logo_path)
+    #         logo_img = logo_img.resize((200, 100), Image.LANCZOS)
+    #         logo_photo = ImageTk.PhotoImage(logo_img)
+            
+    #         logo_label = ttk.Label(frame_login, image=logo_photo)
+    #         logo_label.image = logo_photo  # Mantém uma referência
+    #         logo_label.pack(pady=10)
+    #     except Exception as e:
+    #         logger.error(f"Erro ao carregar logo: {e}")
+    #         # Cria um label de texto como fallback
+    #         logo_label = ttk.Label(frame_login, text="Sistema de E-mail Institucional", 
+    #                                 font=('Helvetica', 16, 'bold'))
+    #         logo_label.pack(pady=10)
+        
+    #     # Título
+    #     titulo = ttk.Label(frame_login, text=f"Login do Sistema - Prefeitura de {prefeitura_titulo}", 
+    #                     font=('Helvetica', 14, 'bold'))
+    #     titulo.pack(pady=10)
+        
+    #     # Form de login
+    #     frame_form = ttk.Frame(frame_login)
+    #     frame_form.pack(pady=10, fill=tk.X)
+        
+    #     # Email
+    #     ttk.Label(frame_form, text="E-mail:").pack(anchor=tk.W, pady=(5, 0))
+    #     self.entry_email = ttk.Entry(frame_form, width=30)
+    #     self.entry_email.pack(fill=tk.X, pady=(0, 10))
+        
+    #     # Predefinir o e-mail com base na prefeitura selecionada
+    #     if self.prefeitura_atual == 'sj':
+    #         self.entry_email.insert(0, "admin.sj@saojose.sc.gov.br")
+    #     else:
+    #         self.entry_email.insert(0, "admin.floripa@pmf.sc.gov.br")
+        
+    #     # Senha
+    #     ttk.Label(frame_form, text="Senha:").pack(anchor=tk.W, pady=(5, 0))
+    #     self.entry_senha = ttk.Entry(frame_form, width=30, show="*")
+    #     self.entry_senha.pack(fill=tk.X, pady=(0, 10))
+    #     self.entry_senha.insert(0, "admin")  # Senha padrão
+        
+    #     # Prefeitura
+    #     ttk.Label(frame_form, text="Prefeitura:").pack(anchor=tk.W, pady=(5, 0))
+    #     self.combo_prefeitura = ttk.Combobox(frame_form, 
+    #                                     values=["São José", "Florianópolis"],
+    #                                     state="readonly")
+    #     self.combo_prefeitura.pack(fill=tk.X, pady=(0, 10))
+    #     self.combo_prefeitura.current(0 if self.prefeitura_atual == 'sj' else 1)
+    #     self.combo_prefeitura.bind("<<ComboboxSelected>>", self.alterar_prefeitura)
+        
+    #     # Botão de login
+    #     btn_login = ttk.Button(frame_login, text="Entrar", command=self.fazer_login)
+    #     btn_login.pack(pady=10, fill=tk.X)
+        
+    #     # Mensagem de erro
+    #     self.lbl_erro = ttk.Label(frame_login, text="", foreground="red")
+    #     self.lbl_erro.pack(pady=5)
+        
+    #     # Versão
+    #     versao = ttk.Label(frame_login, text="v1.0.0", font=('Helvetica', 8))
+    #     versao.pack(pady=5)
+        
+    #     # Configurar evento de tecla Enter
+    #     self.entry_email.bind("<Return>", lambda e: self.entry_senha.focus())
+    #     self.entry_senha.bind("<Return>", lambda e: self.fazer_login())
     def criar_tela_login(self):
         """Cria a tela de login."""
         # Limpa a tela
         for widget in self.frame_principal.winfo_children():
             widget.destroy()
 
+        # Configura estilo
+        style = ttk.Style()
+        style.configure('TFrame', background=self.cores['fundo'])
+        style.configure('TLabel', background=self.cores['fundo'], foreground=self.cores['texto'])
+        style.configure('TButton', background=self.cores['primaria'], foreground='white')
+        
         # Frame de login
         frame_login = ttk.Frame(self.frame_principal, padding=20)
         frame_login.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
         # Logo
         try:
+            # Verificar qual logo deve ser mostrado
             if self.prefeitura_atual == 'sj':
-                logo_path = os.path.join(RESOURCES_DIR, 'logo_sj.png')
+                logo_path = os.path.join(RESOURCES_DIR, './images/sj.png')
             else:
-                logo_path = os.path.join(RESOURCES_DIR, 'logo_floripa.png')
+                logo_path = os.path.join(RESOURCES_DIR, './images/floripa.png')
                 
-            # Se o arquivo não existir, cria um placeholder
+            # Se o arquivo não existir, tenta usar o logo da Estácio
+            if not os.path.exists(logo_path):
+                logo_path = os.path.join(RESOURCES_DIR, './images/estacio.png')
+                
+            # Se ainda não existir, cria um diretório e uma imagem placeholder
             if not os.path.exists(logo_path):
                 # Cria um diretório se não existir
                 os.makedirs(os.path.dirname(logo_path), exist_ok=True)
                 
                 # Cria uma imagem placeholder
-                img = Image.new('RGB', (200, 100), color=(30, 30, 30))
+                img = Image.new('RGB', (200, 100), color=(255, 255, 255))
                 img.save(logo_path)
             
             logo_img = Image.open(logo_path)
@@ -523,10 +524,7 @@ class SistemaEmail:
         self.entry_email.bind("<Return>", lambda e: self.entry_senha.focus())
         self.entry_senha.bind("<Return>", lambda e: self.fazer_login())
 
-    # Adicionar também as configurações adicionais para os widgets Text:
 
-    # Este código deve ser adicionado em todas as funções que criam widgets Text
-    # Como exemplo, adicione isto antes de cada criação de widgets Text:
 
     def configurar_widget_text(self, text_widget):
         """Configura o estilo de um widget Text."""
@@ -536,30 +534,40 @@ class SistemaEmail:
                         selectbackground=self.cores['primaria'],  # Cor de seleção mantida
                         selectforeground="black")  # Texto na seleção em branco
 
+    # def aplicar_cores_widgets(self, parent):
+    #     """Aplica as cores em todos os widgets filhos."""
+    #     for child in parent.winfo_children():
+    #         # Configura entry widgets
+    #         if isinstance(child, ttk.Entry):
+    #             child.configure(foreground='black')
+            
+    #         # Configura widgets Text
+    #         elif isinstance(child, tk.Text):
+    #             child.configure(foreground='black', insertbackground='black')
+            
+    #         # Processa widgets filhos recursivamente
+    #         if child.winfo_children():
+    #             self.aplicar_cores_widgets(child)
+
     def aplicar_cores_widgets(self, parent):
         """Aplica as cores em todos os widgets filhos."""
-        for child in parent.winfo_children():
-            # Configura entry widgets
-            if isinstance(child, ttk.Entry):
-                child.configure(foreground='black')
-            
-            # Configura widgets Text
-            elif isinstance(child, tk.Text):
-                child.configure(foreground='black', insertbackground='black')
-            
-            # Processa widgets filhos recursivamente
-            if child.winfo_children():
-                self.aplicar_cores_widgets(child)
+        try:
+            for child in parent.winfo_children():
+                # Configura entry widgets
+                if isinstance(child, ttk.Entry):
+                    child.configure(foreground='black')
+                
+                # Configura widgets Text
+                elif isinstance(child, tk.Text):
+                    child.configure(foreground='black', insertbackground='black')
+                
+                # Processa widgets filhos recursivamente
+                if child.winfo_children():
+                    self.aplicar_cores_widgets(child)
+        except Exception as e:
+            logger.error(f"Erro ao aplicar cores aos widgets: {e}")
 
-
-    # Adicione esta chamada antes de inserir o conteúdo em cada widget Text
-    # Exemplo de uso:
-
-    # self.text_mensagem = tk.Text(frame_individual, width=80, height=15)
-    # self.configurar_widget_text(self.text_mensagem)
-    # self.text_mensagem.grid(row=6, column=0, columnspan=2, sticky=tk.NSEW, pady=(0, 10))
-
-    
+    # 4. Adaptação da função alterar_prefeitura para preencher o e-mail correto
     def alterar_prefeitura(self, event=None):
         """Altera a prefeitura selecionada."""
         prefeitura = self.combo_prefeitura.get()
@@ -573,10 +581,7 @@ class SistemaEmail:
         
         # Atualiza a interface
         self.criar_tela_login()
-
-        # Aplica as cores pretas aos widgets de texto
-        self.aplicar_cores_widgets(self.frame_principal)
-    
+        
     def fazer_login(self):
         """Valida o login e acessa o sistema."""
         email = self.entry_email.get().strip()
@@ -647,8 +652,46 @@ class SistemaEmail:
             logger.error(f"Erro ao realizar login: {e}")
             self.lbl_erro.config(text="Erro ao conectar ao banco de dados")
     
+    # def criar_tela_principal(self):
+    #     """Cria a tela principal do sistema."""
+    #     # Limpa a tela
+    #     for widget in self.frame_principal.winfo_children():
+    #         widget.destroy()
+        
+    #     # Configura estilo
+    #     style = ttk.Style()
+    #     style.configure('TFrame', background=self.cores['fundo'])
+    #     style.configure('TLabel', background=self.cores['fundo'], foreground=self.cores['texto'])
+    #     style.configure('TButton', background=self.cores['primaria'], foreground='black')
+    #     style.configure('TNotebook', background=self.cores['fundo'])
+    #     style.configure('TNotebook.Tab', background=self.cores['secundaria'], 
+    #                     foreground=self.cores['texto'], padding=[10, 5])
+    #     style.map('TNotebook.Tab', background=[('selected', self.cores['primaria'])],
+    #                 foreground=[('selected', 'black')])
+        
+    #     # Cria o menu superior
+    #     self.criar_menu_superior()
+        
+    #     # Cria o notebook (sistema de abas)
+    #     self.notebook = ttk.Notebook(self.frame_principal)
+    #     self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+    #     # Cria as abas
+    #     self.criar_aba_email_individual()
+    #     self.criar_aba_email_massa()
+    #     self.criar_aba_agendamento()
+    #     self.criar_aba_templates()
+    #     self.criar_aba_funcionarios()
+        
+    #     # Adiciona abas administrativas se o usuário tiver permissão
+    #     if self.usuario_atual['nivel_acesso'] >= 2:
+    #         self.criar_aba_usuarios()
+        
+    #     if self.usuario_atual['nivel_acesso'] >= 3:
+    #         self.criar_aba_configuracoes()
+    #         self.criar_aba_logs()
     def criar_tela_principal(self):
-        """Cria a tela principal do sistema."""
+        """Cria a tela principal do sistema com ordem correta de carregamento."""
         # Limpa a tela
         for widget in self.frame_principal.winfo_children():
             widget.destroy()
@@ -657,12 +700,12 @@ class SistemaEmail:
         style = ttk.Style()
         style.configure('TFrame', background=self.cores['fundo'])
         style.configure('TLabel', background=self.cores['fundo'], foreground=self.cores['texto'])
-        style.configure('TButton', background=self.cores['primaria'], foreground='black')
+        style.configure('TButton', background=self.cores['primaria'], foreground='white')
         style.configure('TNotebook', background=self.cores['fundo'])
         style.configure('TNotebook.Tab', background=self.cores['secundaria'], 
                         foreground=self.cores['texto'], padding=[10, 5])
         style.map('TNotebook.Tab', background=[('selected', self.cores['primaria'])],
-                    foreground=[('selected', 'black')])
+                    foreground=[('selected', 'white')])
         
         # Cria o menu superior
         self.criar_menu_superior()
@@ -685,7 +728,95 @@ class SistemaEmail:
         if self.usuario_atual['nivel_acesso'] >= 3:
             self.criar_aba_configuracoes()
             self.criar_aba_logs()
+        
+        # Configure para usar after() para carregar departamentos após a criação de todos os widgets
+        self.root.after(100, self.carregar_departamentos)
+        
+        # Aplica cores aos widgets
+        self.aplicar_cores_texto()
+
+    # def criar_menu_superior(self):
+    #     """Cria o menu superior."""
+    #     frame_menu = ttk.Frame(self.frame_principal, style='Menu.TFrame')
+    #     frame_menu.pack(fill=tk.X, padx=0, pady=0)
+        
+    #     # Configura estilo
+    #     style = ttk.Style()
+    #     style.configure('Menu.TFrame', background=self.cores['primaria'])
+    #     style.configure('Menu.TLabel', background=self.cores['primaria'], foreground='black')
+    #     style.configure('Menu.TButton', background=self.cores['destaque'], foreground='black')
+        
+    #     # Logo
+    #     try:
+    #         if self.prefeitura_atual == 'sj':
+    #             logo_path = os.path.join(RESOURCES_DIR, 'sj.png')
+    #         else:
+    #             logo_path = os.path.join(RESOURCES_DIR, 'floripa.png')
+                
+    #         # Se o arquivo não existir, cria um placeholder
+    #         if not os.path.exists(logo_path):
+    #             logo_path = os.path.join(RESOURCES_DIR, 'estacio.png')
+                
+    #             # Cria uma imagem placeholder
+    #             img = Image.new('RGB', (100, 50), color=(255, 255, 255))
+    #             img.save(logo_path)
+            
+    #         logo_img = Image.open(logo_path)
+    #         logo_img = logo_img.resize((100, 50), Image.LANCZOS)
+    #         logo_photo = ImageTk.PhotoImage(logo_img)
+            
+    #         logo_label = ttk.Label(frame_menu, image=logo_photo, style='Menu.TLabel')
+    #         logo_label.image = logo_photo  # Mantém uma referência
+    #         logo_label.pack(side=tk.LEFT, padx=10, pady=5)
+    #     except Exception as e:
+    #         logger.error(f"Erro ao carregar logo do menu: {e}")
+    #         # Cria um label de texto como fallback
+    #         logo_label = ttk.Label(frame_menu, text="Sistema E-mail", 
+    #                                style='Menu.TLabel', font=('Helvetica', 12, 'bold'))
+    #         logo_label.pack(side=tk.LEFT, padx=10, pady=5)
+        
+    #     # Informações do usuário
+    #     lbl_usuario = ttk.Label(frame_menu, 
+    #                           text=f"Usuário: {self.usuario_atual['nome']} | Prefeitura: {'São José' if self.prefeitura_atual == 'sj' else 'Florianópolis'}",
+    #                           style='Menu.TLabel')
+    #     lbl_usuario.pack(side=tk.LEFT, padx=10, pady=5)
+        
+    #     # Botão Sair
+    #     btn_sair = ttk.Button(frame_menu, text="Sair", command=self.fazer_logout, style='Menu.TButton')
+    #     btn_sair.pack(side=tk.RIGHT, padx=10, pady=5)
+        
+    #     # Botão Ajuda
+    #     btn_ajuda = ttk.Button(frame_menu, text="Ajuda", command=self.abrir_ajuda, style='Menu.TButton')
+    #     btn_ajuda.pack(side=tk.RIGHT, padx=10, pady=5)
     
+    def aplicar_cores_texto(self):
+        """Configura a cor do texto em todos os widgets para preto."""
+        try:
+            style = ttk.Style()
+            
+            # Configuração para Entry (campos de texto)
+            style.configure('TEntry', foreground='black')
+            
+            # Configuração para Combobox
+            style.configure('TCombobox', foreground='black')
+            style.map('TCombobox', foreground=[('readonly', 'black')])
+            
+            # Configuração para Spinbox
+            style.configure('TSpinbox', foreground='black')
+            
+            # Configuração para Treeview (tabelas)
+            style.configure('Treeview', foreground='black')
+            style.map('Treeview', foreground=[('selected', 'white')])
+            
+            # Configuração para as abas
+            style.configure('TNotebook.Tab', foreground='black')
+            style.map('TNotebook.Tab', foreground=[('selected', 'black')])
+            
+            # Aplica em todos os widgets Text existentes
+            self.aplicar_cores_widgets(self.frame_principal)
+        except Exception as e:
+            logger.error(f"Erro ao aplicar cores ao texto: {e}")
+
     def criar_menu_superior(self):
         """Cria o menu superior."""
         frame_menu = ttk.Frame(self.frame_principal, style='Menu.TFrame')
@@ -694,23 +825,28 @@ class SistemaEmail:
         # Configura estilo
         style = ttk.Style()
         style.configure('Menu.TFrame', background=self.cores['primaria'])
-        style.configure('Menu.TLabel', background=self.cores['primaria'], foreground='black')
-        style.configure('Menu.TButton', background=self.cores['destaque'], foreground='black')
+        style.configure('Menu.TLabel', background=self.cores['primaria'], foreground='white')
+        style.configure('Menu.TButton', background=self.cores['destaque'], foreground='white')
         
         # Logo
         try:
+            # Verificar qual logo deve ser mostrado
             if self.prefeitura_atual == 'sj':
-                logo_path = os.path.join(RESOURCES_DIR, 'logo_sj_small.png')
+                logo_path = os.path.join(RESOURCES_DIR, 'sj.png')
             else:
-                logo_path = os.path.join(RESOURCES_DIR, 'logo_floripa_small.png')
+                logo_path = os.path.join(RESOURCES_DIR, 'floripa.png')
                 
-            # Se o arquivo não existir, cria um placeholder
+            # Se o arquivo não existir, tenta usar o logo da Estácio
+            if not os.path.exists(logo_path):
+                logo_path = os.path.join(RESOURCES_DIR, 'estacio.png')
+                
+            # Se ainda não existir, cria um placeholder
             if not os.path.exists(logo_path):
                 # Cria um diretório se não existir
                 os.makedirs(os.path.dirname(logo_path), exist_ok=True)
                 
                 # Cria uma imagem placeholder
-                img = Image.new('RGB', (100, 50), color=(255, 255, 255))
+                img = Image.new('RGB', (100, 50), color=(30, 30, 30))
                 img.save(logo_path)
             
             logo_img = Image.open(logo_path)
@@ -724,13 +860,13 @@ class SistemaEmail:
             logger.error(f"Erro ao carregar logo do menu: {e}")
             # Cria um label de texto como fallback
             logo_label = ttk.Label(frame_menu, text="Sistema E-mail", 
-                                   style='Menu.TLabel', font=('Helvetica', 12, 'bold'))
+                                style='Menu.TLabel', font=('Helvetica', 12, 'bold'))
             logo_label.pack(side=tk.LEFT, padx=10, pady=5)
         
         # Informações do usuário
         lbl_usuario = ttk.Label(frame_menu, 
-                              text=f"Usuário: {self.usuario_atual['nome']} | Prefeitura: {'São José' if self.prefeitura_atual == 'sj' else 'Florianópolis'}",
-                              style='Menu.TLabel')
+                            text=f"Usuário: {self.usuario_atual['nome']} | Prefeitura: {'São José' if self.prefeitura_atual == 'sj' else 'Florianópolis'}",
+                            style='Menu.TLabel')
         lbl_usuario.pack(side=tk.LEFT, padx=10, pady=5)
         
         # Botão Sair
@@ -740,7 +876,6 @@ class SistemaEmail:
         # Botão Ajuda
         btn_ajuda = ttk.Button(frame_menu, text="Ajuda", command=self.abrir_ajuda, style='Menu.TButton')
         btn_ajuda.pack(side=tk.RIGHT, padx=10, pady=5)
-    
     def criar_aba_email_individual(self):
         """Cria a aba para envio de e-mail individual."""
         frame_individual = ttk.Frame(self.notebook, padding=10)
@@ -2920,8 +3055,39 @@ class SistemaEmail:
             logger.error(f"Erro ao carregar grupos para agendamento: {e}")
             messagebox.showerror("Erro", f"Não foi possível carregar os grupos: {e}")
     
+    # def carregar_departamentos(self):
+    #     """Carrega os departamentos disponíveis."""
+    #     try:
+    #         conn = sqlite3.connect(DB_FILE)
+    #         cursor = conn.cursor()
+            
+    #         # Busca departamentos únicos dos funcionários da prefeitura atual
+    #         prefeitura_codigo = 'sj' if self.prefeitura_atual == 'sj' else 'floripa'
+            
+    #         cursor.execute('''
+    #         SELECT DISTINCT departamento FROM funcionarios 
+    #         WHERE prefeitura = ? AND departamento IS NOT NULL AND departamento != ''
+    #         ORDER BY departamento
+    #         ''', (prefeitura_codigo,))
+            
+    #         departamentos = [dep[0] for dep in cursor.fetchall()]
+            
+    #         # Atualiza os comboboxes que usam departamentos
+    #         if hasattr(self, 'combo_departamento_template'):
+    #             self.combo_departamento_template.config(values=departamentos)
+            
+    #         if hasattr(self, 'combo_departamento_funcionario'):
+    #             self.combo_departamento_funcionario.config(values=departamentos)
+            
+    #         if hasattr(self, 'combo_departamento_usuario'):
+    #             self.combo_departamento_usuario.config(values=departamentos)
+            
+    #         conn.close()
+    #     except Exception as e:
+    #         logger.error(f"Erro ao carregar departamentos: {e}")
+    #         messagebox.showerror("Erro", f"Não foi possível carregar os departamentos: {e}")
     def carregar_departamentos(self):
-        """Carrega os departamentos disponíveis."""
+        """Carrega os departamentos disponíveis com tratamento de erro para widgets."""
         try:
             conn = sqlite3.connect(DB_FILE)
             cursor = conn.cursor()
@@ -2937,23 +3103,58 @@ class SistemaEmail:
             
             departamentos = [dep[0] for dep in cursor.fetchall()]
             
-            # Atualiza os comboboxes que usam departamentos
-            if hasattr(self, 'combo_departamento_template'):
-                self.combo_departamento_template.config(values=departamentos)
+            # Verifica se os widgets existem antes de tentar atualizá-los
+            try:
+                if hasattr(self, 'combo_departamento_template') and self.combo_departamento_template.winfo_exists():
+                    self.combo_departamento_template.config(values=departamentos)
+            except tk.TclError:
+                logger.warning("Widget combo_departamento_template não está disponível")
             
-            if hasattr(self, 'combo_departamento_funcionario'):
-                self.combo_departamento_funcionario.config(values=departamentos)
+            try:
+                if hasattr(self, 'combo_departamento_funcionario') and self.combo_departamento_funcionario.winfo_exists():
+                    self.combo_departamento_funcionario.config(values=departamentos)
+            except tk.TclError:
+                logger.warning("Widget combo_departamento_funcionario não está disponível")
             
-            if hasattr(self, 'combo_departamento_usuario'):
-                self.combo_departamento_usuario.config(values=departamentos)
+            try:
+                if hasattr(self, 'combo_departamento_usuario') and self.combo_departamento_usuario.winfo_exists():
+                    self.combo_departamento_usuario.config(values=departamentos)
+            except tk.TclError:
+                logger.warning("Widget combo_departamento_usuario não está disponível")
             
             conn.close()
         except Exception as e:
             logger.error(f"Erro ao carregar departamentos: {e}")
-            messagebox.showerror("Erro", f"Não foi possível carregar os departamentos: {e}")
+            # Não mostra a mensagem de erro aqui para evitar popup durante a inicialização
+            # Apenas registra no log
+
+    # def carregar_departamentos_combo(self):
+    #     """Carrega os departamentos disponíveis no combobox para e-mail em massa."""
+    #     try:
+    #         conn = sqlite3.connect(DB_FILE)
+    #         cursor = conn.cursor()
+            
+    #         # Busca departamentos únicos dos funcionários da prefeitura atual
+    #         prefeitura_codigo = 'sj' if self.prefeitura_atual == 'sj' else 'floripa'
+            
+    #         cursor.execute('''
+    #         SELECT DISTINCT departamento FROM funcionarios 
+    #         WHERE prefeitura = ? AND departamento IS NOT NULL AND departamento != ''
+    #         ORDER BY departamento
+    #         ''', (prefeitura_codigo,))
+            
+    #         departamentos = [dep[0] for dep in cursor.fetchall()]
+            
+    #         # Preenche o combobox
+    #         self.combo_departamento.config(values=departamentos)
+            
+    #         conn.close()
+    #     except Exception as e:
+    #         logger.error(f"Erro ao carregar departamentos para e-mail em massa: {e}")
+    #         messagebox.showerror("Erro", f"Não foi possível carregar os departamentos: {e}")
     
     def carregar_departamentos_combo(self):
-        """Carrega os departamentos disponíveis no combobox para e-mail em massa."""
+        """Carrega os departamentos disponíveis no combobox para e-mail em massa, com tratamento de erro."""
         try:
             conn = sqlite3.connect(DB_FILE)
             cursor = conn.cursor()
@@ -2969,16 +3170,42 @@ class SistemaEmail:
             
             departamentos = [dep[0] for dep in cursor.fetchall()]
             
-            # Preenche o combobox
-            self.combo_departamento.config(values=departamentos)
+            # Verifica se o widget existe antes de tentar atualizá-lo
+            if hasattr(self, 'combo_departamento') and self.combo_departamento.winfo_exists():
+                self.combo_departamento.config(values=departamentos)
             
             conn.close()
+        except tk.TclError as e:
+            logger.warning(f"Erro de Tcl ao configurar combo_departamento: {e}")
         except Exception as e:
             logger.error(f"Erro ao carregar departamentos para e-mail em massa: {e}")
-            messagebox.showerror("Erro", f"Não foi possível carregar os departamentos: {e}")
-    
+
+    # def carregar_departamentos_combo_agendamento(self):
+    #     """Carrega os departamentos disponíveis no combobox para agendamento."""
+    #     try:
+    #         conn = sqlite3.connect(DB_FILE)
+    #         cursor = conn.cursor()
+            
+    #         # Busca departamentos únicos dos funcionários da prefeitura atual
+    #         prefeitura_codigo = 'sj' if self.prefeitura_atual == 'sj' else 'floripa'
+            
+    #         cursor.execute('''
+    #         SELECT DISTINCT departamento FROM funcionarios 
+    #         WHERE prefeitura = ? AND departamento IS NOT NULL AND departamento != ''
+    #         ORDER BY departamento
+    #         ''', (prefeitura_codigo,))
+            
+    #         departamentos = [dep[0] for dep in cursor.fetchall()]
+            
+    #         # Preenche o combobox
+    #         self.combo_departamento_agendamento.config(values=departamentos)
+            
+    #         conn.close()
+    #     except Exception as e:
+    #         logger.error(f"Erro ao carregar departamentos para agendamento: {e}")
+    #         messagebox.showerror("Erro", f"Não foi possível carregar os departamentos: {e}")
     def carregar_departamentos_combo_agendamento(self):
-        """Carrega os departamentos disponíveis no combobox para agendamento."""
+        """Carrega os departamentos disponíveis no combobox para agendamento, com tratamento de erro."""
         try:
             conn = sqlite3.connect(DB_FILE)
             cursor = conn.cursor()
@@ -2994,14 +3221,15 @@ class SistemaEmail:
             
             departamentos = [dep[0] for dep in cursor.fetchall()]
             
-            # Preenche o combobox
-            self.combo_departamento_agendamento.config(values=departamentos)
+            # Verifica se o widget existe antes de tentar atualizá-lo
+            if hasattr(self, 'combo_departamento_agendamento') and self.combo_departamento_agendamento.winfo_exists():
+                self.combo_departamento_agendamento.config(values=departamentos)
             
             conn.close()
+        except tk.TclError as e:
+            logger.warning(f"Erro de Tcl ao configurar combo_departamento_agendamento: {e}")
         except Exception as e:
             logger.error(f"Erro ao carregar departamentos para agendamento: {e}")
-            messagebox.showerror("Erro", f"Não foi possível carregar os departamentos: {e}")
-    
     def selecionar_arquivo_destinatarios(self):
         """Abre o diálogo para selecionar arquivo de importação de destinatários."""
         filetypes = [
@@ -6218,15 +6446,17 @@ class SistemaEmail:
                     id_template, nome, assunto, departamento, data_formatada
                 ))
             
-            # Atualiza os comboboxes de templates
-            self.carregar_templates_combo()
-            self.carregar_templates_combo_agendamento()
+            # Verifica se os atributos de combobox existem antes de atualizá-los
+            if hasattr(self, 'combo_template'):
+                self.carregar_templates_combo()
+            
+            if hasattr(self, 'combo_template_agendamento'):
+                self.carregar_templates_combo_agendamento()
             
             conn.close()
         except Exception as e:
             logger.error(f"Erro ao atualizar lista de templates: {e}")
             messagebox.showerror("Erro", f"Falha ao carregar templates: {e}")
-    
     def visualizar_template_selecionado(self):
         """Visualiza o template selecionado na lista."""
         try:
