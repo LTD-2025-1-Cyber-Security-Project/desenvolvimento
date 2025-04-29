@@ -795,10 +795,124 @@ class SistemaEmail:
         frame_individual.columnconfigure(0, weight=1)
         frame_individual.rowconfigure(6, weight=1)
     
+    
     def criar_aba_email_massa(self):
-        """Cria a aba para envio de e-mail em massa."""
+        """Cria a aba para envio de e-mail em massa (versão simplificada)."""
         frame_massa = ttk.Frame(self.notebook, padding=10)
         self.notebook.add(frame_massa, text="E-mail em Massa")
+        
+        # Destinatários - Simplificado
+        ttk.Label(frame_massa, text="Destinatários:", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, sticky=tk.W, pady=(5, 0))
+        
+        frame_destinatarios = ttk.Frame(frame_massa)
+        frame_destinatarios.grid(row=1, column=0, columnspan=3, sticky=tk.EW, pady=(0, 10))
+        
+        # Opções de seleção simplificadas
+        self.opcao_destinatarios = tk.StringVar(value="grupo")
+        
+        rb_grupo = ttk.Radiobutton(frame_destinatarios, text="Grupo", variable=self.opcao_destinatarios, value="grupo", command=self.atualizar_opcao_destinatarios)
+        rb_grupo.pack(side=tk.LEFT, padx=5)
+        
+        rb_departamento = ttk.Radiobutton(frame_destinatarios, text="Departamento", variable=self.opcao_destinatarios, value="departamento", command=self.atualizar_opcao_destinatarios)
+        rb_departamento.pack(side=tk.LEFT, padx=5)
+        
+        rb_manual = ttk.Radiobutton(frame_destinatarios, text="Lista Manual", variable=self.opcao_destinatarios, value="manual", command=self.atualizar_opcao_destinatarios)
+        rb_manual.pack(side=tk.LEFT, padx=5)
+        
+        # Frame para opções específicas de destinatários
+        self.frame_opcao_destinatarios = ttk.Frame(frame_massa)
+        self.frame_opcao_destinatarios.grid(row=2, column=0, columnspan=3, sticky=tk.EW, pady=(0, 10))
+        
+        # Inicializa a exibição de opções de destinatários
+        self.atualizar_opcao_destinatarios()
+        
+        # Preview de destinatários - Simplificado
+        ttk.Label(frame_massa, text="Preview de destinatários:", font=('Helvetica', 10, 'bold')).grid(row=3, column=0, sticky=tk.W, pady=(5, 0))
+        
+        frame_preview = ttk.Frame(frame_massa)
+        frame_preview.grid(row=4, column=0, columnspan=3, sticky=tk.NSEW, pady=(0, 10))
+        
+        self.lista_preview = ttk.Treeview(frame_preview, columns=('email', 'nome'), show='headings', height=4)
+        self.lista_preview.heading('email', text='E-mail')
+        self.lista_preview.heading('nome', text='Nome')
+        self.lista_preview.column('email', width=250)
+        self.lista_preview.column('nome', width=200)
+        self.lista_preview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        scrollbar_preview = ttk.Scrollbar(frame_preview, orient=tk.VERTICAL, command=self.lista_preview.yview)
+        scrollbar_preview.pack(side=tk.RIGHT, fill=tk.Y)
+        self.lista_preview.config(yscrollcommand=scrollbar_preview.set)
+        
+        # Contador de destinatários
+        self.lbl_contador = ttk.Label(frame_massa, text="Total de destinatários: 0")
+        self.lbl_contador.grid(row=5, column=0, sticky=tk.W, pady=5)
+        
+        # Formulário de e-mail
+        ttk.Label(frame_massa, text="Assunto:", font=('Helvetica', 10, 'bold')).grid(row=6, column=0, sticky=tk.W, pady=(5, 0))
+        self.entry_assunto_massa = ttk.Entry(frame_massa, width=80)
+        self.entry_assunto_massa.grid(row=7, column=0, columnspan=3, sticky=tk.EW, pady=(0, 10))
+        
+        ttk.Label(frame_massa, text="Mensagem:", font=('Helvetica', 10, 'bold')).grid(row=8, column=0, sticky=tk.W, pady=(5, 0))
+        
+        # Simplificou botões de edição
+        frame_botoes_editor_massa = ttk.Frame(frame_massa)
+        frame_botoes_editor_massa.grid(row=9, column=0, columnspan=3, sticky=tk.EW, pady=(0, 5))
+        
+        btn_negrito = ttk.Button(frame_botoes_editor_massa, text="Negrito", width=8, command=lambda: self.formatar_texto_massa("negrito"))
+        btn_negrito.pack(side=tk.LEFT, padx=2)
+        
+        btn_italico = ttk.Button(frame_botoes_editor_massa, text="Itálico", width=8, command=lambda: self.formatar_texto_massa("italico"))
+        btn_italico.pack(side=tk.LEFT, padx=2)
+        
+        btn_template = ttk.Button(frame_botoes_editor_massa, text="Usar Template", width=15, command=self.abrir_selecao_template)
+        btn_template.pack(side=tk.RIGHT, padx=2)
+        
+        self.text_mensagem_massa = tk.Text(frame_massa, width=80, height=10)
+        self.text_mensagem_massa.grid(row=10, column=0, columnspan=3, sticky=tk.NSEW, pady=(0, 10))
+        self.text_mensagem_massa.config(fg='black')  # Texto em preto
+        
+        # Adiciona barra de rolagem
+        scrollbar_massa = ttk.Scrollbar(frame_massa, orient=tk.VERTICAL, command=self.text_mensagem_massa.yview)
+        scrollbar_massa.grid(row=10, column=3, sticky=tk.NS)
+        self.text_mensagem_massa.config(yscrollcommand=scrollbar_massa.set)
+        
+        # Assinatura - Simplificada
+        self.assinatura_massa_var = tk.BooleanVar(value=True)
+        check_assinatura_massa = ttk.Checkbutton(frame_massa, text="Incluir assinatura", variable=self.assinatura_massa_var)
+        check_assinatura_massa.grid(row=11, column=0, sticky=tk.W, pady=(5, 10))
+        
+        # Botões de ação - Mais visíveis
+        frame_acoes_massa = ttk.Frame(frame_massa)
+        frame_acoes_massa.grid(row=12, column=0, columnspan=3, sticky=tk.EW, pady=(10, 0))
+        
+        btn_enviar_massa = ttk.Button(frame_acoes_massa, text="Enviar E-mails", command=self.enviar_emails_massa)
+        btn_enviar_massa.pack(side=tk.RIGHT, padx=5)
+        
+        btn_limpar_massa = ttk.Button(frame_acoes_massa, text="Limpar Campos", command=self.limpar_campos_massa)
+        btn_limpar_massa.pack(side=tk.RIGHT, padx=5)
+        
+        btn_previsualizar_massa = ttk.Button(frame_acoes_massa, text="Pré-visualizar", command=self.previsualizar_email_massa)
+        btn_previsualizar_massa.pack(side=tk.RIGHT, padx=5)
+        
+        # Configurar a expansão da grid
+        frame_massa.columnconfigure(0, weight=1)
+        frame_massa.rowconfigure(10, weight=1)  # Texto da mensagem
+        
+        # Anexos - Removi para simplificar
+        self.anexos_massa = []
+    def configure_scroll_region(event):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+        canvas.itemconfig(canvas_window, width=event.width)
+
+        frame_massa.bind("<Configure>", configure_scroll_region)
+        canvas.bind("<Configure>", lambda e: canvas.itemconfig(canvas_window, width=e.width))
+
+    def _on_mousewheel(event):
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+    
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        # Agora continuamos com o conteúdo da aba como antes
         
         # Destinatários
         ttk.Label(frame_massa, text="Destinatários:", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, sticky=tk.W, pady=(5, 0))
@@ -978,11 +1092,39 @@ class SistemaEmail:
         # Configurar a expansão da grid
         frame_massa.columnconfigure(0, weight=1)
         frame_massa.rowconfigure(12, weight=1)
-    
+
     def criar_aba_agendamento(self):
         """Cria a aba para agendamento de e-mails."""
-        frame_agendamento = ttk.Frame(self.notebook, padding=10)
-        self.notebook.add(frame_agendamento, text="Agendamento")
+        # Cria o frame principal da aba
+        frame_agendamento_outer = ttk.Frame(self.notebook)
+        self.notebook.add(frame_agendamento_outer, text="Agendamento")
+        
+        # Cria o canvas para permitir rolagem
+        canvas_agendamento = tk.Canvas(frame_agendamento_outer, borderwidth=0)
+        canvas_agendamento.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        # Adiciona barra de rolagem vertical
+        scrollbar = ttk.Scrollbar(frame_agendamento_outer, orient=tk.VERTICAL, command=canvas_agendamento.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        canvas_agendamento.configure(yscrollcommand=scrollbar.set)
+        
+        # Cria o frame interno que conterá todos os widgets
+        frame_agendamento = ttk.Frame(canvas_agendamento, padding=10)
+        canvas_window = canvas_agendamento.create_window((0, 0), window=frame_agendamento, anchor=tk.NW)
+        
+        # Configuração para ajustar o tamanho do canvas conforme o frame interno
+        def config_canvas(event):
+            canvas_agendamento.configure(scrollregion=canvas_agendamento.bbox("all"))
+            canvas_agendamento.itemconfig(canvas_window, width=event.width)
+        
+        frame_agendamento.bind("<Configure>", config_canvas)
+        canvas_agendamento.bind('<Configure>', lambda e: canvas_agendamento.itemconfig(canvas_window, width=e.width))
+        
+        # Configuração para rolagem com o mouse
+        def on_mousewheel(event):
+            canvas_agendamento.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+        canvas_agendamento.bind_all("<MouseWheel>", on_mousewheel)
         
         # Painel de e-mails agendados
         ttk.Label(frame_agendamento, text="E-mails Agendados:", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, sticky=tk.W, pady=(5, 0))
@@ -991,8 +1133,8 @@ class SistemaEmail:
         frame_lista_agendados.grid(row=1, column=0, columnspan=3, sticky=tk.NSEW, pady=(0, 10))
         
         self.lista_agendados = ttk.Treeview(frame_lista_agendados, 
-                                          columns=('id', 'assunto', 'destinatarios', 'data', 'recorrencia', 'status'),
-                                          show='headings', height=5)
+                                        columns=('id', 'assunto', 'destinatarios', 'data', 'recorrencia', 'status'),
+                                        show='headings', height=5)
         self.lista_agendados.heading('id', text='ID')
         self.lista_agendados.heading('assunto', text='Assunto')
         self.lista_agendados.heading('destinatarios', text='Destinatários')
@@ -1051,21 +1193,21 @@ class SistemaEmail:
         rb_grupo_agendamento.pack(side=tk.LEFT, padx=5)
         
         rb_departamento_agendamento = ttk.Radiobutton(frame_destinatarios_agendamento, text="Departamento", 
-                                                  variable=self.opcao_destinatarios_agendamento, 
-                                                  value="departamento", 
-                                                  command=self.atualizar_opcao_destinatarios_agendamento)
+                                                variable=self.opcao_destinatarios_agendamento, 
+                                                value="departamento", 
+                                                command=self.atualizar_opcao_destinatarios_agendamento)
         rb_departamento_agendamento.pack(side=tk.LEFT, padx=5)
         
         rb_importar_agendamento = ttk.Radiobutton(frame_destinatarios_agendamento, text="Importar Lista", 
-                                             variable=self.opcao_destinatarios_agendamento, 
-                                             value="importar", 
-                                             command=self.atualizar_opcao_destinatarios_agendamento)
+                                            variable=self.opcao_destinatarios_agendamento, 
+                                            value="importar", 
+                                            command=self.atualizar_opcao_destinatarios_agendamento)
         rb_importar_agendamento.pack(side=tk.LEFT, padx=5)
         
         rb_manual_agendamento = ttk.Radiobutton(frame_destinatarios_agendamento, text="Lista Manual", 
-                                           variable=self.opcao_destinatarios_agendamento, 
-                                           value="manual", 
-                                           command=self.atualizar_opcao_destinatarios_agendamento)
+                                        variable=self.opcao_destinatarios_agendamento, 
+                                        value="manual", 
+                                        command=self.atualizar_opcao_destinatarios_agendamento)
         rb_manual_agendamento.pack(side=tk.LEFT, padx=5)
         
         # Frame para opções específicas de destinatários
@@ -1082,8 +1224,8 @@ class SistemaEmail:
         frame_preview_agendamento.grid(row=9, column=0, columnspan=3, sticky=tk.NSEW, pady=(0, 10))
         
         self.lista_preview_agendamento = ttk.Treeview(frame_preview_agendamento, 
-                                                   columns=('email', 'nome', 'departamento'), 
-                                                   show='headings', height=3)
+                                                columns=('email', 'nome', 'departamento'), 
+                                                show='headings', height=3)
         self.lista_preview_agendamento.heading('email', text='E-mail')
         self.lista_preview_agendamento.heading('nome', text='Nome')
         self.lista_preview_agendamento.heading('departamento', text='Departamento')
@@ -1093,7 +1235,7 @@ class SistemaEmail:
         self.lista_preview_agendamento.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         scrollbar_preview_agendamento = ttk.Scrollbar(frame_preview_agendamento, orient=tk.VERTICAL, 
-                                                 command=self.lista_preview_agendamento.yview)
+                                                command=self.lista_preview_agendamento.yview)
         scrollbar_preview_agendamento.pack(side=tk.RIGHT, fill=tk.Y)
         self.lista_preview_agendamento.config(yscrollcommand=scrollbar_preview_agendamento.set)
         
@@ -1109,7 +1251,7 @@ class SistemaEmail:
         ttk.Label(frame_opcoes_agendamento, text="Data:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
         
         self.data_agendamento = DateEntry(frame_opcoes_agendamento, width=12, background=self.cores['primaria'],
-                                      foreground='black', borderwidth=2, date_pattern='dd/mm/yyyy')
+                                    foreground='white', borderwidth=2, date_pattern='dd/mm/yyyy')
         self.data_agendamento.grid(row=0, column=1, sticky=tk.W, padx=5, pady=5)
         
         ttk.Label(frame_opcoes_agendamento, text="Hora:").grid(row=0, column=2, sticky=tk.W, padx=5, pady=5)
@@ -1133,8 +1275,8 @@ class SistemaEmail:
         
         self.recorrencia_var = tk.StringVar(value="nenhuma")
         combo_recorrencia = ttk.Combobox(frame_opcoes_agendamento, textvariable=self.recorrencia_var, 
-                                       values=["Nenhuma", "Diária", "Semanal", "Mensal"], 
-                                       state="readonly", width=15)
+                                    values=["Nenhuma", "Diária", "Semanal", "Mensal"], 
+                                    state="readonly", width=15)
         combo_recorrencia.grid(row=1, column=1, sticky=tk.W, padx=5, pady=5)
         combo_recorrencia.bind("<<ComboboxSelected>>", self.atualizar_recorrencia)
         
@@ -1157,7 +1299,7 @@ class SistemaEmail:
         self.combo_template_agendamento.bind("<<ComboboxSelected>>", self.selecionar_template_agendamento)
         
         btn_visualizar_template_agendamento = ttk.Button(frame_template_agendamento, text="Visualizar", 
-                                                      command=self.visualizar_template_agendamento)
+                                                    command=self.visualizar_template_agendamento)
         btn_visualizar_template_agendamento.pack(side=tk.LEFT, padx=5)
         
         # Carrega os templates disponíveis
@@ -1174,15 +1316,15 @@ class SistemaEmail:
         frame_botoes_editor_agendamento.grid(row=17, column=0, columnspan=3, sticky=tk.EW, pady=(0, 5))
         
         btn_negrito = ttk.Button(frame_botoes_editor_agendamento, text="N", width=3, 
-                              command=lambda: self.formatar_texto_agendamento("negrito"))
+                            command=lambda: self.formatar_texto_agendamento("negrito"))
         btn_negrito.pack(side=tk.LEFT, padx=2)
         
         btn_italico = ttk.Button(frame_botoes_editor_agendamento, text="I", width=3, 
-                              command=lambda: self.formatar_texto_agendamento("italico"))
+                            command=lambda: self.formatar_texto_agendamento("italico"))
         btn_italico.pack(side=tk.LEFT, padx=2)
         
         btn_sublinhado = ttk.Button(frame_botoes_editor_agendamento, text="S", width=3, 
-                                 command=lambda: self.formatar_texto_agendamento("sublinhado"))
+                                command=lambda: self.formatar_texto_agendamento("sublinhado"))
         btn_sublinhado.pack(side=tk.LEFT, padx=2)
         
         btn_lista = ttk.Button(frame_botoes_editor_agendamento, text="• Lista", width=6, 
@@ -1190,11 +1332,11 @@ class SistemaEmail:
         btn_lista.pack(side=tk.LEFT, padx=2)
         
         btn_link = ttk.Button(frame_botoes_editor_agendamento, text="Link", width=6, 
-                           command=lambda: self.formatar_texto_agendamento("link"))
+                        command=lambda: self.formatar_texto_agendamento("link"))
         btn_link.pack(side=tk.LEFT, padx=2)
         
         btn_imagem = ttk.Button(frame_botoes_editor_agendamento, text="Imagem", width=8, 
-                             command=lambda: self.formatar_texto_agendamento("imagem"))
+                            command=lambda: self.formatar_texto_agendamento("imagem"))
         btn_imagem.pack(side=tk.LEFT, padx=2)
         
         btn_variaveis = ttk.Button(frame_botoes_editor_agendamento, text="Variáveis", width=8, 
@@ -1204,9 +1346,12 @@ class SistemaEmail:
         self.text_mensagem_agendamento = tk.Text(frame_agendamento, width=80, height=10)
         self.text_mensagem_agendamento.grid(row=18, column=0, columnspan=3, sticky=tk.NSEW, pady=(0, 10))
         
+        # Aplicar a cor preta ao texto
+        self.text_mensagem_agendamento.config(fg='black', insertbackground='black')
+        
         # Adiciona barra de rolagem
         scrollbar_agendamento = ttk.Scrollbar(frame_agendamento, orient=tk.VERTICAL, 
-                                          command=self.text_mensagem_agendamento.yview)
+                                        command=self.text_mensagem_agendamento.yview)
         scrollbar_agendamento.grid(row=18, column=3, sticky=tk.NS)
         self.text_mensagem_agendamento.config(yscrollcommand=scrollbar_agendamento.set)
         
@@ -1224,8 +1369,8 @@ class SistemaEmail:
         frame_anexos_agendamento.grid(row=21, column=0, columnspan=3, sticky=tk.EW, pady=(0, 10))
         
         self.lista_anexos_agendamento = ttk.Treeview(frame_anexos_agendamento, 
-                                                 columns=('nome', 'tamanho'), 
-                                                 show='headings', height=3)
+                                                columns=('nome', 'tamanho'), 
+                                                show='headings', height=3)
         self.lista_anexos_agendamento.heading('nome', text='Nome do arquivo')
         self.lista_anexos_agendamento.heading('tamanho', text='Tamanho')
         self.lista_anexos_agendamento.column('nome', width=300)
@@ -1233,7 +1378,7 @@ class SistemaEmail:
         self.lista_anexos_agendamento.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         scrollbar_anexos_agendamento = ttk.Scrollbar(frame_anexos_agendamento, orient=tk.VERTICAL, 
-                                                 command=self.lista_anexos_agendamento.yview)
+                                                command=self.lista_anexos_agendamento.yview)
         scrollbar_anexos_agendamento.pack(side=tk.RIGHT, fill=tk.Y)
         self.lista_anexos_agendamento.config(yscrollcommand=scrollbar_anexos_agendamento.set)
         
@@ -1243,28 +1388,31 @@ class SistemaEmail:
         self.anexos_agendamento = []  # Lista para armazenar os caminhos dos arquivos anexados
         
         btn_adicionar_anexo_agendamento = ttk.Button(frame_botoes_anexos_agendamento, 
-                                                 text="Adicionar Anexo", 
-                                                 command=self.adicionar_anexo_agendamento)
+                                                text="Adicionar Anexo", 
+                                                command=self.adicionar_anexo_agendamento)
         btn_adicionar_anexo_agendamento.pack(side=tk.LEFT, padx=2)
         
         btn_remover_anexo_agendamento = ttk.Button(frame_botoes_anexos_agendamento, 
-                                              text="Remover Anexo", 
-                                              command=self.remover_anexo_agendamento)
+                                            text="Remover Anexo", 
+                                            command=self.remover_anexo_agendamento)
         btn_remover_anexo_agendamento.pack(side=tk.LEFT, padx=2)
         
         # Botões de ação
         frame_acoes_agendamento = ttk.Frame(frame_agendamento)
-        frame_acoes_agendamento.grid(row=23, column=0, columnspan=3, sticky=tk.EW, pady=(10, 0))
+        frame_acoes_agendamento.grid(row=23, column=0, columnspan=3, sticky=tk.EW, pady=(10, 30))
         
         btn_agendar = ttk.Button(frame_acoes_agendamento, text="Agendar E-mail", command=self.agendar_email)
         btn_agendar.pack(side=tk.RIGHT, padx=5)
+        # Nome específico para o botão para poder acessá-lo posteriormente
+        btn_agendar.winfo_name = lambda: "btn_agendar"
+        frame_acoes_agendamento.nametowidget = lambda name: btn_agendar if name == "btn_agendar" else super(ttk.Frame, frame_acoes_agendamento).nametowidget(name)
         
         btn_limpar_agendamento = ttk.Button(frame_acoes_agendamento, text="Limpar Campos", 
                                         command=self.limpar_campos_agendamento)
         btn_limpar_agendamento.pack(side=tk.RIGHT, padx=5)
         
         btn_previsualizar_agendamento = ttk.Button(frame_acoes_agendamento, text="Pré-visualizar", 
-                                               command=self.previsualizar_email_agendamento)
+                                            command=self.previsualizar_email_agendamento)
         btn_previsualizar_agendamento.pack(side=tk.RIGHT, padx=5)
         
         # Atualiza a lista de e-mails agendados
@@ -1273,6 +1421,20 @@ class SistemaEmail:
         # Configurar a expansão da grid
         frame_agendamento.columnconfigure(0, weight=1)
         frame_agendamento.rowconfigure(18, weight=1)
+        
+        # Espaço extra para garantir que tudo seja visível com a rolagem
+        ttk.Label(frame_agendamento, text="").grid(row=24, column=0, pady=30)
+        
+        # Desativa bind_all após criar esta aba para não afetar outras telas
+        def on_tab_change(event):
+            # Desativa a rolagem global quando sai da aba de agendamento
+            canvas_agendamento.unbind_all("<MouseWheel>")
+            
+            # Reativa quando volta para a aba de agendamento
+            if event.widget.index("current") == 2:  # Índice da aba de agendamento
+                canvas_agendamento.bind_all("<MouseWheel>", on_mousewheel)
+        
+        self.notebook.bind("<<NotebookTabChanged>>", on_tab_change)
     
     def criar_aba_templates(self):
         """Cria a aba para gerenciamento de templates de e-mail."""
