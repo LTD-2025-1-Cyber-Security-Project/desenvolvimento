@@ -79,6 +79,7 @@ DB_FILE = os.path.join(BASE_DIR, 'prefeituras_email.db')
 class SistemaEmail:
     """Classe principal do sistema de envio de e-mails."""
     
+    # Adicione esta função ao método __init__ da classe SistemaEmail, logo após inicializar_banco_dados
     def __init__(self, root):
         """Inicializa a aplicação."""
         self.root = root
@@ -97,6 +98,9 @@ class SistemaEmail:
         
         # Inicializa o banco de dados
         self.inicializar_banco_dados()
+        
+        # Atualiza a estrutura do banco de dados se necessário
+        self.atualizar_banco_dados()
         
         # Cria a interface
         self.criar_interface()
@@ -291,10 +295,25 @@ class SistemaEmail:
                 destinatarios TEXT NOT NULL,
                 data_agendada TIMESTAMP NOT NULL,
                 recorrencia TEXT, -- diario, semanal, mensal, nenhuma
+                anexos TEXT, -- JSON com lista de caminhos de anexos
+                recorrencia_opcoes TEXT, -- JSON com opções de recorrência
                 status TEXT NOT NULL DEFAULT 'pendente',
                 FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
             )
             ''')
+            
+            # Verifica se a coluna 'anexos' existe na tabela 'emails_agendados'
+            # Se não existir, adiciona a coluna
+            cursor.execute("PRAGMA table_info(emails_agendados)")
+            colunas = [info[1] for info in cursor.fetchall()]
+            
+            if 'anexos' not in colunas:
+                logger.info("Adicionando coluna 'anexos' à tabela 'emails_agendados'")
+                cursor.execute("ALTER TABLE emails_agendados ADD COLUMN anexos TEXT")
+            
+            if 'recorrencia_opcoes' not in colunas:
+                logger.info("Adicionando coluna 'recorrencia_opcoes' à tabela 'emails_agendados'")
+                cursor.execute("ALTER TABLE emails_agendados ADD COLUMN recorrencia_opcoes TEXT")
             
             # Tabela de logs
             cursor.execute('''
@@ -324,6 +343,39 @@ class SistemaEmail:
         except Exception as e:
             logger.error(f"Erro ao inicializar banco de dados: {e}")
             messagebox.showerror("Erro", f"Não foi possível inicializar o banco de dados: {e}")
+
+    # Script para atualizar o banco de dados existente
+    def atualizar_banco_dados(self):
+        """Atualiza a estrutura de um banco de dados existente."""
+        try:
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            
+            # Verificar se a tabela emails_agendados existe
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='emails_agendados'")
+            if cursor.fetchone():
+                # Verificar se a coluna anexos existe
+                cursor.execute("PRAGMA table_info(emails_agendados)")
+                colunas = [info[1] for info in cursor.fetchall()]
+                
+                # Adiciona as colunas que faltam
+                if 'anexos' not in colunas:
+                    logger.info("Adicionando coluna 'anexos' à tabela 'emails_agendados'")
+                    cursor.execute("ALTER TABLE emails_agendados ADD COLUMN anexos TEXT")
+                
+                if 'recorrencia_opcoes' not in colunas:
+                    logger.info("Adicionando coluna 'recorrencia_opcoes' à tabela 'emails_agendados'")
+                    cursor.execute("ALTER TABLE emails_agendados ADD COLUMN recorrencia_opcoes TEXT")
+                
+                logger.info("Banco de dados atualizado com sucesso")
+            
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            logger.error(f"Erro ao atualizar banco de dados: {e}")
+            messagebox.showerror("Erro", f"Não foi possível atualizar o banco de dados: {e}")
+            return False
     
     def criar_interface(self):
         """Cria a interface gráfica do sistema."""
