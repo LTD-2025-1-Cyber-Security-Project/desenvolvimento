@@ -5,6 +5,7 @@
 Script para inserir usuários administradores no banco de dados do
 Sistema de Envio de E-mails para Prefeituras.
 
+
 Este script adiciona dois administradores:
 1. Um para São José (senha: admin@sj123)
 2. Um para Florianópolis (senha: admin@fpolis2505)
