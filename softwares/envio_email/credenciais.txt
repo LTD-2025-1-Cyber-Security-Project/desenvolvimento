@@ -2,3 +2,7 @@ No sistema que desenvolvi, o login e senha padrão são:
 
 E-mail: admin@admin.com
 Senha: admin
+
+smtp.pmf.sc.gov.br
+estevamsouzalaureth@gmail.com
+loyx siyf tjez ajyv
