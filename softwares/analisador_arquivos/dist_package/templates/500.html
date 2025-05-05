@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Erro no servidor - DocMaster{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <i class="bi bi-bug text-danger" style="font-size: 4rem;"></i>
+                    <h1 class="mt-4">500</h1>
+                    <h3 class="mb-4">Erro no servidor</h3>
+                    <p class="text-muted mb-4">
+                        Desculpe, ocorreu um erro inesperado. Nossa equipe já foi notificada e está trabalhando para resolver o problema.
+                    </p>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <i class="bi bi-house me-2"></i>Voltar ao Início
+                        </a>
+                        <button onclick="location.reload()" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Tentar Novamente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

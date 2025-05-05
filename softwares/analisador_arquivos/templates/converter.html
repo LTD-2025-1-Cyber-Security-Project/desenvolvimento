@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block title %}DocMaster - Conversor de Arquivos{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <h1 class="mb-4">Conversor Universal de Arquivos</h1>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Converter Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Converter Arquivos</h5>
+                    
+                    <!-- File Selection -->
+                    <div class="mb-4">
+                        <label class="form-label">Selecione o arquivo para converter</label>
+                        <select class="form-select" id="fileSelect" onchange="updateConversionOptions()">
+                            <option value="">Escolha um arquivo...</option>
+                            {% for file in user_files %}
+                            <option value="{{ file.id }}" data-type="{{ file.file_type }}">
+                                {{ file.original_filename }} ({{ file.file_type | upper }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Conversion Options -->
+                    <div id="conversionOptions" style="display: none;">
+                        <div class="mb-4">
+                            <label class="form-label">Converter para:</label>
+                            <div id="formatOptions" class="row g-3">
+                                <!-- Format options will be dynamically inserted here -->
+                            </div>
+                        </div>
+
+                        <!-- Advanced Options -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="preserveFormatting">
+                                <label class="form-check-label" for="preserveFormatting">
+                                    Preservar formatação original
+                                </label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="compressOutput">
+                                <label class="form-check-label" for="compressOutput">
+                                    Comprimir arquivo de saída
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Convert Button -->
+                        <button class="btn btn-primary" onclick="startConversion()" id="convertButton">
+                            <i class="bi bi-arrow-repeat me-2"></i>Iniciar Conversão
+                        </button>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="conversionResults" class="mt-4" style="display: none;">
+                        <h6 class="mb-3">Resultado da Conversão</h6>
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Conversão concluída com sucesso!
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="#" id="downloadLink" class="btn btn-primary">
+                                <i class="bi bi-download me-2"></i>Download do Arquivo Convertido
+                            </a>
+                            <button class="btn btn-outline-secondary" onclick="resetConverter()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Converter Outro Arquivo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Batch Conversion -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Conversão em Lote</h5>
+                    <p class="text-muted mb-3">Converta múltiplos arquivos de uma vez</p>
+                    <button class="btn btn-secondary" onclick="showBatchConverter()">
+                        <i class="bi bi-files me-2"></i>Iniciar Conversão em Lote
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Supported Formats -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Formatos Suportados</h5>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>De</th>
+                                <th>Para</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PDF</td>
+                                <td>Word, TXT</td>
+                            </tr>
+                            <tr>
+                                <td>Word</td>
+                                <td>PDF</td>
+                            </tr>
+                            <tr>
+                                <td>Imagens</td>
+                                <td>PDF</td>
+                            </tr>
+                            <tr>
+                                <td>Excel/CSV</td>
+                                <td>PDF</td>
+                            </tr>
+                            <tr>
+                                <td>PowerPoint</td>
+                                <td>PDF</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Conversions -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Conversões Recentes</h5>
+                    <div id="recentConversions">
+                        <p class="text-muted text-center">Nenhuma conversão recente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Batch Conversion Modal -->
+<div class="modal fade" id="batchModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Conversão em Lote</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Selecione múltiplos arquivos</label>
+                    <select multiple class="form-select" id="batchFiles" size="5">
+                        {% for file in user_files %}
+                        <option value="{{ file.id }}" data-type="{{ file.file_type }}">
+                            {{ file.original_filename }} ({{ file.file_type | upper }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Converter todos para</label>
+                    <select class="form-select" id="batchFormat">
+                        <option value="pdf">PDF</option>
+                        <option value="docx">Word (DOCX)</option>
+                        <option value="txt">Texto (TXT)</option>
+                    </select>
+                </div>
+                <div id="batchProgress" style="display: none;">
+                    <div class="progress mb-2">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="text-center" id="batchStatus">Processando...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="startBatchConversion()">
+                    Iniciar Conversão
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const conversionMatrix = {
+    'pdf': ['docx', 'txt'],
+    'docx': ['pdf'],
+    'doc': ['pdf'],
+    'txt': ['pdf'],
+    'jpg': ['pdf'],
+    'jpeg': ['pdf'],
+    'png': ['pdf'],
+    'xlsx': ['pdf'],
+    'xls': ['pdf'],
+    'csv': ['pdf'],
+    'pptx': ['pdf'],
+    'ppt': ['pdf']
+};
+
+function updateConversionOptions() {
+    const fileSelect = document.getElementById('fileSelect');
+    const selectedOption = fileSelect.options[fileSelect.selectedIndex];
+    const conversionOptions = document.getElementById('conversionOptions');
+    const formatOptions = document.getElementById('formatOptions');
+    
+    if (!selectedOption.value) {
+        conversionOptions.style.display = 'none';
+        return;
+    }
+    
+    const fileType = selectedOption.dataset.type;
+    const availableFormats = conversionMatrix[fileType] || [];
+    
+    if (availableFormats.length === 0) {
+        formatOptions.innerHTML = '<div class="col-12"><p class="text-muted">Nenhuma conversão disponível para este tipo de arquivo.</p></div>';
+    } else {
+        formatOptions.innerHTML = availableFormats.map(format => `
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="outputFormat" 
+                           id="format_${format}" value="${format}">
+                    <label class="form-check-label" for="format_${format}">
+                        ${format.toUpperCase()}
+                    </label>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    conversionOptions.style.display = 'block';
+    document.getElementById('conversionResults').style.display = 'none';
+}
+
+function startConversion() {
+    const fileSelect = document.getElementById('fileSelect');
+    const selectedFormat = document.querySelector('input[name="outputFormat"]:checked');
+    
+    if (!fileSelect.value || !selectedFormat) {
+        showToast('Por favor, selecione um arquivo e formato de saída', 'warning');
+        return;
+    }
+    
+    const convertButton = document.getElementById('convertButton');
+    convertButton.disabled = true;
+    convertButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Convertendo...';
+    
+    const formData = {
+        file_id: fileSelect.value,
+        output_format: selectedFormat.value,
+        preserve_formatting: document.getElementById('preserveFormatting').checked,
+        compress_output: document.getElementById('compressOutput').checked
+    };
+    
+    fetch('/api/convert', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showConversionResult(data.result_file);
+            loadRecentConversions();
+        } else {
+            showToast('Erro na conversão: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Erro na conversão', 'danger');
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        convertButton.disabled = false;
+        convertButton.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Iniciar Conversão';
+    });
+}
+
+function showConversionResult(downloadUrl) {
+    const results = document.getElementById('conversionResults');
+    const downloadLink = document.getElementById('downloadLink');
+    
+    downloadLink.href = downloadUrl;
+    results.style.display = 'block';
+    
+    // Scroll to results
+    results.scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetConverter() {
+    document.getElementById('fileSelect').value = '';
+    document.getElementById('conversionOptions').style.display = 'none';
+    document.getElementById('conversionResults').style.display = 'none';
+}
+
+function showBatchConverter() {
+    const modal = new bootstrap.Modal(document.getElementById('batchModal'));
+    modal.show();
+}
+
+function startBatchConversion() {
+    const selectedFiles = Array.from(document.getElementById('batchFiles').selectedOptions);
+    const format = document.getElementById('batchFormat').value;
+    
+    if (selectedFiles.length === 0) {
+        showToast('Por favor, selecione pelo menos um arquivo', 'warning');
+        return;
+    }
+    
+    const progressBar = document.querySelector('#batchProgress .progress-bar');
+    const progressDiv = document.getElementById('batchProgress');
+    const statusDiv = document.getElementById('batchStatus');
+    
+    progressDiv.style.display = 'block';
+    let completed = 0;
+    
+    selectedFiles.forEach((option, index) => {
+        setTimeout(() => {
+            convertFile(option.value, format)
+                .then(() => {
+                    completed++;
+                    const progress = (completed / selectedFiles.length) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    statusDiv.textContent = `Processando ${completed}/${selectedFiles.length}`;
+                    
+                    if (completed === selectedFiles.length) {
+                        statusDiv.textContent = 'Conversão concluída!';
+                        setTimeout(() => {
+                            bootstrap.Modal.getInstance(document.getElementById('batchModal')).hide();
+                            showToast('Conversão em lote concluída!', 'success');
+                            loadRecentConversions();
+                        }, 1500);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error converting file:', error);
+                });
+        }, index * 500); // Add delay between conversions
+    });
+}
+
+function convertFile(fileId, format) {
+    return fetch('/api/convert', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            file_id: fileId,
+            output_format: format
+        })
+    }).then(response => response.json());
+}
+
+function loadRecentConversions() {
+    fetch('/api/recent-conversions')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('recentConversions');
+            if (data.conversions && data.conversions.length > 0) {
+                let html = '<div class="list-group">';
+                data.conversions.forEach(conv => {
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">${conv.original_file}</small>
+                                    <div>${conv.from_format} → ${conv.to_format}</div>
+                                </div>
+                                <a href="${conv.download_url}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p class="text-muted text-center">Nenhuma conversão recente</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading recent conversions:', error);
+        });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    loadRecentConversions();
+});
+</script>
+{% endblock %}

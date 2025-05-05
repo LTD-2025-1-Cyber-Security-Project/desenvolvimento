@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+
+{% block title %}DocMaster - Ferramentas PDF{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <h1 class="mb-4">Ferramentas PDF</h1>
+
+    <div class="row g-4">
+        <!-- Merge PDFs -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-files me-2"></i>Mesclar PDFs
+                    </h5>
+                    <p class="card-text">Combine múltiplos arquivos PDF em um único documento.</p>
+                    <button class="btn btn-primary" onclick="showMergeModal()">
+                        <i class="bi bi-plus-circle me-2"></i>Mesclar PDFs
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Split PDF -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-scissors me-2"></i>Dividir PDF
+                    </h5>
+                    <p class="card-text">Separe um PDF em múltiplos arquivos menores.</p>
+                    <button class="btn btn-primary" onclick="showSplitModal()">
+                        <i class="bi bi-dash-circle me-2"></i>Dividir PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compress PDF -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-file-zip me-2"></i>Comprimir PDF
+                    </h5>
+                    <p class="card-text">Reduza o tamanho do arquivo PDF mantendo a qualidade.</p>
+                    <button class="btn btn-primary" onclick="showCompressModal()">
+                        <i class="bi bi-arrow-down-circle me-2"></i>Comprimir PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rotate PDF -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Rotacionar PDF
+                    </h5>
+                    <p class="card-text">Rotacione páginas do PDF em qualquer ângulo.</p>
+                    <button class="btn btn-primary" onclick="showRotateModal()">
+                        <i class="bi bi-arrow-repeat me-2"></i>Rotacionar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extract Pages -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-file-earmark-minus me-2"></i>Extrair Páginas
+                    </h5>
+                    <p class="card-text">Extraia páginas específicas de um PDF.</p>
+                    <button class="btn btn-primary" onclick="showExtractModal()">
+                        <i class="bi bi-box-arrow-up me-2"></i>Extrair Páginas
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reorder Pages -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-sort-numeric-down me-2"></i>Reordenar Páginas
+                    </h5>
+                    <p class="card-text">Reorganize as páginas do seu PDF.</p>
+                    <button class="btn btn-primary" onclick="showReorderModal()">
+                        <i class="bi bi-arrow-down-up me-2"></i>Reordenar Páginas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Merge PDFs Modal -->
+<div class="modal fade" id="mergeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mesclar PDFs</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Selecione os PDFs para mesclar</label>
+                    <select multiple class="form-select" id="mergeFiles" size="5">
+                        {% for file in user_files %}
+                        {% if file.file_type == 'pdf' %}
+                        <option value="{{ file.id }}">{{ file.original_filename }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Segure Ctrl/Cmd para selecionar múltiplos arquivos</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nome do arquivo final</label>
+                    <input type="text" class="form-control" id="mergeOutputName" placeholder="documento_mesclado.pdf">
+                </div>
+                <div id="mergeOrder" class="mb-3" style="display: none;">
+                    <label class="form-label">Ordem dos arquivos</label>
+                    <div class="list-group" id="mergeOrderList">
+                    </div>
+                    <small class="text-muted">Arraste para reordenar</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="mergePDFs()">Mesclar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Split PDF Modal -->
+<div class="modal fade" id="splitModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Dividir PDF</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Selecione o PDF para dividir</label>
+                    <select class="form-select" id="splitFile">
+                        <option value="">Escolha um arquivo...</option>
+                        {% for file in user_files %}
+                        {% if file.file_type == 'pdf' %}
+                        <option value="{{ file.id }}">{{ file.original_filename }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Método de divisão</label>
+                    <select class="form-select" id="splitMethod" onchange="updateSplitOptions()">
+                        <option value="pages">Por número de páginas</option>
+                        <option value="size">Por tamanho do arquivo</option>
+                        <option value="custom">Personalizado</option>
+                    </select>
+                </div>
+                <div id="splitOptions">
+                    <div class="mb-3">
+                        <label class="form-label">Páginas por arquivo</label>
+                        <input type="number" class="form-control" id="pagesPerFile" value="1" min="1">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="splitPDF()">Dividir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Compress PDF Modal -->
+<div class="modal fade" id="compressModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Comprimir PDF</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Selecione o PDF para comprimir</label>
+                    <select class="form-select" id="compressFile">
+                        <option value="">Escolha um arquivo...</option>
+                        {% for file in user_files %}
+                        {% if file.file_type == 'pdf' %}
+                        <option value="{{ file.id }}">{{ file.original_filename }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nível de compressão</label>
+                    <select class="form-select" id="compressionLevel">
+                        <option value="low">Baixa (melhor qualidade)</option>
+                        <option value="medium" selected>Média (balanceado)</option>
+                        <option value="high">Alta (menor tamanho)</option>
+                    </select>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="compressImages" checked>
+                    <label class="form-check-label" for="compressImages">
+                        Comprimir imagens no PDF
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="compressPDF()">Comprimir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Modal functions
+function showMergeModal() {
+    const modal = new bootstrap.Modal(document.getElementById('merge Modal'));
+    modal.show();
+}
+
+function showSplitModal() {
+    const modal = new bootstrap.Modal(document.getElementById('splitModal'));
+    modal.show();
+}
+
+function showCompressModal() {
+    const modal = new bootstrap.Modal(document.getElementById('compressModal'));
+    modal.show();
+}
+
+function showRotateModal() {
+    // Implement rotate modal
+    showToast('Função de rotação em desenvolvimento', 'info');
+}
+
+function showExtractModal() {
+    // Implement extract modal
+    showToast('Função de extração em desenvolvimento', 'info');
+}
+
+function showReorderModal() {
+    // Implement reorder modal
+    showToast('Função de reordenação em desenvolvimento', 'info');
+}
+
+// Merge functionality
+document.getElementById('mergeFiles').addEventListener('change', function() {
+    const selectedFiles = Array.from(this.selectedOptions);
+    const orderDiv = document.getElementById('mergeOrder');
+    const orderList = document.getElementById('mergeOrderList');
+    
+    if (selectedFiles.length > 1) {
+        orderDiv.style.display = 'block';
+        orderList.innerHTML = selectedFiles.map((option, index) => `
+            <div class="list-group-item d-flex justify-content-between align-items-center" data-id="${option.value}">
+                <span>${index + 1}. ${option.text}</span>
+                <i class="bi bi-grip-vertical"></i>
+            </div>
+        `).join('');
+        
+        // Make list sortable (you would need to implement drag-and-drop functionality)
+    } else {
+        orderDiv.style.display = 'none';
+    }
+});
+
+function mergePDFs() {
+    const selectedFiles = Array.from(document.getElementById('mergeFiles').selectedOptions);
+    const outputName = document.getElementById('mergeOutputName').value || 'merged.pdf';
+    
+    if (selectedFiles.length < 2) {
+        showToast('Selecione pelo menos 2 arquivos para mesclar', 'warning');
+        return;
+    }
+    
+    const fileIds = selectedFiles.map(option => option.value);
+    
+    showToast('Mesclando arquivos...', 'info');
+    
+    fetch('/api/merge-pdfs', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            file_ids: fileIds,
+            output_name: outputName
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('PDFs mesclados com sucesso!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('mergeModal')).hide();
+            window.location.href = data.download_url;
+        } else {
+            showToast('Erro ao mesclar PDFs: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Erro ao mesclar PDFs', 'danger');
+        console.error('Error:', error);
+    });
+}
+
+// Split functionality
+function updateSplitOptions() {
+    const method = document.getElementById('splitMethod').value;
+    const optionsDiv = document.getElementById('splitOptions');
+    
+    switch(method) {
+        case 'pages':
+            optionsDiv.innerHTML = `
+                <div class="mb-3">
+                    <label class="form-label">Páginas por arquivo</label>
+                    <input type="number" class="form-control" id="pagesPerFile" value="1" min="1">
+                </div>
+            `;
+            break;
+        case 'size':
+            optionsDiv.innerHTML = `
+                <div class="mb-3">
+                    <label class="form-label">Tamanho máximo por arquivo (MB)</label>
+                    <input type="number" class="form-control" id="maxFileSize" value="5" min="1">
+                </div>
+            `;
+            break;
+        case 'custom':
+            optionsDiv.innerHTML = `
+                <div class="mb-3">
+                    <label class="form-label">Intervalos de páginas (ex: 1-3,4-6,7-10)</label>
+                    <input type="text" class="form-control" id="pageRanges" placeholder="1-3,4-6,7-10">
+                </div>
+            `;
+            break;
+    }
+}
+
+function splitPDF() {
+    const fileSelect = document.getElementById('splitFile');
+    const method = document.getElementById('splitMethod').value;
+    
+    if (!fileSelect.value) {
+        showToast('Por favor, selecione um arquivo', 'warning');
+        return;
+    }
+    
+    let options = {
+        file_id: fileSelect.value,
+        method: method
+    };
+    
+    switch(method) {
+        case 'pages':
+            options.pages_per_file = parseInt(document.getElementById('pagesPerFile').value);
+            break;
+        case 'size':
+            options.max_file_size = parseInt(document.getElementById('maxFileSize').value);
+            break;
+        case 'custom':
+            options.page_ranges = document.getElementById('pageRanges').value;
+            break;
+    }
+    
+    showToast('Dividindo PDF...', 'info');
+    
+    fetch('/api/split-pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(options)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('PDF dividido com sucesso!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('splitModal')).hide();
+            window.location.href = data.download_url;
+        } else {
+            showToast('Erro ao dividir PDF: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Erro ao dividir PDF', 'danger');
+        console.error('Error:', error);
+    });
+}
+
+// Compress functionality
+function compressPDF() {
+    const fileSelect = document.getElementById('compressFile');
+    const compressionLevel = document.getElementById('compressionLevel').value;
+    const compressImages = document.getElementById('compressImages').checked;
+    
+    if (!fileSelect.value) {
+        showToast('Por favor, selecione um arquivo', 'warning');
+        return;
+    }
+    
+    showToast('Comprimindo PDF...', 'info');
+    
+    fetch('/api/compress-pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            file_id: fileSelect.value,
+            compression_level: compressionLevel,
+            compress_images: compressImages
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`PDF comprimido com sucesso! Redução: ${data.size_reduction}%`, 'success');
+            bootstrap.Modal.getInstance(document.getElementById('compressModal')).hide();
+            window.location.href = data.download_url;
+        } else {
+            showToast('Erro ao comprimir PDF: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Erro ao comprimir PDF', 'danger');
+        console.error('Error:', error);
+    });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize sortable for merge order (would need a library like SortableJS)
+});
+</script>
+{% endblock %}
