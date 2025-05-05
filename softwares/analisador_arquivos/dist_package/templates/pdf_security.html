@@ -1,0 +1,551 @@
+{% extends "base.html" %}
+
+{% block title %}DocMaster - Segurança PDF{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <h1 class="mb-4">Segurança de PDF</h1>
+
+    <div class="row g-4">
+        <!-- Password Protection -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="feature-icon accent mb-3">
+                        <i class="bi bi-lock fs-2"></i>
+                    </div>
+                    <h5 class="card-title mb-3">Proteger com Senha</h5>
+                    <p class="card-text">Adicione proteção por senha ao seu PDF para restringir acesso.</p>
+                    <button class="btn btn-accent" onclick="showPasswordModal()">
+                        <i class="bi bi-shield-lock me-2"></i>Proteger PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Watermark -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="feature-icon primary mb-3">
+                        <i class="bi bi-droplet fs-2"></i>
+                    </div>
+                    <h5 class="card-title mb-3">Marca d'água</h5>
+                    <p class="card-text">Adicione marca d'água personalizada ao seu PDF.</p>
+                    <button class="btn btn-primary" onclick="showWatermarkModal()">
+                        <i class="bi bi-brush me-2"></i>Adicionar Marca d'água
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Digital Signature -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="feature-icon secondary mb-3">
+                        <i class="bi bi-pen fs-2"></i>
+                    </div>
+                    <h5 class="card-title mb-3">Assinatura Digital</h5>
+                    <p class="card-text">Assine digitalmente seus documentos PDF.</p>
+                    <button class="btn btn-secondary" onclick="showSignatureModal()">
+                        <i class="bi bi-pencil-square me-2"></i>Assinar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Permissions -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="feature-icon warning mb-3">
+                        <i class="bi bi-gear fs-2"></i>
+                    </div>
+                    <h5 class="card-title mb-3">Permissões</h5>
+                    <p class="card-text">Configure permissões de impressão, cópia e edição.</p>
+                    <button class="btn btn-warning" onclick="showPermissionsModal()">
+                        <i class="bi bi-sliders me-2"></i>Configurar Permissões
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Security Operations -->
+    <div class="card mt-5">
+        <div class="card-body">
+            <h5 class="card-title mb-4">Operações de Segurança Recentes</h5>
+            <div id="securityHistory" class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Arquivo</th>
+                            <th>Operação</th>
+                            <th>Data</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="securityHistoryBody">
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Nenhuma operação recente</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Protection Modal -->
+<div class="modal fade" id="passwordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Proteger PDF com Senha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Selecione o PDF</label>
+                    <select class="form-select" id="passwordFile">
+                        <option value="">Escolha um arquivo...</option>
+                        {% for file in user_files %}
+                        {% if file.file_type == 'pdf' %}
+                        <option value="{{ file.id }}">{{ file.original_filename }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Senha de abertura</label>
+                    <input type="password" class="form-control" id="openPassword" placeholder="Senha para abrir o PDF">
+                    <div class="form-text">Deixe em branco se não quiser senha de abertura</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Senha de permissões</label>
+                    <input type="password" class="form-control" id="permissionPassword" placeholder="Senha para modificar permissões">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Confirmar senha de permissões</label>
+                    <input type="password" class="form-control" id="confirmPermissionPassword" placeholder="Confirme a senha">
+                </div>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Use senhas fortes com letras, números e símbolos.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="protectPDF()">Proteger</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Watermark Modal -->
+<div class="modal fade" id="watermarkModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar Marca d'água</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Selecione o PDF</label>
+                    <select class="form-select" id="watermarkFile">
+                        <option value="">Escolha um arquivo...</option>
+                        {% for file in user_files %}
+                        {% if file.file_type == 'pdf' %}
+                        <option value="{{ file.id }}">{{ file.original_filename }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Texto da marca d'água</label>
+                    <input type="text" class="form-control" id="watermarkText" placeholder="Ex: CONFIDENCIAL">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Posição</label>
+                        <select class="form-select" id="watermarkPosition">
+                            <option value="center">Centro</option>
+                            <option value="diagonal">Diagonal</option>
+                            <option value="top-left">Superior esquerdo</option>
+                            <option value="top-right">Superior direito</option>
+                            <option value="bottom-left">Inferior esquerdo</option>
+                            <option value="bottom-right">Inferior direito</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Transparência</label>
+                        <input type="range" class="form-range" id="watermarkOpacity" min="0" max="100" value="50">
+                        <small class="text-muted">Transparência: <span id="opacityValue">50</span>%</small>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Cor</label>
+                        <input type="color" class="form-control form-control-color" id="watermarkColor" value="#000000">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Tamanho da fonte</label>
+                        <input type="number" class="form-control" id="watermarkFontSize" value="48" min="12" max="144">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Visualização</label>
+                    <div class="border rounded p-3 text-center" id="watermarkPreview" style="height: 200px; position: relative;">
+                        <div id="previewText" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                            PREVIEW
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="addWatermark()">Adicionar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Digital Signature Modal -->
+<div class="modal fade" id="signatureModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assinatura Digital</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Selecione o PDF</label>
+                    <select class="form-select" id="signatureFile">
+                        <option value="">Escolha um arquivo...</option>
+                        {% for file in user_files %}
+                        {% if file.file_type == 'pdf' %}
+                        <option value="{{ file.id }}">{{ file.original_filename }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tipo de assinatura</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="signatureType" id="drawSignature" checked>
+                        <label class="btn btn-outline-primary" for="drawSignature">Desenhar</label>
+                        
+                        <input type="radio" class="btn-check" name="signatureType" id="typeSignature">
+                        <label class="btn btn-outline-primary" for="typeSignature">Digitar</label>
+                        
+                        <input type="radio" class="btn-check" name="signatureType" id="uploadSignature">
+                        <label class="btn btn-outline-primary" for="uploadSignature">Upload</label>
+                    </div>
+                </div>
+                <div id="signatureArea">
+                    <canvas id="signatureCanvas" class="border rounded" width="600" height="200"></canvas>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="clearSignature()">
+                            <i class="bi bi-trash me-1"></i>Limpar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="signPDF()">Assinar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Modal functions
+function showPasswordModal() {
+    const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+    modal.show();
+}
+
+function showWatermarkModal() {
+    const modal = new bootstrap.Modal(document.getElementById('watermarkModal'));
+    modal.show();
+}
+
+function showSignatureModal() {
+    const modal = new bootstrap.Modal(document.getElementById('signatureModal'));
+    modal.show();
+    initSignatureCanvas();
+}
+
+function showPermissionsModal() {
+    showToast('Configuração de permissões em desenvolvimento', 'info');
+}
+
+// Password protection
+function protectPDF() {
+    const fileSelect = document.getElementById('passwordFile');
+    const openPassword = document.getElementById('openPassword').value;
+    const permissionPassword = document.getElementById('permissionPassword').value;
+    const confirmPassword = document.getElementById('confirmPermissionPassword').value;
+    
+    if (!fileSelect.value) {
+        showToast('Por favor, selecione um arquivo', 'warning');
+        return;
+    }
+    
+    if (permissionPassword !== confirmPassword) {
+        showToast('As senhas de permissão não coincidem', 'warning');
+        return;
+    }
+    
+    if (!openPassword && !permissionPassword) {
+        showToast('Por favor, forneça pelo menos uma senha', 'warning');
+        return;
+    }
+    
+    showToast('Protegendo PDF...', 'info');
+    
+    fetch('/api/protect-pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            file_id: fileSelect.value,
+            open_password: openPassword,
+            permission_password: permissionPassword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('PDF protegido com sucesso!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
+            loadSecurityHistory();
+        } else {
+            showToast('Erro ao proteger PDF: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Erro ao proteger PDF', 'danger');
+        console.error('Error:', error);
+    });
+}
+
+// Watermark functionality
+const watermarkOpacity = document.getElementById('watermarkOpacity');
+const opacityValue = document.getElementById('opacityValue');
+const watermarkText = document.getElementById('watermarkText');
+const watermarkPreview = document.getElementById('previewText');
+
+watermarkOpacity.addEventListener('input', function() {
+    opacityValue.textContent = this.value;
+    updateWatermarkPreview();
+});
+
+watermarkText.addEventListener('input', updateWatermarkPreview);
+
+function updateWatermarkPreview() {
+    const text = watermarkText.value || 'PREVIEW';
+    const opacity = watermarkOpacity.value / 100;
+    const color = document.getElementById('watermarkColor').value;
+    const fontSize = document.getElementById('watermarkFontSize').value;
+    
+    watermarkPreview.textContent = text;
+    watermarkPreview.style.opacity = opacity;
+    watermarkPreview.style.color = color;
+    watermarkPreview.style.fontSize = fontSize + 'px';
+}
+
+function addWatermark() {
+    const fileSelect = document.getElementById('watermarkFile');
+    const text = document.getElementById('watermarkText').value;
+    
+    if (!fileSelect.value) {
+        showToast('Por favor, selecione um arquivo', 'warning');
+        return;
+    }
+    
+    if (!text) {
+        showToast('Por favor, insira o texto da marca d\'água', 'warning');
+        return;
+    }
+    
+    showToast('Adicionando marca d\'água...', 'info');
+    
+    fetch('/api/add-watermark', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            file_id: fileSelect.value,
+            text: text,
+            position: document.getElementById('watermarkPosition').value,
+            opacity: parseInt(watermarkOpacity.value),
+            color: document.getElementById('watermarkColor').value,
+            font_size: parseInt(document.getElementById('watermarkFontSize').value)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Marca d\'água adicionada com sucesso!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('watermarkModal')).hide();
+            loadSecurityHistory();
+        } else {
+            showToast('Erro ao adicionar marca d\'água: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Erro ao adicionar marca d\'água', 'danger');
+        console.error('Error:', error);
+    });
+}
+
+// Digital signature functionality
+let signatureCanvas, signatureContext;
+
+function initSignatureCanvas() {
+    signatureCanvas = document.getElementById('signatureCanvas');
+    signatureContext = signatureCanvas.getContext('2d');
+    
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    
+    signatureCanvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+    });
+    
+    signatureCanvas.addEventListener('mousemove', (e) => {
+        if (!isDrawing) return;
+        
+        signatureContext.beginPath();
+        signatureContext.moveTo(lastX, lastY);
+        signatureContext.lineTo(e.offsetX, e.offsetY);
+        signatureContext.strokeStyle = '#000';
+        signatureContext.lineWidth = 2;
+        signatureContext.stroke();
+        
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+    });
+    
+    signatureCanvas.addEventListener('mouseup', () => isDrawing = false);
+    signatureCanvas.addEventListener('mouseout', () => isDrawing = false);
+}
+
+function clearSignature() {
+    signatureContext.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+}
+
+function signPDF() {
+    const fileSelect = document.getElementById('signatureFile');
+    
+    if (!fileSelect.value) {
+        showToast('Por favor, selecione um arquivo', 'warning');
+        return;
+    }
+    
+    // Get signature data
+    const signatureData = signatureCanvas.toDataURL();
+    
+    showToast('Assinando PDF...', 'info');
+    
+    fetch('/api/sign-pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            file_id: fileSelect.value,
+            signature_data: signatureData
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('PDF assinado com sucesso!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('signatureModal')).hide();
+            loadSecurityHistory();
+        } else {
+            showToast('Erro ao assinar PDF: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Erro ao assinar PDF', 'danger');
+        console.error('Error:', error);
+    });
+}
+
+// Load security history
+function loadSecurityHistory() {
+    fetch('/api/security-history')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('securityHistoryBody');
+            if (data.operations && data.operations.length > 0) {
+                tbody.innerHTML = data.operations.map(op => `
+                    <tr>
+                        <td>${op.filename}</td>
+                        <td>
+                            <span class="badge bg-${getOperationBadgeClass(op.type)}">
+                                ${getOperationLabel(op.type)}
+                            </span>
+                        </td>
+                        <td>${new Date(op.date).toLocaleString()}</td>
+                        <td>
+                            <span class="badge bg-${op.status === 'success' ? 'success' : 'danger'}">
+                                ${op.status}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="${op.download_url}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-download"></i>
+                            </a>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhuma operação recente</td></tr>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading security history:', error);
+        });
+}
+
+function getOperationBadgeClass(type) {
+    const classes = {
+        'password': 'primary',
+        'watermark': 'info',
+        'signature': 'success',
+        'permissions': 'warning'
+    };
+    return classes[type] || 'secondary';
+}
+
+function getOperationLabel(type) {
+    const labels = {
+        'password': 'Proteção por senha',
+        'watermark': 'Marca d\'água',
+        'signature': 'Assinatura digital',
+        'permissions': 'Permissões'
+    };
+    return labels[type] || type;
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    loadSecurityHistory();
+});
+</script>
+{% endblock %}

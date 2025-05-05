@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}DocMaster - OCR{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <h1 class="mb-4">OCR - Reconhecimento Óptico de Caracteres</h1>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- OCR Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Extrair Texto de Imagens e PDFs</h5>
+                    
+                    <!-- File Selection -->
+                    <div class="mb-4">
+                        <label class="form-label">Selecione o arquivo para OCR</label>
+                        <select class="form-select" id="fileSelect" onchange="updateOCROptions()">
+                            <option value="">Escolha um arquivo...</option>
+                            {% for file in user_files %}
+                            {% if file.file_type in ['pdf', 'jpg', 'jpeg', 'png'] %}
+                            <option value="{{ file.id }}" data-type="{{ file.file_type }}">
+                                {{ file.original_filename }} ({{ file.file_type | upper }})
+                            </option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- OCR Options -->
+                    <div id="ocrOptions" style="display: none;">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Idioma do Documento</label>
+                                <select class="form-select" id="ocrLanguage">
+                                    <option value="por+eng">Português + Inglês</option>
+                                    <option value="por">Português</option>
+                                    <option value="eng">Inglês</option>
+                                    <option value="spa">Espanhol</option>
+                                    <option value="fra">Francês</option>
+                                    <option value="deu">Alemão</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Qualidade da Imagem</label>
+                                <select class="form-select" id="imageQuality">
+                                    <option value="auto">Automático</option>
+                                    <option value="high">Alta qualidade</option>
+                                    <option value="medium">Média qualidade</option>
+                                    <option value="low">Baixa qualidade</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Opções Avançadas</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enhanceImage" checked>
+                                <label class="form-check-label" for="enhanceImage">
+                                    Melhorar qualidade da imagem automaticamente
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="preserveLayout">
+                                <label class="form-check-label" for="preserveLayout">
+                                    Preservar layout original
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="detectTables">
+                                <label class="form-check-label" for="detectTables">
+                                    Detectar e extrair tabelas
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- OCR Button -->
+                        <button class="btn btn-primary" onclick="startOCR()" id="ocrButton">
+                            <i class="bi bi-eye me-2"></i>Iniciar OCR
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OCR Results -->
+            <div id="ocrResults" style="display: none;">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Texto Extraído</h5>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Caracteres encontrados: <span id="charCount">0</span></span>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary me-2" onclick="copyText()">
+                                        <i class="bi bi-clipboard me-1"></i>Copiar
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="downloadText()">
+                                        <i class="bi bi-download me-1"></i>Download
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea class="form-control" id="extractedText" rows="15" readonly></textarea>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex">
+                            <button class="btn btn-secondary" onclick="editText()">
+                                <i class="bi bi-pencil me-2"></i>Editar Texto
+                            </button>
+                            <button class="btn btn-primary" onclick="processAnother()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Processar Outro Arquivo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Analysis -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Análise do Texto</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h3 id="wordCount">0</h3>
+                                    <p class="text-muted mb-0">Palavras</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h3 id="lineCount">0</h3>
+                                    <p class="text-muted mb-0">Linhas</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h3 id="accuracy">0%</h3>
+                                    <p class="text-muted mb-0">Confiança</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Tips Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Dicas para Melhor OCR</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Use imagens com alta resolução (300 DPI ou mais)
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Garanta boa iluminação e contraste
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Evite imagens distorcidas ou inclinadas
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Texto deve estar nítido e legível
+                        </li>
+                        <li class="mb-0">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Selecione o idioma correto do documento
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Recent OCR -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">OCR Recentes</h5>
+                    <div id="recentOCR">
+                        <p class="text-muted text-center">Nenhum OCR recente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentText = '';
+
+function updateOCROptions() {
+    const fileSelect = document.getElementById('fileSelect');
+    const ocrOptions = document.getElementById('ocrOptions');
+    
+    if (fileSelect.value) {
+        ocrOptions.style.display = 'block';
+    } else {
+        ocrOptions.style.display = 'none';
+    }
+    
+    // Hide results
+    document.getElementById('ocrResults').style.display = 'none';
+}
+
+function startOCR() {
+    const fileSelect = document.getElementById('fileSelect');
+    if (!fileSelect.value) {
+        showToast('Por favor, selecione um arquivo', 'warning');
+        return;
+    }
+    
+    const ocrButton = document.getElementById('ocrButton');
+    ocrButton.disabled = true;
+    ocrButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
+    
+    const formData = {
+        file_id: fileSelect.value,
+        language: document.getElementById('ocrLanguage').value,
+        quality: document.getElementById('imageQuality').value,
+        enhance_image: document.getElementById('enhanceImage').checked,
+        preserve_layout: document.getElementById('preserveLayout').checked,
+        detect_tables: document.getElementById('detectTables').checked
+    };
+    
+    fetch('/api/ocr', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayOCRResults(data);
+            loadRecentOCR();
+        } else {
+            showToast('Erro no OCR: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Erro no OCR', 'danger');
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        ocrButton.disabled = false;
+        ocrButton.innerHTML = '<i class="bi bi-eye me-2"></i>Iniciar OCR';
+    });
+}
+
+function displayOCRResults(data) {
+    const resultsDiv = document.getElementById('ocrResults');
+    const textArea = document.getElementById('extractedText');
+    
+    currentText = data.text;
+    textArea.value = currentText;
+    
+    // Update statistics
+    document.getElementById('charCount').textContent = currentText.length;
+    document.getElementById('wordCount').textContent = currentText.split(/\s+/).filter(word => word.length > 0).length;
+    document.getElementById('lineCount').textContent = currentText.split('\n').length;
+    document.getElementById('accuracy').textContent = data.confidence ? `${data.confidence}%` : 'N/A';
+    
+    resultsDiv.style.display = 'block';
+    resultsDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+function copyText() {
+    const textArea = document.getElementById('extractedText');
+    textArea.select();
+    document.execCommand('copy');
+    showToast('Texto copiado para a área de transferência!', 'success');
+}
+
+function downloadText() {
+    const text = document.getElementById('extractedText').value;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ocr_${new Date().toISOString().slice(0,10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+}
+
+function editText() {
+    const textArea = document.getElementById('extractedText');
+    textArea.readOnly = false;
+    textArea.focus();
+    showToast('Você pode editar o texto agora', 'info');
+}
+
+function processAnother() {
+    document.getElementById('fileSelect').value = '';
+    document.getElementById('ocrOptions').style.display = 'none';
+    document.getElementById('ocrResults').style.display = 'none';
+    window.scrollTo(0, 0);
+}
+
+function loadRecentOCR() {
+    fetch('/api/recent-ocr')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('recentOCR');
+            if (data.ocr_tasks && data.ocr_tasks.length > 0) {
+                let html = '<div class="list-group">';
+                data.ocr_tasks.forEach(task => {
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">${task.filename}</h6>
+                                    <small class="text-muted">${new Date(task.date).toLocaleString()}</small>
+                                </div>
+                                <a href="${task.download_url}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p class="text-muted text-center">Nenhum OCR recente</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading recent OCR:', error);
+        });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    loadRecentOCR();
+});
+</script>
+{% endblock %}

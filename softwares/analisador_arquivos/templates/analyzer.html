@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+
+{% block title %}DocMaster - Analisador de Documentos{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <h1 class="mb-4">Analisador de Documentos com IA</h1>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Analyzer Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Analisar Documento</h5>
+                    
+                    <!-- File Selection -->
+                    <div class="mb-4">
+                        <label class="form-label">Selecione o documento para análise</label>
+                        <select class="form-select" id="fileSelect" onchange="updateAnalysisOptions()">
+                            <option value="">Escolha um arquivo...</option>
+                            {% for file in user_files %}
+                            {% if file.file_type in ['pdf', 'docx', 'txt'] %}
+                            <option value="{{ file.id }}" data-type="{{ file.file_type }}" {% if selected_file_id|string == file.id|string %}selected{% endif %}>
+                                {{ file.original_filename }} ({{ file.file_type | upper }})
+                            </option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Analysis Options -->
+                    <div id="analysisOptions" style="display: none;">
+                        <div class="mb-4">
+                            <label class="form-label">Tipo de Análise:</label>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="summarize" checked>
+                                        <label class="form-check-label" for="summarize">
+                                            Resumo Executivo
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="keyPoints" checked>
+                                        <label class="form-check-label" for="keyPoints">
+                                            Pontos-Chave
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sentiment" checked>
+                                        <label class="form-check-label" for="sentiment">
+                                            Análise de Sentimento
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="topics" checked>
+                                        <label class="form-check-label" for="topics">
+                                            Tópicos Principais
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="entities">
+                                        <label class="form-check-label" for="entities">
+                                            Entidades Nomeadas
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="actionItems">
+                                        <label class="form-check-label" for="actionItems">
+                                            Itens de Ação
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analyze Button -->
+                        <button class="btn btn-primary" onclick="startAnalysis()" id="analyzeButton">
+                            <i class="bi bi-cpu me-2"></i>Iniciar Análise
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Results -->
+            <div id="analysisResults" style="display: none;">
+                <!-- Summary Card -->
+                <div class="card mb-4" id="summaryCard" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-file-text me-2"></i>Resumo Executivo
+                        </h5>
+                        <p id="summaryText" class="lead"></p>
+                    </div>
+                </div>
+
+                <!-- Key Points Card -->
+                <div class="card mb-4" id="keyPointsCard" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-list-check me-2"></i>Pontos-Chave
+                        </h5>
+                        <ul id="keyPointsList" class="list-group list-group-flush">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Sentiment Analysis Card -->
+                <div class="card mb-4" id="sentimentCard" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-emoji-smile me-2"></i>Análise de Sentimento
+                        </h5>
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <canvas id="sentimentChart"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <h3 id="sentimentScore" class="mb-2"></h3>
+                                <p id="sentimentDescription" class="mb-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topics Card -->
+                <div class="card mb-4" id="topicsCard" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-tags me-2"></i>Tópicos Principais
+                        </h5>
+                        <div id="topicsList" class="d-flex flex-wrap gap-2">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keywords Card -->
+                <div class="card mb-4" id="keywordsCard">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-key me-2"></i>Palavras-Chave
+                        </h5>
+                        <div id="keywordCloud" class="text-center">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Exportar Análise</h5>
+                        <div class="d-grid gap-2 d-md-flex">
+                            <button class="btn btn-outline-primary" onclick="exportAnalysis('pdf')">
+                                <i class="bi bi-file-earmark-pdf me-2"></i>PDF
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="exportAnalysis('docx')">
+                                <i class="bi bi-file-earmark-word me-2"></i>Word
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="exportAnalysis('json')">
+                                <i class="bi bi-file-earmark-code me-2"></i>JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Document Info -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Informações do Documento</h5>
+                    <div id="documentInfo">
+                        <p class="text-muted text-center">Selecione um documento para ver informações</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis History -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Histórico de Análises</h5>
+                    <div id="analysisHistory">
+                        <p class="text-muted text-center">Nenhuma análise recente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentAnalysis = null;
+let sentimentChart = null;
+
+function updateAnalysisOptions() {
+    const fileSelect = document.getElementById('fileSelect');
+    const analysisOptions = document.getElementById('analysisOptions');
+    
+    if (fileSelect.value) {
+        analysisOptions.style.display = 'block';
+        loadDocumentInfo(fileSelect.value);
+    } else {
+        analysisOptions.style.display = 'none';
+    }
+    
+    // Hide results
+    document.getElementById('analysisResults').style.display = 'none';
+}
+
+function loadDocumentInfo(fileId) {
+    fetch(`/api/document-info/${fileId}`)
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('documentInfo');
+            container.innerHTML = `
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Nome:</dt>
+                    <dd class="col-sm-8">${data.filename}</dd>
+                    
+                    <dt class="col-sm-4">Tipo:</dt>
+                    <dd class="col-sm-8">${data.type.toUpperCase()}</dd>
+                    
+                    <dt class="col-sm-4">Tamanho:</dt>
+                    <dd class="col-sm-8">${formatFileSize(data.size)}</dd>
+                    
+                    <dt class="col-sm-4">Páginas:</dt>
+                    <dd class="col-sm-8">${data.pages || 'N/A'}</dd>
+                    
+                    <dt class="col-sm-4">Data:</dt>
+                    <dd class="col-sm-8">${new Date(data.upload_date).toLocaleDateString()}</dd>
+                </dl>
+            `;
+        })
+        .catch(error => {
+            console.error('Error loading document info:', error);
+        });
+}
+
+function startAnalysis() {
+    const fileSelect = document.getElementById('fileSelect');
+    if (!fileSelect.value) {
+        showToast('Por favor, selecione um documento', 'warning');
+        return;
+    }
+    
+    const analyzeButton = document.getElementById('analyzeButton');
+    analyzeButton.disabled = true;
+    analyzeButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analisando...';
+    
+    const options = {
+        summarize: document.getElementById('summarize').checked,
+        keyPoints: document.getElementById('keyPoints').checked,
+        sentiment: document.getElementById('sentiment').checked,
+        topics: document.getElementById('topics').checked,
+        entities: document.getElementById('entities').checked,
+        actionItems: document.getElementById('actionItems').checked
+    };
+    
+    fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            file_id: fileSelect.value,
+            options: options
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            currentAnalysis = data.analysis;
+            displayAnalysisResults(data.analysis);
+            loadAnalysisHistory();
+        } else {
+            showToast('Erro na análise: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Erro na análise', 'danger');
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        analyzeButton.disabled = false;
+        analyzeButton.innerHTML = '<i class="bi bi-cpu me-2"></i>Iniciar Análise';
+    });
+}
+
+function displayAnalysisResults(analysis) {
+    const resultsDiv = document.getElementById('analysisResults');
+    resultsDiv.style.display = 'block';
+    
+    // Summary
+    if (analysis.analysis.resumo) {
+        const summaryCard = document.getElementById('summaryCard');
+        const summaryText = document.getElementById('summaryText');
+        summaryCard.style.display = 'block';
+        summaryText.textContent = analysis.analysis.resumo;
+    }
+    
+    // Key Points
+    if (analysis.analysis.pontos_chave && analysis.analysis.pontos_chave.length > 0) {
+        const keyPointsCard = document.getElementById('keyPointsCard');
+        const keyPointsList = document.getElementById('keyPointsList');
+        keyPointsCard.style.display = 'block';
+        
+        keyPointsList.innerHTML = analysis.analysis.pontos_chave.map(point => `
+            <li class="list-group-item">
+                <i class="bi bi-check-circle text-success me-2"></i>${point}
+            </li>
+        `).join('');
+    }
+    
+    // Sentiment
+    if (analysis.analysis.sentimento) {
+        const sentimentCard = document.getElementById('sentimentCard');
+        sentimentCard.style.display = 'block';
+        displaySentimentChart(analysis.analysis.sentimento);
+    }
+    
+    // Topics
+    if (analysis.analysis.topicos && analysis.analysis.topicos.length > 0) {
+        const topicsCard = document.getElementById('topicsCard');
+        const topicsList = document.getElementById('topicsList');
+        topicsCard.style.display = 'block';
+        
+        topicsList.innerHTML = analysis.analysis.topicos.map(topic => `
+            <span class="badge bg-primary">${topic}</span>
+        `).join('');
+    }
+    
+    // Keywords
+    if (analysis.analysis.palavras_chave && analysis.analysis.palavras_chave.length > 0) {
+        displayKeywordCloud(analysis.analysis.palavras_chave);
+    }
+    
+    // Scroll to results
+    resultsDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+function displaySentimentChart(sentiment) {
+    const score = sentiment.pontuacao;
+    const classification = sentiment.classificacao;
+    
+    document.getElementById('sentimentScore').textContent = `${score}/100`;
+    document.getElementById('sentimentDescription').textContent = 
+        classification === 'positivo' ? 'Sentimento positivo detectado' :
+        classification === 'negativo' ? 'Sentimento negativo detectado' :
+        'Sentimento neutro detectado';
+    
+    // Destroy existing chart if any
+    if (sentimentChart) {
+        sentimentChart.destroy();
+    }
+    
+    // Create new chart
+    const ctx = document.getElementById('sentimentChart').getContext('2d');
+    sentimentChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Sentimento', 'Restante'],
+            datasets: [{
+                data: [score, 100 - score],
+                backgroundColor: [
+                    classification === 'positivo' ? '#10B981' :
+                    classification === 'negativo' ? '#EF4444' : '#6B7280',
+                    '#E5E7EB'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            cutout: '70%'
+        }
+    });
+}
+
+function displayKeywordCloud(keywords) {
+    const container = document.getElementById('keywordCloud');
+    const maxFontSize = 32;
+    const minFontSize = 14;
+    
+    container.innerHTML = keywords.map((keyword, index) => {
+        const fontSize = maxFontSize - (index * (maxFontSize - minFontSize) / keywords.length);
+        return `<span style="font-size: ${fontSize}px; margin: 0 10px; display: inline-block; color: var(--primary-color);">${keyword}</span>`;
+    }).join('');
+}
+
+function exportAnalysis(format) {
+    if (!currentAnalysis) {
+        showToast('Nenhuma análise para exportar', 'warning');
+        return;
+    }
+    
+    showToast('Preparando exportação...', 'info');
+    
+    fetch('/api/export-analysis', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            analysis: currentAnalysis,
+            format: format
+        })
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `analysis_${new Date().toISOString().slice(0,10)}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        showToast('Análise exportada com sucesso!', 'success');
+    })
+    .catch(error => {
+        console.error('Error exporting analysis:', error);
+        showToast('Erro ao exportar análise', 'danger');
+    });
+}
+
+function loadAnalysisHistory() {
+    fetch('/api/analysis-history')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('analysisHistory');
+            if (data.analyses && data.analyses.length > 0) {
+                let html = '<div class="list-group">';
+                data.analyses.forEach(analysis => {
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">${analysis.filename}</h6>
+                                    <small class="text-muted">${new Date(analysis.date).toLocaleString()}</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewAnalysis(${analysis.id})">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p class="text-muted text-center">Nenhuma análise recente</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading analysis history:', error);
+        });
+}
+
+function viewAnalysis(analysisId) {
+    fetch(`/api/analysis/${analysisId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentAnalysis = data.analysis;
+                displayAnalysisResults(data.analysis);
+            } else {
+                showToast('Erro ao carregar análise', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error viewing analysis:', error);
+            showToast('Erro ao carregar análise', 'danger');
+        });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    loadAnalysisHistory();
+    
+    // Check if a file was pre-selected
+    const fileSelect = document.getElementById('fileSelect');
+    if (fileSelect.value) {
+        updateAnalysisOptions();
+    }
+});
+</script>
+{% endblock %}

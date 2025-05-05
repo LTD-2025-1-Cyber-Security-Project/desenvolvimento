@@ -1,0 +1,669 @@
+{% extends "base.html" %}
+
+{% block title %}DocMaster - Soluções Inteligentes em Documentos{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Hero Section -->
+    <section class="py-5 text-center mb-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mx-auto">
+                    <h1 class="display-3 fw-bold mb-4">DocMaster Pro</h1>
+                    <p class="lead mb-4">Transforme a maneira como você trabalha com documentos usando Inteligência Artificial avançada e ferramentas profissionais de processamento.</p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                            <i class="bi bi-cloud-upload me-2"></i>Começar Agora
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary btn-lg px-4" data-bs-toggle="modal" data-bs-target="#demoModal">
+                            <i class="bi bi-play-circle me-2"></i>Ver Demo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="py-4 mb-5 bg-light">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <h2 class="display-5 fw-bold text-primary">100+</h2>
+                    <p class="text-muted mb-0">Formatos Suportados</p>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="display-5 fw-bold text-success">99.9%</h2>
+                    <p class="text-muted mb-0">Precisão de OCR</p>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="display-5 fw-bold text-info">24/7</h2>
+                    <p class="text-muted mb-0">Disponibilidade</p>
+                </div>
+                <div class="col-md-3">
+                    <h2 class="display-5 fw-bold text-warning">5s</h2>
+                    <p class="text-muted mb-0">Tempo Médio de Análise</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="py-5 mb-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">Recursos Poderosos</h2>
+                <p class="lead text-muted">Ferramentas profissionais para todas as suas necessidades de documentos</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Análise com IA -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm hover-lift">
+                        <div class="card-body p-4">
+                            <div class="feature-icon accent mb-3">
+                                <i class="bi bi-cpu fs-2"></i>
+                            </div>
+                            <h3 class="h4 mb-3">Análise com IA</h3>
+                            <p class="text-muted mb-4">Extraia insights profundos, resumos automáticos e análise de sentimento com IA avançada.</p>
+                            <a href="{{ url_for('analyzer') }}" class="btn btn-accent stretched-link">
+                                <i class="bi bi-arrow-right me-2"></i>Analisar Agora
+                            </a>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-light text-dark">GPT-4</span>
+                                <span class="badge bg-light text-dark">NLP</span>
+                                <span class="badge bg-light text-dark">Sentimento</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversor Universal -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm hover-lift">
+                        <div class="card-body p-4">
+                            <div class="feature-icon secondary mb-3">
+                                <i class="bi bi-arrow-left-right fs-2"></i>
+                            </div>
+                            <h3 class="h4 mb-3">Conversor Universal</h3>
+                            <p class="text-muted mb-4">Converta entre PDF, Word, Excel, imagens e mais com preservação perfeita de formatação.</p>
+                            <a href="{{ url_for('converter') }}" class="btn btn-secondary stretched-link">
+                                <i class="bi bi-arrow-right me-2"></i>Converter
+                            </a>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-light text-dark">PDF</span>
+                                <span class="badge bg-light text-dark">DOCX</span>
+                                <span class="badge bg-light text-dark">Excel</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OCR Avançado -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm hover-lift">
+                        <div class="card-body p-4">
+                            <div class="feature-icon primary mb-3">
+                                <i class="bi bi-eye fs-2"></i>
+                            </div>
+                            <h3 class="h4 mb-3">OCR Avançado</h3>
+                            <p class="text-muted mb-4">Extraia texto de PDFs escaneados e imagens com precisão superior a 99% em múltiplos idiomas.</p>
+                            <a href="{{ url_for('ocr') }}" class="btn btn-primary stretched-link">
+                                <i class="bi bi-arrow-right me-2"></i>Extrair Texto
+                            </a>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-light text-dark">Multi-idioma</span>
+                                <span class="badge bg-light text-dark">Alta Precisão</span>
+                                <span class="badge bg-light text-dark">Em Lote</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ferramentas PDF -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm hover-lift">
+                        <div class="card-body p-4">
+                            <div class="feature-icon warning mb-3">
+                                <i class="bi bi-tools fs-2"></i>
+                            </div>
+                            <h3 class="h4 mb-3">Ferramentas PDF</h3>
+                            <p class="text-muted mb-4">Mescle, divida, comprima e edite PDFs com ferramentas profissionais e intuitivas.</p>
+                            <a href="{{ url_for('pdf_tools') }}" class="btn btn-warning text-dark stretched-link">
+                                <i class="bi bi-arrow-right me-2"></i>Editar PDFs
+                            </a>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-light text-dark">Merge</span>
+                                <span class="badge bg-light text-dark">Split</span>
+                                <span class="badge bg-light text-dark">Compress</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Segurança de Documentos -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm hover-lift">
+                        <div class="card-body p-4">
+                            <div class="feature-icon danger mb-3">
+                                <i class="bi bi-shield-lock fs-2"></i>
+                            </div>
+                            <h3 class="h4 mb-3">Segurança Avançada</h3>
+                            <p class="text-muted mb-4">Proteja seus documentos com criptografia, marca d'água e assinatura digital.</p>
+                            <a href="{{ url_for('pdf_security') }}" class="btn btn-danger stretched-link">
+                                <i class="bi bi-arrow-right me-2"></i>Proteger Documentos
+                            </a>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-light text-dark">Criptografia</span>
+                                <span class="badge bg-light text-dark">Marca d'água</span>
+                                <span class="badge bg-light text-dark">Digital Sign</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processamento em Lote -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm hover-lift">
+                        <div class="card-body p-4">
+                            <div class="feature-icon info mb-3">
+                                <i class="bi bi-layers fs-2"></i>
+                            </div>
+                            <h3 class="h4 mb-3">Processamento em Lote</h3>
+                            <p class="text-muted mb-4">Processe centenas de documentos simultaneamente com eficiência máxima.</p>
+                            <a href="{{ url_for('upload') }}" class="btn btn-info text-white stretched-link">
+                                <i class="bi bi-arrow-right me-2"></i>Processar em Lote
+                            </a>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-light text-dark">Múltiplos Arquivos</span>
+                                <span class="badge bg-light text-dark">Automação</span>
+                                <span class="badge bg-light text-dark">Agendamento</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Upload Section -->
+    <section class="py-5 mb-5 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="display-6 fw-bold mb-4">Upload Rápido</h2>
+                    <p class="lead mb-4">Arraste e solte seus arquivos ou clique para selecionar. Suportamos mais de 100 formatos diferentes.</p>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <span class="badge bg-primary">PDF</span>
+                        <span class="badge bg-primary">Word</span>
+                        <span class="badge bg-primary">Excel</span>
+                        <span class="badge bg-primary">PowerPoint</span>
+                        <span class="badge bg-primary">Imagens</span>
+                        <span class="badge bg-primary">Texto</span>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div id="dropZone" class="drop-zone border-primary" 
+                         ondrop="handleDrop(event)" 
+                         ondragover="handleDragOver(event)" 
+                         ondragleave="handleDragLeave(event)"
+                         style="min-height: 200px;">
+                        <i class="bi bi-cloud-arrow-up fs-1 mb-3 text-primary"></i>
+                        <p class="h5 mb-2">Arraste seus arquivos aqui</p>
+                        <p class="text-muted mb-3">ou clique para selecionar</p>
+                        <button class="btn btn-primary btn-lg">
+                            <i class="bi bi-folder-open me-2"></i>Selecionar Arquivos
+                        </button>
+                        <input type="file" id="fileInput" multiple class="d-none" onchange="handleFileSelect(event)">
+                    </div>
+                    <div id="fileList" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Activity -->
+    {% if recent_files %}
+    <section class="py-5 mb-5">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0">Atividade Recente</h2>
+                <a href="{{ url_for('upload') }}" class="btn btn-outline-primary">Ver Todos</a>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%">Arquivo</th>
+                            <th>Tipo</th>
+                            <th>Tamanho</th>
+                            <th>Data</th>
+                            <th style="width: 200px">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in recent_files[:5] %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="file-icon me-3">
+                                        <i class="bi bi-file-earmark-{{ file.file_type }} fs-4 text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{ file.original_filename }}</div>
+                                        <small class="text-muted">ID: {{ file.id }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">{{ file.file_type | upper }}</span>
+                            </td>
+                            <td>{{ file.file_size | filesizeformat }}</td>
+                            <td>{{ file.upload_date.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('download_file', file_id=file.id) }}" 
+                                       class="btn btn-sm btn-outline-primary" 
+                                       data-bs-toggle="tooltip" 
+                                       title="Download">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                    <a href="{{ url_for('analyzer') }}?file_id={{ file.id }}" 
+                                       class="btn btn-sm btn-outline-secondary"
+                                       data-bs-toggle="tooltip" 
+                                       title="Analisar">
+                                        <i class="bi bi-graph-up"></i>
+                                    </a>
+                                    <a href="{{ url_for('converter') }}?file_id={{ file.id }}" 
+                                       class="btn btn-sm btn-outline-info"
+                                       data-bs-toggle="tooltip" 
+                                       title="Converter">
+                                        <i class="bi bi-arrow-left-right"></i>
+                                    </a>
+                                    <button onclick="deleteFile({{ file.id }})" 
+                                            class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="tooltip" 
+                                            title="Excluir">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- CTA Section -->
+    <section class="py-5 bg-primary text-white mb-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h2 class="display-6 fw-bold mb-3">Pronto para transformar seus documentos?</h2>
+                    <p class="lead mb-4">Junte-se a milhares de profissionais que já utilizam o DocMaster para otimizar seu trabalho com documentos.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a href="{{ url_for('upload') }}" class="btn btn-light btn-lg px-4">
+                        Começar Gratuitamente
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-6 fw-bold">Perguntas Frequentes</h2>
+                <p class="lead text-muted">Tudo o que você precisa saber sobre o DocMaster</p>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    Quais formatos de arquivo são suportados?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    O DocMaster suporta mais de 100 formatos de arquivo, incluindo PDF, Word (DOC/DOCX), Excel (XLS/XLSX), PowerPoint (PPT/PPTX), imagens (JPG, PNG, GIF), arquivos de texto (TXT, CSV) e muito mais.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    Os meus documentos estão seguros?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Sim, a segurança é nossa prioridade. Todos os arquivos são criptografados durante o upload e processamento. Os arquivos são automaticamente excluídos após 24 horas, e você pode solicitar a exclusão imediata a qualquer momento.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    Qual é o tamanho máximo de arquivo?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    O tamanho máximo de arquivo é de 100MB por upload. Para necessidades de arquivos maiores, considere dividir o arquivo ou entre em contato conosco para soluções empresariais.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                    Como funciona a análise com IA?
+                                </button>
+                            </h2>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Nossa análise com IA utiliza o Google Gemini, um modelo de linguagem avançado, para extrair insights, gerar resumos, analisar sentimentos e identificar tópicos principais em seus documentos. O processamento é feito em tempo real e os resultados são apresentados de forma clara e acionável.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Demo Modal -->
+<div class="modal fade" id="demoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Demonstração do DocMaster</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ratio ratio-16x9">
+                    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.file-icon i {
+    font-size: 1.5rem;
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feature-icon.primary {
+    background-color: rgba(37, 99, 235, 0.1);
+    color: var(--primary-color);
+}
+
+.feature-icon.secondary {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--secondary-color);
+}
+
+.feature-icon.accent {
+    background-color: rgba(124, 58, 237, 0.1);
+    color: var(--accent-color);
+}
+
+.feature-icon.warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #F59E0B;
+}
+
+.feature-icon.danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.feature-icon.info {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+}
+
+.drop-zone {
+    border: 3px dashed;
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.drop-zone:hover {
+    background-color: rgba(37, 99, 235, 0.05);
+}
+
+.drop-zone.dragover {
+    background-color: rgba(37, 99, 235, 0.1);
+    border-color: var(--primary-color);
+    transform: scale(1.01);
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Drag and Drop functionality
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileList = document.getElementById('fileList');
+
+dropZone.addEventListener('click', () => {
+    fileInput.click();
+});
+
+function handleDragOver(e) {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+}
+
+function handleDragLeave(e) {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    
+    const files = e.dataTransfer.files;
+    handleFiles(files);
+}
+
+function handleFileSelect(e) {
+    const files = e.target.files;
+    handleFiles(files);
+}
+
+function handleFiles(files) {
+    fileList.innerHTML = '';
+    
+    Array.from(files).forEach(file => {
+        const filePreview = document.createElement('div');
+        filePreview.className = 'file-preview mb-2';
+        filePreview.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                <div>
+                    <i class="bi bi-file-earmark-text me-2"></i>
+                    <span>${file.name}</span>
+                    <small class="text-muted ms-2">(${formatFileSize(file.size)})</small>
+                </div>
+                <button class="btn btn-sm btn-outline-danger" onclick="removeFile(this)">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        `;
+        fileList.appendChild(filePreview);
+    });
+
+    // Auto-submit for quick upload
+    if (files.length > 0) {
+        uploadFiles(files);
+    }
+}
+
+function removeFile(button) {
+    button.closest('.file-preview').remove();
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function uploadFiles(files) {
+    const formData = new FormData();
+    Array.from(files).forEach(file => {
+        formData.append('files[]', file);
+    });
+
+    // Show progress
+    showToast('Enviando arquivos...', 'info');
+
+    fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Arquivos enviados com sucesso!', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showToast('Erro ao enviar arquivos: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        showToast('Erro ao enviar arquivos', 'danger');
+        console.error('Error:', error);
+    });
+}
+
+function deleteFile(fileId) {
+    if (confirm('Tem certeza que deseja excluir este arquivo?')) {
+        fetch(`/api/delete-file/${fileId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Arquivo excluído com sucesso!', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showToast('Erro ao excluir arquivo', 'danger');
+            </div>
+        })
+        .catch(error => {
+            showToast('Erro ao excluir arquivo', 'danger');
+            console.error('Error:', error);
+        });
+    }
+}
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+});
+
+// Add smooth scrolling to all links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+
+// Animated counter for statistics
+function animateValue(element, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        element.textContent = value;
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// Animate statistics when they come into view
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const element = entry.target;
+            const endValue = parseInt(element.textContent);
+            animateValue(element, 0, endValue, 2000);
+            observer.unobserve(element);
+        }
+    });
+});
+
+// Observe all statistics numbers
+document.querySelectorAll('.display-5').forEach((el) => {
+    observer.observe(el);
+});
+</script>
+{% endblock %}

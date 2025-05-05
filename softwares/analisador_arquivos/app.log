@@ -1,0 +1,1 @@
+2025-05-04 21:30:50,331 ERROR: Conversion error: FileConverter.pdf_to_text() got an unexpected keyword argument 'output_path' [in /Users/cliente/Desktop/conversor-arquivos1/app.py:198]

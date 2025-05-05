@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}DocMaster - Upload de Arquivos{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <h1 class="mb-4">Upload de Arquivos</h1>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Upload Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Fazer Upload</h5>
+                    
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div id="dropZone" class="drop-zone mb-4" 
+                             ondrop="handleDrop(event)" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)">
+                            <i class="bi bi-cloud-arrow-up fs-1 mb-3"></i>
+                            <p class="mb-2">Arraste e solte seus arquivos aqui</p>
+                            <p class="text-muted mb-3">ou</p>
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                <i class="bi bi-folder-open me-2"></i>Selecionar Arquivos
+                            </button>
+                            <input type="file" id="fileInput" multiple class="d-none" onchange="handleFileSelect(event)">
+                        </div>
+
+                        <!-- File List -->
+                        <div id="fileList" class="mb-4"></div>
+
+                        <!-- Upload Options -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Categoria</label>
+                                <select class="form-select" id="category">
+                                    <option value="">Selecione uma categoria</option>
+                                    <option value="documentos">Documentos</option>
+                                    <option value="imagens">Imagens</option>
+                                    <option value="planilhas">Planilhas</option>
+                                    <option value="apresentacoes">Apresentações</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tags</label>
+                                <input type="text" class="form-control" id="tags" placeholder="Separe as tags por vírgula">
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="autoProcess">
+                                <label class="form-check-label" for="autoProcess">
+                                    Processar automaticamente após upload
+                                </label>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-outline-secondary me-2" onclick="clearFiles()">
+                                    <i class="bi bi-x-circle me-2"></i>Limpar
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="uploadButton" disabled>
+                                    <i class="bi bi-cloud-upload me-2"></i>Enviar Arquivos
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Uploads -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Uploads Recentes</h5>
+                    <div id="recentUploads">
+                        <p class="text-muted text-center">Nenhum arquivo enviado recentemente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Info Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Informações</h5>
+                    <p class="mb-2"><strong>Formatos aceitos:</strong></p>
+                    <ul class="list-unstyled mb-3">
+                        <li><i class="bi bi-check-circle text-success me-2"></i>PDF, DOC, DOCX, TXT</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>JPG, JPEG, PNG</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>XLS, XLSX, CSV</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>PPT, PPTX</li>
+                    </ul>
+                    <p class="mb-2"><strong>Limites:</strong></p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-info-circle text-primary me-2"></i>Tamanho máximo: 100MB</li>
+                        <li><i class="bi bi-info-circle text-primary me-2"></i>Até 10 arquivos por vez</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Storage Card -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Armazenamento</h5>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Espaço utilizado</span>
+                            <span id="storageUsed">0 MB / 1 GB</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar" role="progressbar" style="width: 0%;" 
+                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline-danger btn-sm w-100" onclick="clearStorage()">
+                        <i class="bi bi-trash me-2"></i>Limpar arquivos antigos
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedFiles = [];
+    
+    // Form submission
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        uploadFiles();
+    });
+
+    // Drag and drop handlers
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.add('dragover');
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.remove('dragover');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.remove('dragover');
+        
+        const files = Array.from(e.dataTransfer.files);
+        addFiles(files);
+    }
+
+    function handleFileSelect(e) {
+        const files = Array.from(e.target.files);
+        addFiles(files);
+    }
+
+    function addFiles(files) {
+        files.forEach(file => {
+            if (!selectedFiles.find(f => f.name === file.name)) {
+                selectedFiles.push(file);
+            }
+        });
+        
+        updateFileList();
+        document.getElementById('uploadButton').disabled = selectedFiles.length === 0;
+    }
+
+    function updateFileList() {
+        const fileList = document.getElementById('fileList');
+        fileList.innerHTML = '';
+        
+        selectedFiles.forEach((file, index) => {
+            const div = document.createElement('div');
+            div.className = 'file-preview mb-2';
+            div.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-file-earmark-text me-2"></i>
+                    <span class="me-2">${file.name}</span>
+                    <small class="text-muted">(${formatFileSize(file.size)})</small>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile(${index})">
+                    <i class="bi bi-x"></i>
+                </button>
+            `;
+            fileList.appendChild(div);
+        });
+    }
+
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        updateFileList();
+        document.getElementById('uploadButton').disabled = selectedFiles.length === 0;
+    }
+
+    function clearFiles() {
+        selectedFiles = [];
+        updateFileList();
+        document.getElementById('uploadButton').disabled = true;
+        document.getElementById('fileInput').value = '';
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function uploadFiles() {
+        if (selectedFiles.length === 0) return;
+
+        const formData = new FormData();
+        selectedFiles.forEach(file => {
+            formData.append('files', file);
+        });
+
+        // Add metadata
+        formData.append('category', document.getElementById('category').value);
+        formData.append('tags', document.getElementById('tags').value);
+        formData.append('autoProcess', document.getElementById('autoProcess').checked);
+
+        // Show progress
+        const uploadButton = document.getElementById('uploadButton');
+        uploadButton.disabled = true;
+        uploadButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
+
+        fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Arquivos enviados com sucesso!', 'success');
+                clearFiles();
+                loadRecentUploads();
+                updateStorageInfo();
+            } else {
+                showToast(data.error || 'Erro ao enviar arquivos', 'danger');
+            }
+        })
+        .catch(error => {
+            showToast('Erro ao enviar arquivos', 'danger');
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            uploadButton.disabled = false;
+            uploadButton.innerHTML = '<i class="bi bi-cloud-upload me-2"></i>Enviar Arquivos';
+        });
+    }
+
+    function loadRecentUploads() {
+        fetch('/api/recent-uploads')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('recentUploads');
+                if (data.files && data.files.length > 0) {
+                    let html = '<div class="list-group">';
+                    data.files.forEach(file => {
+                        html += `
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-file-earmark me-2"></i>
+                                    <span>${file.name}</span>
+                                    <small class="text-muted ms-2">${file.date}</small>
+                                </div>
+                                <div class="btn-group">
+                                    <a href="/download/${file.id}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteFile('${file.id}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p class="text-muted text-center">Nenhum arquivo enviado recentemente</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading recent uploads:', error);
+            });
+    }
+
+    function updateStorageInfo() {
+        fetch('/api/storage-info')
+            .then(response => response.json())
+            .then(data => {
+                const storageUsed = document.getElementById('storageUsed');
+                const progressBar = document.querySelector('.progress-bar');
+                
+                storageUsed.textContent = `${data.used} / ${data.total}`;
+                progressBar.style.width = `${data.percentage}%`;
+                progressBar.setAttribute('aria-valuenow', data.percentage);
+                
+                if (data.percentage > 80) {
+                    progressBar.classList.add('bg-warning');
+                }
+                if (data.percentage > 90) {
+                    progressBar.classList.remove('bg-warning');
+                    progressBar.classList.add('bg-danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating storage info:', error);
+            });
+    }
+
+    function deleteFile(fileId) {
+        if (confirm('Tem certeza que deseja excluir este arquivo?')) {
+            fetch(`/api/delete-file/${fileId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Arquivo excluído com sucesso!', 'success');
+                    loadRecentUploads();
+                    updateStorageInfo();
+                } else {
+                    showToast('Erro ao excluir arquivo', 'danger');
+                }
+            })
+            .catch(error => {
+                showToast('Erro ao excluir arquivo', 'danger');
+                console.error('Error:', error);
+            });
+        }
+    }
+
+    function clearStorage() {
+        if (confirm('Tem certeza que deseja limpar os arquivos antigos?')) {
+            fetch('/api/clear-storage', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Arquivos antigos removidos com sucesso!', 'success');
+                    loadRecentUploads();
+                    updateStorageInfo();
+                } else {
+                    showToast('Erro ao limpar arquivos', 'danger');
+                }
+            })
+            .catch(error => {
+                showToast('Erro ao limpar arquivos', 'danger');
+                console.error('Error:', error);
+            });
+        }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        loadRecentUploads();
+        updateStorageInfo();
+    });
+</script>
+{% endblock %}
