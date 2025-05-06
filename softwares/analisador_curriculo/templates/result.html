@@ -1,0 +1,249 @@
+{% extends "layout.html" %}
+
+{% block title %}Resultados da Análise de Currículo{% endblock %}
+
+{% block extra_css %}
+<style>
+    .score-circle {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+    }
+    
+    .recommendation-card {
+        border-left: 4px solid #0d6efd;
+        background-color: #f8f9fa;
+    }
+    
+    .strength-item, .improvement-item {
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+    
+    .strength-item {
+        background-color: #d1e7dd;
+        border-left: 4px solid #198754;
+    }
+    
+    .improvement-item {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mb-4">
+    <div class="col-md-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-chart-bar me-2"></i>Resultados da Análise</h2>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-1"></i>Nova Análise
+            </a>
+        </div>
+
+        <!-- Resumo Geral -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Resumo da Análise</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-4 mb-md-0">
+                        <div class="score-circle" style="background: {% if analysis.pontuacao_geral > 80 %}#198754{% elif analysis.pontuacao_geral > 60 %}#0d6efd{% elif analysis.pontuacao_geral > 40 %}#ffc107{% else %}#dc3545{% endif %};">
+                            {{ analysis.pontuacao_geral }}
+                        </div>
+                        <h5 class="mt-3">Pontuação Geral</h5>
+                        <p class="text-muted small">
+                            {% if analysis.pontuacao_geral > 80 %}Excelente
+                            {% elif analysis.pontuacao_geral > 60 %}Bom
+                            {% elif analysis.pontuacao_geral > 40 %}Regular
+                            {% else %}Precisa de atenção
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-8">
+                        <h4>Resumo Executivo</h4>
+                        <p>{{ analysis.resumo_executivo }}</p>
+                        <div class="card recommendation-card p-3 mt-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-lightbulb text-primary fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title">Recomendação Principal</h5>
+                                    <p class="card-text">
+                                        {% if analysis.recomendacoes and analysis.recomendacoes|length > 0 %}
+                                            {{ analysis.recomendacoes[0] }}
+                                        {% else %}
+                                            Trabalhe nos pontos de melhoria listados abaixo para aumentar a eficácia do seu currículo.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Pontos Fortes -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-thumbs-up me-2"></i>Pontos Fortes
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            {% for ponto in analysis.pontos_fortes %}
+                                <li class="strength-item">
+                                    <i class="fas fa-check-circle text-success me-2"></i>{{ ponto }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Oportunidades de Melhoria -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-tools me-2"></i>Oportunidades de Melhoria
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            {% for oportunidade in analysis.oportunidades_melhoria %}
+                                <li class="improvement-item">
+                                    <i class="fas fa-exclamation-circle text-warning me-2"></i>{{ oportunidade }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Análise Detalhada -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-search-plus me-2"></i>Análise Detalhada
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Aspecto</th>
+                                <th>Avaliação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Formatação e Apresentação Visual</strong></td>
+                                <td>{{ analysis.analise_detalhada.formatacao_apresentacao }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Estrutura e Organização</strong></td>
+                                <td>{{ analysis.analise_detalhada.estrutura_organizacao }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Qualidade das Descrições</strong></td>
+                                <td>{{ analysis.analise_detalhada.qualidade_descricoes }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Relevância das Habilidades</strong></td>
+                                <td>{{ analysis.analise_detalhada.relevancia_habilidades }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Destaque de Conquistas</strong></td>
+                                <td>{{ analysis.analise_detalhada.destaque_conquistas }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Adequação ao Nível</strong></td>
+                                <td>{{ analysis.analise_detalhada.adequacao_nivel }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Otimização para ATS -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-info text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-robot me-2"></i>Otimização para ATS
+                </h4>
+            </div>
+            <div class="card-body">
+                <p>{{ analysis.otimizacao_ats }}</p>
+                
+                {% if analysis.metadados and analysis.metadados.habilidades_identificadas %}
+                <div class="mt-3">
+                    <h5>Habilidades Identificadas</h5>
+                    <div class="mb-3">
+                        {% for skill in analysis.metadados.habilidades_identificadas %}
+                            <span class="badge bg-primary me-2 mb-2">{{ skill }}</span>
+                        {% else %}
+                            <p class="text-muted">Nenhuma habilidade técnica específica identificada.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recomendações Personalizadas -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-clipboard-list me-2"></i>Recomendações Personalizadas
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-primary mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Área de Foco:</strong> {{ analysis.metadados.stack_area|capitalize }}
+                    <span class="ms-3">|</span>
+                    <strong class="ms-3">Nível Profissional:</strong> {{ analysis.metadados.nivel|capitalize }}
+                </div>
+                
+                {% if analysis.recomendacoes %}
+                    <ol class="list-group list-group-numbered">
+                        {% for recomendacao in analysis.recomendacoes %}
+                            <li class="list-group-item d-flex">
+                                <div class="ms-2">{{ recomendacao }}</div>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% else %}
+                    <p class="text-muted">Nenhuma recomendação personalizada disponível.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-sync-alt me-2"></i>Analisar Outro Currículo
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

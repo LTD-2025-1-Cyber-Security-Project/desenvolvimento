@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+
+{% block title %}Analisador de Currículos com IA{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-file-upload me-2"></i>Analisar Currículo
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <img src="{{ url_for('static', filename='img/resume-analysis.svg') }}" alt="Análise de Currículo" class="img-fluid mb-3" style="max-height: 180px;">
+                    <h4>Upload de Currículo para Análise com IA</h4>
+                    <p class="text-muted">Nosso sistema analisa seu currículo e fornece feedback detalhado para ajudar a melhorá-lo.</p>
+                </div>
+
+                <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    <div class="mb-4">
+                        <label for="resume" class="form-label">Selecione seu currículo (PDF)</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="resume" name="resume" accept=".pdf" required>
+                            <label class="input-group-text" for="resume"><i class="fas fa-file-pdf"></i></label>
+                        </div>
+                        <div class="form-text">Apenas arquivos em formato PDF são aceitos (máx. 16MB)</div>
+                        <div class="invalid-feedback">Por favor, selecione um arquivo PDF válido.</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="tipo_analise" class="form-label">Tipo de Análise</label>
+                            <select class="form-select" id="tipo_analise" name="tipo_analise" required>
+                                <option value="geral" selected>Geral</option>
+                                <option value="tecnico">Técnico</option>
+                                <option value="comportamental">Comportamental</option>
+                                <option value="ats">Otimização para ATS</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="nivel" class="form-label">Nível Profissional</label>
+                            <select class="form-select" id="nivel" name="nivel" required>
+                                <option value="estagiario">Estagiário</option>
+                                <option value="junior" selected>Júnior</option>
+                                <option value="pleno">Pleno</option>
+                                <option value="senior">Sênior</option>
+                                <option value="lideranca">Liderança</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="stack_area" class="form-label">Stack/Área de Tecnologia</label>
+                            <select class="form-select" id="stack_area" name="stack_area" required>
+                                <option value="desenvolvimento web" selected>Desenvolvimento Web</option>
+                                <option value="ciencia de dados">Ciência de Dados</option>
+                                <option value="devops">DevOps</option>
+                                <option value="mobile">Desenvolvimento Mobile</option>
+                                <option value="seguranca">Segurança da Informação</option>
+                                <option value="ia">Inteligência Artificial/ML</option>
+                                <option value="gestao">Gestão de TI</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-robot me-2"></i>Analisar Currículo
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light">
+                <div class="small text-muted">
+                    <i class="fas fa-shield-alt me-1"></i>Seus dados são processados com segurança e não são armazenados permanentemente.
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="fas fa-question-circle me-2"></i>Como funciona?
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="text-center">
+                            <div class="feature-icon bg-primary text-white rounded-circle mb-3">
+                                <i class="fas fa-upload"></i>
+                            </div>
+                            <h5>1. Upload</h5>
+                            <p class="small">Faça upload do seu currículo em formato PDF.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="text-center">
+                            <div class="feature-icon bg-primary text-white rounded-circle mb-3">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <h5>2. Análise com IA</h5>
+                            <p class="small">Nossa IA analisa seu currículo com base nos parâmetros selecionados.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="feature-icon bg-primary text-white rounded-circle mb-3">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h5>3. Resultados</h5>
+                            <p class="small">Receba feedback detalhado e recomendações personalizadas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validação de formulário
+    (function() {
+        'use strict';
+        
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

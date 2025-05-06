@@ -1,0 +1,10 @@
+flask
+Werkzeug
+PyPDF2
+python-dotenv
+langchain
+google-generativeai
+nltk
+pdfminer.six
+scikit-learn
+gunicorn
