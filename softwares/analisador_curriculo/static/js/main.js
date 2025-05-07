@@ -97,3 +97,48 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   }
 });
+
+// Adicione ao final do seu arquivo JavaScript existente
+
+// Função para destacar o nível atual na barra de progresso
+function highlightCurrentLevel() {
+    const nivelAtual = document.querySelector('.nivel-atual');
+    if (!nivelAtual) return;
+    
+    const nivel = nivelAtual.textContent.trim().toLowerCase();
+    const progressBar = document.querySelector('.progress-stacked');
+    if (!progressBar) return;
+    
+    let position = 0;
+    
+    switch(nivel) {
+        case 'estagiário':
+            position = 12.5;
+            break;
+        case 'júnior':
+            position = 37.5;
+            break;
+        case 'pleno':
+            position = 62.5;
+            break;
+        case 'sênior':
+            position = 87.5;
+            break;
+        default:
+            return;
+    }
+    
+    const indicator = document.createElement('div');
+    indicator.className = 'nivel-indicator';
+    indicator.style.left = `${position}%`;
+    indicator.textContent = 'Você está aqui';
+    progressBar.appendChild(indicator);
+}
+
+// Inicializar a função quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+    // Funções existentes...
+    
+    // Adicionar nova função
+    highlightCurrentLevel();
+});

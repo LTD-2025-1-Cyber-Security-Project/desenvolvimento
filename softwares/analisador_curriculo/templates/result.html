@@ -17,23 +17,24 @@
         font-weight: bold;
         color: white;
     }
-    
+
     .recommendation-card {
         border-left: 4px solid #0d6efd;
         background-color: #f8f9fa;
     }
-    
-    .strength-item, .improvement-item {
+
+    .strength-item,
+    .improvement-item {
         padding: 10px 15px;
         margin-bottom: 10px;
         border-radius: 5px;
     }
-    
+
     .strength-item {
         background-color: #d1e7dd;
         border-left: 4px solid #198754;
     }
-    
+
     .improvement-item {
         background-color: #fff3cd;
         border-left: 4px solid #ffc107;
@@ -59,7 +60,8 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4 text-center mb-4 mb-md-0">
-                        <div class="score-circle" style="background: {% if analysis.pontuacao_geral > 80 %}#198754{% elif analysis.pontuacao_geral > 60 %}#0d6efd{% elif analysis.pontuacao_geral > 40 %}#ffc107{% else %}#dc3545{% endif %};">
+                        <div class="score-circle"
+                            style="background: {% if analysis.pontuacao_geral > 80 %}#198754{% elif analysis.pontuacao_geral > 60 %}#0d6efd{% elif analysis.pontuacao_geral > 40 %}#ffc107{% else %}#dc3545{% endif %};">
                             {{ analysis.pontuacao_geral }}
                         </div>
                         <h5 class="mt-3">Pontuação Geral</h5>
@@ -83,9 +85,10 @@
                                     <h5 class="card-title">Recomendação Principal</h5>
                                     <p class="card-text">
                                         {% if analysis.recomendacoes and analysis.recomendacoes|length > 0 %}
-                                            {{ analysis.recomendacoes[0] }}
+                                        {{ analysis.recomendacoes[0] }}
                                         {% else %}
-                                            Trabalhe nos pontos de melhoria listados abaixo para aumentar a eficácia do seu currículo.
+                                        Trabalhe nos pontos de melhoria listados abaixo para aumentar a eficácia do seu
+                                        currículo.
                                         {% endif %}
                                     </p>
                                 </div>
@@ -108,9 +111,9 @@
                     <div class="card-body">
                         <ul class="list-unstyled">
                             {% for ponto in analysis.pontos_fortes %}
-                                <li class="strength-item">
-                                    <i class="fas fa-check-circle text-success me-2"></i>{{ ponto }}
-                                </li>
+                            <li class="strength-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>{{ ponto }}
+                            </li>
                             {% endfor %}
                         </ul>
                     </div>
@@ -128,9 +131,9 @@
                     <div class="card-body">
                         <ul class="list-unstyled">
                             {% for oportunidade in analysis.oportunidades_melhoria %}
-                                <li class="improvement-item">
-                                    <i class="fas fa-exclamation-circle text-warning me-2"></i>{{ oportunidade }}
-                                </li>
+                            <li class="improvement-item">
+                                <i class="fas fa-exclamation-circle text-warning me-2"></i>{{ oportunidade }}
+                            </li>
                             {% endfor %}
                         </ul>
                     </div>
@@ -194,15 +197,15 @@
             </div>
             <div class="card-body">
                 <p>{{ analysis.otimizacao_ats }}</p>
-                
+
                 {% if analysis.metadados and analysis.metadados.habilidades_identificadas %}
                 <div class="mt-3">
                     <h5>Habilidades Identificadas</h5>
                     <div class="mb-3">
                         {% for skill in analysis.metadados.habilidades_identificadas %}
-                            <span class="badge bg-primary me-2 mb-2">{{ skill }}</span>
+                        <span class="badge bg-primary me-2 mb-2">{{ skill }}</span>
                         {% else %}
-                            <p class="text-muted">Nenhuma habilidade técnica específica identificada.</p>
+                        <p class="text-muted">Nenhuma habilidade técnica específica identificada.</p>
                         {% endfor %}
                     </div>
                 </div>
@@ -211,6 +214,162 @@
         </div>
 
         <!-- Recomendações Personalizadas -->
+        <!-- Depois da seção de Recomendações Personalizadas, adicione: -->
+
+        <!-- Nível Profissional -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-level-up-alt me-2"></i>Nível Profissional
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5>Nível Atual</h5>
+                        <div class="p-3 bg-light rounded">
+                            <h3 class="text-center text-primary mb-0">{{ analysis.nivel_atual|capitalize }}</h3>
+                        </div>
+                        <p class="mt-3">{{ analysis.analise_detalhada.adequacao_nivel }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="progress-stacked">
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar bg-secondary" role="progressbar" style="width: 25%"
+                                    aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">Estagiário</div>
+                                <div class="progress-bar bg-info" role="progressbar" style="width: 25%"
+                                    aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">Júnior</div>
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 25%"
+                                    aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">Pleno</div>
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 25%"
+                                    aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">Sênior</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            {% if analysis.plano_desenvolvimento and analysis.plano_desenvolvimento.proximo_nivel %}
+                            <h5>Próximo Nível:</h5>
+                            <p>{{ analysis.plano_desenvolvimento.proximo_nivel }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plano de Desenvolvimento -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-graduation-cap me-2"></i>Plano de Desenvolvimento Profissional
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Cursos Recomendados -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-primary">
+                            <div class="card-header bg-primary bg-opacity-25">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-book me-2"></i>Cursos Recomendados
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if analysis.plano_desenvolvimento and
+                                analysis.plano_desenvolvimento.cursos_recomendados %}
+                                <ul class="list-group list-group-flush">
+                                    {% for curso in analysis.plano_desenvolvimento.cursos_recomendados %}
+                                    <li class="list-group-item">
+                                        <i class="fas fa-check-circle text-success me-2"></i>{{ curso }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="text-muted">Não foi possível gerar recomendações de cursos específicos.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certificações -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-info">
+                            <div class="card-header bg-info bg-opacity-25">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-certificate me-2"></i>Certificações Relevantes
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if analysis.plano_desenvolvimento and analysis.plano_desenvolvimento.certificacoes %}
+                                <ul class="list-group list-group-flush">
+                                    {% for cert in analysis.plano_desenvolvimento.certificacoes %}
+                                    <li class="list-group-item">
+                                        <i class="fas fa-award text-info me-2"></i>{{ cert }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="text-muted">Não foi possível gerar recomendações de certificações específicas.
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Habilidades Técnicas -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-success">
+                            <div class="card-header bg-success bg-opacity-25">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-cogs me-2"></i>Habilidades Técnicas a Desenvolver
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if analysis.plano_desenvolvimento and
+                                analysis.plano_desenvolvimento.habilidades_tecnicas %}
+                                <ul class="list-group list-group-flush">
+                                    {% for skill in analysis.plano_desenvolvimento.habilidades_tecnicas %}
+                                    <li class="list-group-item">
+                                        <i class="fas fa-tools text-success me-2"></i>{{ skill }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="text-muted">Não foi possível gerar recomendações de habilidades técnicas
+                                    específicas.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Habilidades Comportamentais -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-warning">
+                            <div class="card-header bg-warning bg-opacity-25">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-brain me-2"></i>Soft Skills Importantes
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if analysis.plano_desenvolvimento and
+                                analysis.plano_desenvolvimento.habilidades_comportamentais %}
+                                <ul class="list-group list-group-flush">
+                                    {% for skill in analysis.plano_desenvolvimento.habilidades_comportamentais %}
+                                    <li class="list-group-item">
+                                        <i class="fas fa-comment-dots text-warning me-2"></i>{{ skill }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="text-muted">Não foi possível gerar recomendações de soft skills específicas.
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="card shadow mb-4">
             <div class="card-header bg-primary text-white">
                 <h4 class="card-title mb-0">
@@ -224,17 +383,17 @@
                     <span class="ms-3">|</span>
                     <strong class="ms-3">Nível Profissional:</strong> {{ analysis.metadados.nivel|capitalize }}
                 </div>
-                
+
                 {% if analysis.recomendacoes %}
-                    <ol class="list-group list-group-numbered">
-                        {% for recomendacao in analysis.recomendacoes %}
-                            <li class="list-group-item d-flex">
-                                <div class="ms-2">{{ recomendacao }}</div>
-                            </li>
-                        {% endfor %}
-                    </ol>
+                <ol class="list-group list-group-numbered">
+                    {% for recomendacao in analysis.recomendacoes %}
+                    <li class="list-group-item d-flex">
+                        <div class="ms-2">{{ recomendacao }}</div>
+                    </li>
+                    {% endfor %}
+                </ol>
                 {% else %}
-                    <p class="text-muted">Nenhuma recomendação personalizada disponível.</p>
+                <p class="text-muted">Nenhuma recomendação personalizada disponível.</p>
                 {% endif %}
             </div>
         </div>
