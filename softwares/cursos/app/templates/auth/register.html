@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastro - EdTech IA & Cyber{% endblock %}
+
+{% block styles %}
+<style>
+    .register-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        background-color: #fff;
+    }
+    
+    .register-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .register-header h1 {
+        color: #1a73e8;
+        font-size: 2rem;
+        font-weight: 600;
+    }
+    
+    .register-form .form-control {
+        border-radius: 0.25rem;
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+    
+    .register-form .form-label {
+        font-weight: 500;
+    }
+    
+    .btn-register {
+        background-color: #1a73e8;
+        border-color: #1a73e8;
+        padding: 0.75rem;
+        font-weight: 500;
+        width: 100%;
+    }
+    
+    .btn-register:hover {
+        background-color: #1557b0;
+        border-color: #1557b0;
+    }
+    
+    .register-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+    
+    .register-footer a {
+        color: #1a73e8;
+        text-decoration: none;
+    }
+    
+    .register-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-header">
+        <h1>Cadastro</h1>
+        <p class="text-muted">Crie sua conta na plataforma EdTech IA & Cyber</p>
+    </div>
+    
+    <form class="register-form" method="POST">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="first_name" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" required autofocus>
+            </div>
+            <div class="col-md-6">
+                <label for="last_name" class="form-label">Sobrenome</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" required>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="email" class="form-label">E-mail</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+            <div class="form-text">Utilize seu e-mail institucional da prefeitura</div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="password" class="form-label">Senha</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="col-md-6">
+                <label for="confirm_password" class="form-label">Confirmar Senha</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+            </div>
+            <div class="form-text">A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um caractere especial</div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="municipality" class="form-label">Município</label>
+            <select class="form-select" id="municipality" name="municipality" required>
+                <option value="" selected disabled>Selecione seu município</option>
+                <option value="Florianópolis">Florianópolis</option>
+                <option value="São José">São José</option>
+            </select>
+        </div>
+        
+        <div class="mb-3">
+            <label for="department" class="form-label">Departamento</label>
+            <input type="text" class="form-control" id="department" name="department" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="job_title" class="form-label">Cargo</label>
+            <input type="text" class="form-control" id="job_title" name="job_title" required>
+        </div>
+        
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
+            <label class="form-check-label" for="terms">
+                Concordo com os <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Termos de Uso</a> e <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Política de Privacidade</a>
+            </label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-register">Cadastrar</button>
+    </form>
+    
+    <div class="register-footer">
+        <p>Já tem uma conta? <a href="{{ url_for('auth.login') }}">Faça login</a></p>
+    </div>
+</div>
+
+<!-- Modal de Termos de Uso -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Termos de Uso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Termos de uso da plataforma EdTech IA & Cyber...</p>
+                <!-- Conteúdo completo dos termos aqui -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Política de Privacidade -->
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="privacyModalLabel">Política de Privacidade</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Política de privacidade da plataforma EdTech IA & Cyber...</p>
+                <!-- Conteúdo completo da política aqui -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const form = document.querySelector('.register-form');
+        
+        // Função para validar senha
+        function validatePassword() {
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                confirmPasswordInput.setCustomValidity('As senhas não coincidem');
+            } else {
+                confirmPasswordInput.setCustomValidity('');
+            }
+        }
+        
+        // Eventos
+        passwordInput.addEventListener('change', validatePassword);
+        confirmPasswordInput.addEventListener('keyup', validatePassword);
+        
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            form.classList.add('was-validated');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Login - EdTech IA & Cyber{% endblock %}
+
+{% block styles %}
+<style>
+    .login-container {
+        max-width: 450px;
+        margin: 2rem auto;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        background-color: #fff;
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .login-header h1 {
+        color: #1a73e8;
+        font-size: 2rem;
+        font-weight: 600;
+    }
+    
+    .login-form .form-control {
+        border-radius: 0.25rem;
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+    
+    .login-form .form-label {
+        font-weight: 500;
+    }
+    
+    .btn-login {
+        background-color: #1a73e8;
+        border-color: #1a73e8;
+        padding: 0.75rem;
+        font-weight: 500;
+        width: 100%;
+    }
+    
+    .btn-login:hover {
+        background-color: #1557b0;
+        border-color: #1557b0;
+    }
+    
+    .login-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+    
+    .login-footer a {
+        color: #1a73e8;
+        text-decoration: none;
+    }
+    
+    .login-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-header">
+        <h1>Login</h1>
+        <p class="text-muted">Acesse a plataforma EdTech IA & Cyber</p>
+    </div>
+    
+    <form class="login-form" method="POST">
+        <div class="mb-3">
+            <label for="email" class="form-label">E-mail</label>
+            <input type="email" class="form-control" id="email" name="email" required autofocus>
+        </div>
+        
+        <div class="mb-3">
+            <label for="password" class="form-label">Senha</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+            <label class="form-check-label" for="remember">Lembrar de mim</label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-login">Entrar</button>
+    </form>
+    
+    <div class="login-footer">
+        <p><a href="{{ url_for('auth.reset_password_request') }}">Esqueceu sua senha?</a></p>
+        <p>Não tem uma conta? <a href="{{ url_for('auth.register') }}">Cadastre-se</a></p>
+    </div>
+</div>
+{% endblock %}
