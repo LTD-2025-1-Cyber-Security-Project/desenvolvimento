@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - EdTech IA & Cyber{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Bem-vindo(a), {{ current_user.first_name }}!</h1>
+            <p class="lead">Continue sua jornada de aprendizado em Inteligência Artificial e Cybersegurança.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="d-inline-block text-center p-3 bg-white rounded shadow-sm">
+                <div class="display-4 text-primary">{{ current_user.level }}</div>
+                <div class="text-muted">Seu nível</div>
+                <div class="progress mt-2" style="height: 6px; width: 100px;">
+                    {% set next_level = current_user.xp_points % 1000 %}
+                    {% set percentage = (next_level / 1000) * 100 %}
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ percentage }}%"></div>
+                </div>
+                <small class="text-muted">{{ next_level }}/1000 XP para o próximo nível</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-stats mb-5">
+        <div class="stat-card">
+            <div class="stat-value text-primary">{{ enrolled_courses|length }}</div>
+            <div class="stat-label">Cursos matriculados</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value text-success">{{ completed_lessons }}</div>
+            <div class="stat-label">Lições concluídas</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value text-warning">{{ certificates }}</div>
+            <div class="stat-label">Certificados</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value text-info">{{ current_user.xp_points }}</div>
+            <div class="stat-label">XP Total</div>
+        </div>
+    </div>
+
+    {% if enrolled_courses %}
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Meus Cursos</h2>
+            <a href="{{ url_for('courses.course_list') }}" class="btn btn-outline-primary">Ver todos os cursos</a>
+        </div>
+        
+        <div class="row">
+            {% for course in enrolled_courses %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 course-card">
+                    {% if course.thumbnail %}
+                    <img src="{{ course.thumbnail }}" class="card-img-top" alt="{{ course.title }}">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                        <i class="fas {% if course.category == 'IA' %}fa-brain{% else %}fa-shield-alt{% endif %} fa-4x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <span class="course-category">{{ course.category }}</span>
+                    <span class="course-level">{{ course.level }}</span>
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ course.title }}</h5>
+                        <p class="card-text text-muted">{{ course.short_description or course.description|truncate(100) }}</p>
+                        
+                        <div class="mt-auto">
+                            {% set progress = course_progress.get(course.id, 0) %}
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="text-muted">Progresso</small>
+                                <small class="text-muted">{{ progress }}%</small>
+                            </div>
+                            <div class="progress mb-3" style="height: 5px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{ progress }}%"></div>
+                            </div>
+                            
+                            <a href="{{ url_for('courses.course_detail', slug=course.slug) }}" class="btn btn-primary btn-sm d-block">Continuar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-graduation-cap fa-4x text-muted"></i>
+        </div>
+        <h3>Você ainda não está matriculado em nenhum curso</h3>
+        <p class="text-muted">Explore nossos cursos e comece sua jornada de aprendizado hoje!</p>
+        <a href="{{ url_for('courses.course_list') }}" class="btn btn-primary">Explorar cursos</a>
+    </div>
+    {% endif %}
+
+    {% if featured_courses %}
+    <div class="mb-5">
+        <h2 class="mb-4">Cursos recomendados para você</h2>
+        <div class="row">
+            {% for course in featured_courses %}
+            {% if course not in enrolled_courses %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 course-card">
+                    {% if course.thumbnail %}
+                    <img src="{{ course.thumbnail }}" class="card-img-top" alt="{{ course.title }}">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                        <i class="fas {% if course.category == 'IA' %}fa-brain{% else %}fa-shield-alt{% endif %} fa-4x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <span class="course-category">{{ course.category }}</span>
+                    <span class="course-level">{{ course.level }}</span>
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ course.title }}</h5>
+                        <p class="card-text text-muted">{{ course.short_description or course.description|truncate(100) }}</p>
+                        
+                        <div class="mt-auto">
+                            <a href="{{ url_for('courses.course_detail', slug=course.slug) }}" class="btn btn-outline-primary btn-sm d-block">Ver detalhes</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Script para criar um gráfico de progresso do aluno (pode ser implementado usando Chart.js)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aqui poderia ser adicionado um código para criar um gráfico de progresso
+        // utilizando uma biblioteca como Chart.js
+    });
+</script>
+{% endblock %}

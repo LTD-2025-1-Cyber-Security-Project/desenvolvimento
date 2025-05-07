@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página não encontrada | EdTech IA & Cyber</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: #1a73e8;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .error-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #1a73e8;
+            margin: 0;
+            line-height: 1;
+        }
+        .error-message {
+            font-size: 1.5rem;
+            margin: 1rem 0 2rem;
+        }
+        .btn {
+            background-color: #1a73e8;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #1557b0;
+        }
+        .footer {
+            background-color: #f0f2f5;
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>EdTech IA & Cyber</h1>
+    </div>
+
+    <div class="container">
+        <div class="error-container">
+            <h1 class="error-code">404</h1>
+            <p class="error-message">Página não encontrada</p>
+            <p>A página que você está procurando não existe ou foi movida.</p>
+            <a href="/" class="btn">Voltar para a página inicial</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; {% raw %}{{ now.year }}{% endraw %} EdTech IA & Cyber | Plataforma Educacional
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const footer = document.querySelector('.footer');
+            const now = new Date();
+            footer.innerHTML = footer.innerHTML.replace('{% raw %}{{ now.year }}{% endraw %}', now.getFullYear());
+        });
+    </script>
+</body>
+</html>
