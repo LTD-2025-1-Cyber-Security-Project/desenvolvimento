@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="320" viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo e Borda -->
+  <rect x="50" y="40" width="200" height="250" rx="10" ry="10" fill="white" stroke="#0d6efd" stroke-width="3"/>
+  
+  <!-- Linhas do Currículo -->
+  <line x1="70" y1="70" x2="230" y2="70" stroke="#d0d0d0" stroke-width="2"/>
+  <line x1="70" y1="100" x2="230" y2="100" stroke="#d0d0d0" stroke-width="2"/>
+  <line x1="70" y1="130" x2="230" y2="130" stroke="#d0d0d0" stroke-width="2"/>
+  <line x1="70" y1="160" x2="170" y2="160" stroke="#d0d0d0" stroke-width="2"/>
+  <line x1="70" y1="190" x2="230" y2="190" stroke="#d0d0d0" stroke-width="2"/>
+  <line x1="70" y1="220" x2="200" y2="220" stroke="#d0d0d0" stroke-width="2"/>
+  <line x1="70" y1="250" x2="230" y2="250" stroke="#d0d0d0" stroke-width="2"/>
+  
+  <!-- Ícone de Análise/IA -->
+  <circle cx="300" cy="160" r="70" fill="#f8f9fa" stroke="#0d6efd" stroke-width="3"/>
+  
+  <!-- Cérebro/IA no Círculo -->
+  <path d="M280 140 C285 130, 295 125, 305 125 C315 125, 325 130, 330 140 C335 150, 335 160, 330 170 C325 180, 315 185, 305 185 C295 185, 285 180, 280 170 C275 160, 275 150, 280 140" fill="none" stroke="#0d6efd" stroke-width="3"/>
+  <path d="M290 150 C295 145, 300 143, 305 143 C310 143, 315 145, 320 150" fill="none" stroke="#0d6efd" stroke-width="2"/>
+  <path d="M290 170 C295 175, 300 177, 305 177 C310 177, 315 175, 320 170" fill="none" stroke="#0d6efd" stroke-width="2"/>
+  <line x1="305" y1="143" x2="305" y2="177" stroke="#0d6efd" stroke-width="2"/>
+  <line x1="295" y1="150" x2="295" y2="170" stroke="#0d6efd" stroke-width="2"/>
+  <line x1="315" y1="150" x2="315" y2="170" stroke="#0d6efd" stroke-width="2"/>
+  
+  <!-- Setas Conectando o Currículo e a Análise -->
+  <path d="M250 120 C265 120, 270 130, 270 140 C270 150, 260 160, 245 160" fill="none" stroke="#0d6efd" stroke-width="2" stroke-dasharray="5,3"/>
+  <path d="M245 180 C260 180, 270 190, 270 200 C270 210, 265 220, 250 220" fill="none" stroke="#0d6efd" stroke-width="2" stroke-dasharray="5,3"/>
+  
+  <!-- Barras de Score -->
+  <rect x="300" y="100" width="50" height="10" rx="2" ry="2" fill="#198754"/>
+  <rect x="300" y="120" width="40" height="10" rx="2" ry="2" fill="#0d6efd"/>
+  <rect x="300" y="140" width="30" height="10" rx="2" ry="2" fill="#0d6efd"/>
+  <rect x="300" y="160" width="45" height="10" rx="2" ry="2" fill="#198754"/>
+  <rect x="300" y="180" width="20" height="10" rx="2" ry="2" fill="#ffc107"/>
+  <rect x="300" y="200" width="35" height="10" rx="2" ry="2" fill="#0d6efd"/>
+  
+  <!-- Check Marks para Habilidades -->
+  <circle cx="90" y="85" r="8" fill="#f8f9fa" stroke="#198754" stroke-width="2"/>
+  <path d="M85 85 L90 90 L95 80" fill="none" stroke="#198754" stroke-width="2"/>
+  
+  <circle cx="90" y="115" r="8" fill="#f8f9fa" stroke="#198754" stroke-width="2"/>
+  <path d="M85 115 L90 120 L95 110" fill="none" stroke="#198754" stroke-width="2"/>
+  
+  <circle cx="90" y="145" r="8" fill="#f8f9fa" stroke="#198754" stroke-width="2"/>
+  <path d="M85 145 L90 150 L95 140" fill="none" stroke="#198754" stroke-width="2"/>
+  
+  <!-- Estrelas de Avaliação -->
+  <path d="M350 120 L353 127 L360 128 L355 133 L356 140 L350 137 L344 140 L345 133 L340 128 L347 127 Z" fill="#ffc107"/>
+  <path d="M360 140 L363 147 L370 148 L365 153 L366 160 L360 157 L354 160 L355 153 L350 148 L357 147 Z" fill="#ffc107"/>
+  <path d="M370 120 L373 127 L380 128 L375 133 L376 140 L370 137 L364 140 L365 133 L360 128 L367 127 Z" fill="#ffc107"/>
+  
+  <!-- Texto "Análise de Currículo" -->
+  <text x="200" y="300" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#0d6efd">Análise de Currículo com IA</text>
+  
+  <!-- Ícones Extras -->
+  <rect x="70" y="270" width="30" height="10" rx="5" ry="5" fill="#0d6efd"/>
+  <rect x="110" y="270" width="40" height="10" rx="5" ry="5" fill="#198754"/>
+  <rect x="160" y="270" width="20" height="10" rx="5" ry="5" fill="#ffc107"/>
+  <rect x="190" y="270" width="40" height="10" rx="5" ry="5" fill="#dc3545"/>
+</svg>
