@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Matrícula: {{ course.title }} - EdTech IA & Cyber{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Navegação de breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.course_list') }}">Cursos</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.course_details', course_id=course.id) }}">{{ course.title }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Matrícula</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0">Matrícula no Curso</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="course-info mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="course-image me-4">
+                                {% if course.thumbnail %}
+                                <img src="{{ course.thumbnail }}" alt="{{ course.title }}" class="img-fluid rounded" style="width: 120px; height: 80px; object-fit: cover;">
+                                {% else %}
+                                    {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                                    <img src="{{ url_for('static', filename='img/ai-course-banner.jpg') }}" alt="{{ course.title }}" class="img-fluid rounded" style="width: 120px; height: 80px; object-fit: cover;">
+                                    {% elif course.category == "Cybersegurança" %}
+                                    <img src="{{ url_for('static', filename='img/cyber-course-banner.jpg') }}" alt="{{ course.title }}" class="img-fluid rounded" style="width: 120px; height: 80px; object-fit: cover;">
+                                    {% else %}
+                                    <img src="{{ url_for('static', filename='img/course-banner.jpg') }}" alt="{{ course.title }}" class="img-fluid rounded" style="width: 120px; height: 80px; object-fit: cover;">
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h2 class="h4 mb-2">{{ course.title }}</h2>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-robot me-1"></i> {{ course.category }}
+                                    </span>
+                                    {% elif course.category == "Cybersegurança" %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-shield-alt me-1"></i> {{ course.category }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-graduation-cap me-1"></i> {{ course.category }}
+                                    </span>
+                                    {% endif %}
+                                    
+                                    {% if course.level == "Básico" %}
+                                    <span class="badge bg-success">{{ course.level }}</span>
+                                    {% elif course.level == "Intermediário" %}
+                                    <span class="badge bg-primary">{{ course.level }}</span>
+                                    {% elif course.level == "Avançado" %}
+                                    <span class="badge bg-warning text-dark">{{ course.level }}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ course.level }}</span>
+                                    {% endif %}
+                                    
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-clock me-1"></i> {{ course.duration_hours }} horas
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h5 class="mb-3">Resumo do Curso</h5>
+                        <p>{{ course.description }}</p>
+                    </div>
+                    
+                    <div class="course-modules mb-4">
+                        <h5 class="mb-3">Conteúdo do Curso</h5>
+                        <div class="list-group">
+                            {% for module in modules %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Módulo {{ module.order }}:</strong> {{ module.title }}
+                                    </div>
+                                    <span class="badge bg-light text-dark">{{ module.lesson_count }} lições</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="enrollment-benefits mb-4">
+                        <h5 class="mb-3">O que você ganha ao se matricular:</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <i class="fas fa-check-circle text-success me-2"></i> Acesso completo a todo o conteúdo do curso
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check-circle text-success me-2"></i> Certificado de conclusão após completar todas as lições
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check-circle text-success me-2"></i> Suporte via fórum de discussão
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check-circle text-success me-2"></i> Materiais complementares e recursos para download
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check-circle text-success me-2"></i> Acesso à comunidade de aprendizado
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="confirmation-form">
+                        <form action="{{ url_for('courses.confirm_enrollment', course_id=course.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg" id="confirmEnrollBtn">
+                                    <i class="fas fa-graduation-cap me-2"></i> Confirmar Matrícula
+                                </button>
+                                <a href="{{ url_for('courses.course_details', course_id=course.id) }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i> Voltar para Detalhes do Curso
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmEnrollBtn = document.getElementById('confirmEnrollBtn');
+        if (confirmEnrollBtn) {
+            confirmEnrollBtn.addEventListener('click', function() {
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
+                this.disabled = true;
+                this.form.submit();
+            });
+        }
+    });
+</script>
+{% endblock %}

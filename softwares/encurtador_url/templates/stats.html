@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Estatísticas - Encurtador de URLs Inteligente{% endblock %}
+
+{% block content %}
+<section class="stats-header">
+    <h2>Estatísticas de URLs Encurtadas</h2>
+    <p>Monitore o desempenho dos links encurtados pela Prefeitura</p>
+</section>
+
+<section class="stats-content">
+    {% if urls %}
+    <div class="stats-summary">
+        <div class="stat-card">
+            <div class="stat-value">{{ urls|length }}</div>
+            <div class="stat-label">URLs Criadas</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ urls|sum(attribute='access_count') }}</div>
+            <div class="stat-label">Total de Acessos</div>
+        </div>
+    </div>
+
+    <div class="data-table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>URL Original</th>
+                    <th>URL Curta</th>
+                    <th>Data de Criação</th>
+                    <th>Acessos</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for url in urls %}
+                <tr>
+                    <td class="url-cell">
+                        <div class="truncate-text" title="{{ url.original_url }}">
+                            {{ url.original_url }}
+                        </div>
+                    </td>
+                    <td>{{ url.short_url }}</td>
+                    <td>{{ url.created_at }}</td>
+                    <td class="text-center">{{ url.access_count }}</td>
+                    <td class="actions">
+                        <button class="copy-btn" data-url="{{ url.short_url }}">Copiar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>Nenhuma URL encurtada encontrada.</p>
+        <a href="/" class="btn">Criar URL Curta</a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

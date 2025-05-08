@@ -1,0 +1,1486 @@
+{% extends "base.html" %}
+
+{% block title %}Cursos de IA & Cybersegurança - EdTech{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner principal destacando o propósito da plataforma -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white rounded-lg shadow">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h1 class="display-5 fw-bold mb-3">Capacitação em IA & Cybersegurança</h1>
+                            <p class="lead mb-4">Trilhas de aprendizado especializadas para servidores públicos
+                                municipais de Florianópolis e São José.</p>
+                            <div class="d-flex gap-3">
+                                <a href="#ai" class="btn btn-light text-primary fw-bold" data-bs-toggle="tab"
+                                    data-bs-target="#ai">
+                                    <i class="fas fa-robot me-2"></i>Ver cursos de IA
+                                </a>
+                                <a href="#cyber" class="btn btn-light text-primary fw-bold" data-bs-toggle="tab"
+                                    data-bs-target="#cyber">
+                                    <i class="fas fa-shield-alt me-2"></i>Ver cursos de Cybersegurança
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 d-none d-lg-block text-center">
+                            <img src="{{ url_for('static', filename='img/course-hero.svg') }}" alt="Educação digital"
+                                class="img-fluid" style="max-height: 200px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold mb-3">Explore Nossos Cursos</h2>
+            <p class="text-muted">Aprenda com especialistas e desenvolva habilidades essenciais para a transformação
+                digital no setor público.</p>
+        </div>
+        <div class="col-md-4">
+            <form action="{{ url_for('courses.course_list') }}" method="GET" class="mt-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Buscar cursos..." name="search"
+                        value="{{ search_query or '' }}">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Abas para áreas principais -->
+    <ul class="nav nav-tabs nav-fill mb-4" id="courseAreaTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button"
+                role="tab">
+                <i class="fas fa-th-large me-2"></i> Todos os Cursos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="ai-tab" data-bs-toggle="tab" data-bs-target="#ai" type="button" role="tab">
+                <i class="fas fa-robot me-2"></i> Inteligência Artificial
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="cyber-tab" data-bs-toggle="tab" data-bs-target="#cyber" type="button"
+                role="tab">
+                <i class="fas fa-shield-alt me-2"></i> Cybersegurança
+            </button>
+        </li>
+    </ul>
+
+    <!-- Filtros aprimorados -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form action="{{ url_for('courses.course_list') }}" method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="category" class="form-label">Categoria</label>
+                    <select class="form-select" id="category" name="category">
+                        <option value="">Todas as categorias</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat[0] }}" {% if current_category==cat[0] %}selected{% endif %}>{{ cat[0] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="level" class="form-label">Nível</label>
+                    <select class="form-select" id="level" name="level">
+                        <option value="">Todos os níveis</option>
+                        {% for lvl in levels %}
+                        <option value="{{ lvl[0] }}" {% if current_level==lvl[0] %}selected{% endif %}>{{ lvl[0] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="duration" class="form-label">Carga Horária</label>
+                    <select class="form-select" id="duration" name="duration">
+                        <option value="">Qualquer duração</option>
+                        <option value="short" {% if current_duration=="short" %}selected{% endif %}>Até 10 horas
+                        </option>
+                        <option value="medium" {% if current_duration=="medium" %}selected{% endif %}>10-20 horas
+                        </option>
+                        <option value="long" {% if current_duration=="long" %}selected{% endif %}>Mais de 20 horas
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-2"></i> Aplicar Filtros
+                    </button>
+                </div>
+                <!-- Pesquisa avançada - toggle -->
+                <div class="col-12 mt-2">
+                    <a class="text-decoration-none" data-bs-toggle="collapse" href="#advancedSearch">
+                        <i class="fas fa-sliders-h me-1"></i> Mostrar filtros avançados
+                    </a>
+                </div>
+                <!-- Filtros avançados (colapsáveis) -->
+                <div class="collapse" id="advancedSearch">
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <label for="instructor" class="form-label">Instrutor</label>
+                            <select class="form-select" id="instructor" name="instructor">
+                                <option value="">Todos os instrutores</option>
+                                <!-- Loop através dos instrutores -->
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="rating" class="form-label">Avaliação</label>
+                            <select class="form-select" id="rating" name="rating">
+                                <option value="">Qualquer avaliação</option>
+                                <option value="4">4+ estrelas</option>
+                                <option value="3">3+ estrelas</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="sort" class="form-label">Ordenar por</label>
+                            <select class="form-select" id="sort" name="sort">
+                                <option value="popular">Mais populares</option>
+                                <option value="newest">Mais recentes</option>
+                                <option value="rating">Melhor avaliados</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Conteúdo das abas -->
+    <div class="tab-content" id="courseAreaTabsContent">
+        <!-- Todos os cursos -->
+        <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+            <!-- Trilhas de aprendizado - Visão rápida das progressões -->
+            <div class="learning-paths mb-5">
+                <h3 class="fw-bold mb-3">Trilhas de Aprendizado</h3>
+                <div class="row g-4">
+                    <!-- Trilha de IA -->
+                    <div class="col-md-6">
+                        <div class="card border-info shadow-sm h-100">
+                            <div class="card-header bg-info text-white py-3">
+                                <h4 class="mb-0"><i class="fas fa-robot me-2"></i>Trilha de Inteligência Artificial</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="learning-path-progress">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="badge bg-light text-dark border">Básico</span>
+                                        <i class="fas fa-arrow-right text-muted"></i>
+                                        <span class="badge bg-light text-dark border">Intermediário</span>
+                                        <i class="fas fa-arrow-right text-muted"></i>
+                                        <span class="badge bg-light text-dark border">Avançado</span>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 10px;">
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                                <p>Aprenda desde os conceitos básicos até implementações avançadas de IA na
+                                    administração pública municipal.</p>
+                                <div class="path-courses">
+                                    <div class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Fundamentos
+                                        de Inteligência Artificial</div>
+                                    <div class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Machine
+                                        Learning para Gestão Pública</div>
+                                    <div class="mb-2"><i class="fas fa-circle text-muted me-2"></i>Processamento de
+                                        Linguagem Natural</div>
+                                    <div class="mb-2"><i class="fas fa-circle text-muted me-2"></i>Ética em IA para o
+                                        Setor Público</div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="#ai" class="btn btn-outline-info w-100" data-bs-toggle="tab"
+                                    data-bs-target="#ai">
+                                    <i class="fas fa-th-list me-2"></i>Ver todos os cursos de IA
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trilha de Cybersegurança -->
+                    <div class="col-md-6">
+                        <div class="card border-danger shadow-sm h-100">
+                            <div class="card-header bg-danger text-white py-3">
+                                <h4 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Trilha de Cybersegurança</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="learning-path-progress">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="badge bg-light text-dark border">Básico</span>
+                                        <i class="fas fa-arrow-right text-muted"></i>
+                                        <span class="badge bg-light text-dark border">Intermediário</span>
+                                        <i class="fas fa-arrow-right text-muted"></i>
+                                        <span class="badge bg-light text-dark border">Avançado</span>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 10px;">
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 100%">
+                                        </div>
+                                    </div>
+                                </div>
+                                <p>Desenvolva habilidades para proteger dados e sistemas contra ameaças cibernéticas no
+                                    ambiente municipal.</p>
+                                <div class="path-courses">
+                                    <div class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Fundamentos
+                                        de Cibersegurança</div>
+                                    <div class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Segurança de
+                                        Dados na Administração Pública</div>
+                                    <div class="mb-2"><i class="fas fa-circle text-muted me-2"></i>Prevenção de Ataques
+                                        Cibernéticos</div>
+                                    <div class="mb-2"><i class="fas fa-circle text-muted me-2"></i>Gestão de Incidentes
+                                        de Segurança</div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="#cyber" class="btn btn-outline-danger w-100" data-bs-toggle="tab"
+                                    data-bs-target="#cyber">
+                                    <i class="fas fa-th-list me-2"></i>Ver todos os cursos de Cybersegurança
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listagem de todos os cursos -->
+            <h3 class="fw-bold mb-3">Todos os Cursos</h3>
+            {% if courses.items %}
+            <div class="row g-4">
+                {% for course in courses.items %}
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="card course-card h-100 shadow-sm">
+                        <div class="position-relative">
+                            {% if course.thumbnail %}
+                            <img src="{{ course.thumbnail }}" class="card-img-top" alt="{{ course.title }}"
+                                style="height: 160px; object-fit: cover;">
+                            {% else %}
+                            {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                            <img src="{{ url_for('static', filename='img/ai-course-placeholder.jpg') }}"
+                                class="card-img-top" alt="{{ course.title }}" style="height: 160px; object-fit: cover;">
+                            {% elif course.category == "Cybersegurança" %}
+                            <img src="{{ url_for('static', filename='img/cyber-course-placeholder.jpg') }}"
+                                class="card-img-top" alt="{{ course.title }}" style="height: 160px; object-fit: cover;">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='img/course-placeholder.jpg') }}"
+                                class="card-img-top" alt="{{ course.title }}" style="height: 160px; object-fit: cover;">
+                            {% endif %}
+                            {% endif %}
+                            <div class="position-absolute top-0 end-0 m-2">
+                                {% if course.level == "Básico" %}
+                                <span class="badge bg-success">{{ course.level }}</span>
+                                {% elif course.level == "Intermediário" %}
+                                <span class="badge bg-primary">{{ course.level }}</span>
+                                {% elif course.level == "Avançado" %}
+                                <span class="badge bg-warning text-dark">{{ course.level }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ course.level }}</span>
+                                {% endif %}
+                            </div>
+                            {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                            <div class="position-absolute top-0 start-0 m-2 badge bg-info text-white">
+                                <i class="fas fa-robot"></i> IA
+                            </div>
+                            {% elif course.category == "Cybersegurança" %}
+                            <div class="position-absolute top-0 start-0 m-2 badge bg-danger">
+                                <i class="fas fa-shield-alt"></i> Cyber
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">{{ course.title }}</h5>
+                            <p class="card-text small text-muted mb-3">{{ course.short_description or
+                                course.description[:100] + '...' }}</p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="small text-muted">
+                                        <i class="fas fa-clock me-1"></i> {{ course.duration_hours or '?' }} horas
+                                    </span>
+                                    <span class="small text-muted">
+                                        <i class="fas fa-users me-1"></i> {{ course.enrollment_count or 0 }} alunos
+                                    </span>
+                                </div>
+                                {% if course.id in enrolled_course_ids %}
+                                <a href="{{ url_for('courses.course_detail', slug=course.slug) }}"
+                                    class="btn btn-success w-100">
+                                    <i class="fas fa-book-open me-2"></i> Continuar
+                                </a>
+                                {% else %}
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('courses.course_detail', slug=course.slug) }}"
+                                        class="btn btn-outline-primary">
+                                        <i class="fas fa-info-circle me-2"></i> Detalhes
+                                    </a>
+                                    <!-- Substituir o formulário de matrícula por um link/botão direto -->
+                                    <a href="{{ url_for('courses.course_enrollment', course_id=course.id) }}"
+                                        class="btn btn-primary btn-lg w-100" id="enrollBtn">
+                                        <i class="fas fa-graduation-cap me-2"></i> Matricular-se Gratuitamente
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Nenhum curso encontrado com os filtros selecionados.
+                {% if search_query or current_category or current_level %}
+                <a href="{{ url_for('courses.course_list') }}" class="alert-link">Limpar filtros</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Cursos de IA -->
+        <div class="tab-pane fade" id="ai" role="tabpanel" aria-labelledby="ai-tab">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="bg-light p-4 rounded-3 shadow-sm">
+                        <h2 class="mb-3"><i class="fas fa-robot text-info me-2"></i> Inteligência Artificial</h2>
+                        <p class="mb-0">Aprenda a implementar soluções de IA no setor público, desde conceitos básicos
+                            até aplicações avançadas, preparando sua prefeitura para a transformação digital.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trilha de aprendizado IA organizada por nível -->
+            <div class="mb-5">
+                <!-- Nível Básico -->
+                <div class="learning-level mb-5">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="badge bg-success p-2 me-3"><i class="fas fa-star me-1"></i> BÁSICO</div>
+                        <h3 class="mb-0">Fundamentos e Conceitos Iniciais</h3>
+                    </div>
+                    <p class="text-muted mb-4">Comece sua jornada em IA com estes cursos introdutórios, perfeitos para
+                        iniciantes.</p>
+
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-success">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/ai-fundamentos.jpg') }}"
+                                        class="card-img-top" alt="Fundamentos de IA"
+                                        style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-success">Básico</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-info">
+                                        <i class="fas fa-robot"></i> IA
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Fundamentos de Inteligência Artificial</h5>
+                                    <p class="card-text small text-muted mb-3">Conheça os conceitos básicos, história e
+                                        aplicações da IA no setor público municipal.</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 10 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-info">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-info text-white w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-success">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/ai-aplicacoes.jpg') }}"
+                                        class="card-img-top" alt="Aplicações de IA"
+                                        style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-success">Básico</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-info">
+                                        <i class="fas fa-robot"></i> IA
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Aplicações Práticas de IA na Gestão Municipal</h5>
+                                    <p class="card-text small text-muted mb-3">Descubra como a IA pode transformar
+                                        processos administrativos e atendimento ao cidadão.</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 8 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-info">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-info text-white w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nível Intermediário -->
+                <div class="learning-level mb-5">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="badge bg-primary p-2 me-3"><i class="fas fa-star me-1"></i><i
+                                class="fas fa-star me-1"></i> INTERMEDIÁRIO</div>
+                        <h3 class="mb-0">Aprofundamento e Implementação</h3>
+                    </div>
+                    <p class="text-muted mb-4">Aprofunde seus conhecimentos e aprenda a implementar soluções de IA no
+                        ambiente municipal.</p>
+
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-primary">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/ai-machine-learning.jpg') }}"
+                                        class="card-img-top" alt="Machine Learning"
+                                        style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-primary">Intermediário</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-info">
+                                        <i class="fas fa-robot"></i> IA
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Machine Learning para Gestão Pública</h5>
+                                    <p class="card-text small text-muted mb-3">Aprenda a aplicar algoritmos de
+                                        aprendizado de máquina para análise de dados públicos e previsão de tendências.
+                                    </p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 16 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-info">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-info text-white w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-primary">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/ai-nlp.jpg') }}" class="card-img-top"
+                                        alt="Processamento de Linguagem Natural"
+                                        style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-primary">Intermediário</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-info">
+                                        <i class="fas fa-robot"></i> IA
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Processamento de Linguagem Natural</h5>
+                                    <p class="card-text small text-muted mb-3">Implemente chatbots, assistentes virtuais
+                                        e análise de sentimentos para melhorar o atendimento ao cidadão.</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 14 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-info">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-info text-white w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nível Avançado -->
+                <div class="learning-level mb-5">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="badge bg-warning text-dark p-2 me-3"><i class="fas fa-star me-1"></i><i
+                                class="fas fa-star me-1"></i><i class="fas fa-star me-1"></i> AVANÇADO</div>
+                        <h3 class="mb-0">Especialização e Inovação</h3>
+                    </div>
+                    <p class="text-muted mb-4">Para profissionais experientes que desejam liderar projetos de IA e
+                        transformação digital.</p>
+
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-warning">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/ai-etica.jpg') }}" class="card-img-top"
+                                        alt="Ética em IA" style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-warning text-dark">Avançado</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-info">
+                                        <i class="fas fa-robot"></i> IA
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Ética em IA para o Setor Público</h5>
+                                    <p class="card-text small text-muted mb-3">Aborde questões éticas, legais e sociais
+                                        na implementação de sistemas de IA em prefeituras.</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 12 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-info">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-info text-white w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-warning">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/ai-projetos.jpg') }}"
+                                        class="card-img-top" alt="Gestão de Projetos de IA"
+                                        style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-warning text-dark">Avançado</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-info">
+                                        <i class="fas fa-robot"></i> IA
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Gestão de Projetos de IA no Governo</h5>
+                                    <p class="card-text small text-muted mb-3">Aprenda a planejar, implementar e avaliar
+                                        projetos de IA inovadores no setor público.</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 20 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-info">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-info text-white w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cursos dinâmicos filtrados do banco de dados -->
+            <h3 class="fw-bold mb-3">Todos os Cursos de IA</h3>
+            <div class="row g-4">
+                {% for course in courses.items %}
+                {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="card course-card h-100 shadow-sm border-info">
+                        <div class="position-relative">
+                            {% if course.thumbnail %}
+                            <img src="{{ course.thumbnail }}" class="card-img-top" alt="{{ course.title }}"
+                                style="height: 160px; object-fit: cover;">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='img/ai-course-placeholder.jpg') }}"
+                                class="card-img-top" alt="{{ course.title }}" style="height: 160px; object-fit: cover;">
+                            {% endif %}
+                            <div class="position-absolute top-0 end-0 m-2">
+                                {% if course.level == "Básico" %}
+                                <span class="badge bg-success">{{ course.level }}</span>
+                                {% elif course.level == "Intermediário" %}
+                                <span class="badge bg-primary">{{ course.level }}</span>
+                                {% elif course.level == "Avançado" %}
+                                <span class="badge bg-warning text-dark">{{ course.level }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ course.level }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="position-absolute top-0 start-0 m-2 badge bg-info">
+                                <i class="fas fa-robot"></i> IA
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">{{ course.title }}</h5>
+                            <p class="card-text small text-muted mb-3">{{ course.short_description or
+                                course.description[:100] + '...' }}</p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="small text-muted">
+                                        <i class="fas fa-clock me-1"></i> {{ course.duration_hours or '?' }} horas
+                                    </span>
+                                    <span class="small text-muted">
+                                        <i class="fas fa-users me-1"></i> {{ course.enrollment_count or 0 }} alunos
+                                    </span>
+                                </div>
+                                {% if course.id in enrolled_course_ids %}
+                                <a href="{{ url_for('courses.course_detail', slug=course.slug) }}"
+                                    class="btn btn-success w-100">
+                                    <i class="fas fa-book-open me-2"></i> Continuar
+                                </a>
+                                {% else %}
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('courses.course_detail', slug=course.slug) }}"
+                                        class="btn btn-outline-info">
+                                        <i class="fas fa-info-circle me-2"></i> Detalhes
+                                    </a>
+                                    <form action="{{ url_for('courses.enroll', course_id=course.id) }}" method="POST">
+                                        <button type="submit" class="btn btn-info text-white w-100">
+                                            <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                        </button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Cursos de Cybersegurança -->
+        <div class="tab-pane fade" id="cyber" role="tabpanel" aria-labelledby="cyber-tab">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="bg-light p-4 rounded-3 shadow-sm">
+                        <h2 class="mb-3"><i class="fas fa-shield-alt text-danger me-2"></i> Cybersegurança</h2>
+                        <p class="mb-0">Proteja os dados e sistemas de sua prefeitura contra ameaças digitais com nossos
+                            cursos especializados em segurança cibernética para o setor público.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trilha de aprendizado Cybersegurança organizada por nível -->
+            <div class="mb-5">
+                <!-- Nível Básico -->
+                <div class="learning-level mb-5">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="badge bg-success p-2 me-3"><i class="fas fa-star me-1"></i> BÁSICO</div>
+                        <h3 class="mb-0">Fundamentos e Conceitos Iniciais</h3>
+                    </div>
+                    <p class="text-muted mb-4">Inicie sua jornada em Cybersegurança com estes cursos fundamentais.</p>
+
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-success">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/cyber-fundamentos.jpg') }}"
+                                        class="card-img-top" alt="Fundamentos de Cybersegurança"
+                                        style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-success">Básico</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-danger">
+                                        <i class="fas fa-shield-alt"></i> Cyber
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Fundamentos de Cibersegurança</h5>
+                                    <p class="card-text small text-muted mb-3">Aprenda os conceitos básicos e princípios
+                                        fundamentais para proteger sistemas e dados no ambiente municipal.</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 12 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-danger">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-danger w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-success">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/cyber-dados.jpg') }}"
+                                        class="card-img-top" alt="Segurança de Dados"
+                                        style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-success">Básico</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-danger">
+                                        <i class="fas fa-shield-alt"></i> Cyber
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Segurança de Dados na Administração Pública</h5>
+                                    <p class="card-text small text-muted mb-3">Proteja dados sensíveis dos cidadãos e
+                                        garanta conformidade com a LGPD e outras regulamentações.</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 10 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-danger">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-danger w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nível Intermediário -->
+                <div class="learning-level mb-5">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="badge bg-primary p-2 me-3"><i class="fas fa-star me-1"></i><i
+                                class="fas fa-star me-1"></i> INTERMEDIÁRIO</div>
+                        <h3 class="mb-0">Prevenção e Proteção</h3>
+                    </div>
+                    <p class="text-muted mb-4">Aprenda a proteger sistemas e dados contra ameaças digitais cada vez mais
+                        sofisticadas.</p>
+
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-primary">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/cyber-ataques.jpg') }}"
+                                        class="card-img-top" alt="Prevenção de Ataques"
+                                        style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-primary">Intermediário</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-danger">
+                                        <i class="fas fa-shield-alt"></i> Cyber
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Prevenção de Ataques Cibernéticos</h5>
+                                    <p class="card-text small text-muted mb-3">Identifique e previna ataques comuns como
+                                        phishing, malware, ransomware e engenharia social.</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 14 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-danger">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-danger w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-primary">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/cyber-redes.jpg') }}"
+                                        class="card-img-top" alt="Segurança de Redes"
+                                        style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-primary">Intermediário</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-danger">
+                                        <i class="fas fa-shield-alt"></i> Cyber
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Segurança de Redes para Prefeituras</h5>
+                                    <p class="card-text small text-muted mb-3">Configure e proteja redes municipais
+                                        contra invasões e ataques de negação de serviço.</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 16 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-danger">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-danger w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nível Avançado -->
+                <div class="learning-level mb-5">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="badge bg-warning text-dark p-2 me-3"><i class="fas fa-star me-1"></i><i
+                                class="fas fa-star me-1"></i><i class="fas fa-star me-1"></i> AVANÇADO</div>
+                        <h3 class="mb-0">Resposta e Gestão de Incidentes</h3>
+                    </div>
+                    <p class="text-muted mb-4">Para profissionais que gerenciam a segurança digital e respondem a
+                        incidentes em prefeituras.</p>
+
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-warning">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/cyber-incidentes.jpg') }}"
+                                        class="card-img-top" alt="Gestão de Incidentes"
+                                        style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-warning text-dark">Avançado</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-danger">
+                                        <i class="fas fa-shield-alt"></i> Cyber
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Gestão de Incidentes de Segurança</h5>
+                                    <p class="card-text small text-muted mb-3">Desenvolva protocolos de resposta a
+                                        incidentes e recuperação após ataques cibernéticos.</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 18 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-danger">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-danger w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card course-card h-100 shadow-sm border-warning">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='img/cyber-forense.jpg') }}"
+                                        class="card-img-top" alt="Análise Forense"
+                                        style="height: 160px; object-fit: cover;">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-warning text-dark">Avançado</span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2 badge bg-danger">
+                                        <i class="fas fa-shield-alt"></i> Cyber
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title fw-bold">Análise Forense Digital</h5>
+                                    <p class="card-text small text-muted mb-3">Aprenda a investigar incidentes de
+                                        segurança e recuperar evidências digitais após violações.</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i> 20 horas
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-users me-1"></i> 0 alunos
+                                            </span>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="#" class="btn btn-outline-danger">
+                                                <i class="fas fa-info-circle me-2"></i> Detalhes
+                                            </a>
+                                            <form action="#">
+                                                <button type="submit" class="btn btn-danger w-100">
+                                                    <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cursos dinâmicos filtrados do banco de dados -->
+            <h3 class="fw-bold mb-3">Todos os Cursos de Cybersegurança</h3>
+            <div class="row g-4">
+                {% for course in courses.items %}
+                {% if course.category == "Cybersegurança" %}
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="card course-card h-100 shadow-sm border-danger">
+                        <div class="position-relative">
+                            {% if course.thumbnail %}
+                            <img src="{{ course.thumbnail }}" class="card-img-top" alt="{{ course.title }}"
+                                style="height: 160px; object-fit: cover;">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='img/cyber-course-placeholder.jpg') }}"
+                                class="card-img-top" alt="{{ course.title }}" style="height: 160px; object-fit: cover;">
+                            {% endif %}
+                            <div class="position-absolute top-0 end-0 m-2">
+                                {% if course.level == "Básico" %}
+                                <span class="badge bg-success">{{ course.level }}</span>
+                                {% elif course.level == "Intermediário" %}
+                                <span class="badge bg-primary">{{ course.level }}</span>
+                                {% elif course.level == "Avançado" %}
+                                <span class="badge bg-warning text-dark">{{ course.level }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ course.level }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="position-absolute top-0 start-0 m-2 badge bg-danger">
+                                <i class="fas fa-shield-alt"></i> Cyber
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">{{ course.title }}</h5>
+                            <p class="card-text small text-muted mb-3">{{ course.short_description or
+                                course.description[:100] + '...' }}</p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="small text-muted">
+                                        <i class="fas fa-clock me-1"></i> {{ course.duration_hours or '?' }} horas
+                                    </span>
+                                    <span class="small text-muted">
+                                        <i class="fas fa-users me-1"></i> {{ course.enrollment_count or 0 }} alunos
+                                    </span>
+                                </div>
+                                {% if course.id in enrolled_course_ids %}
+                                <a href="{{ url_for('courses.course_detail', slug=course.slug) }}"
+                                    class="btn btn-success w-100">
+                                    <i class="fas fa-book-open me-2"></i> Continuar
+                                </a>
+                                {% else %}
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('courses.course_detail', slug=course.slug) }}"
+                                        class="btn btn-outline-danger">
+                                        <i class="fas fa-info-circle me-2"></i> Detalhes
+                                    </a>
+                                    <form action="{{ url_for('courses.enroll', course_id=course.id) }}" method="POST">
+                                        <button type="submit" class="btn btn-danger w-100">
+                                            <i class="fas fa-graduation-cap me-2"></i> Matricular-se
+                                        </button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginação melhorada -->
+    {% if courses.pages > 1 %}
+    <nav aria-label="Navegação de páginas" class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if courses.has_prev %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="{{ url_for('courses.course_list', page=courses.prev_num, search=search_query, category=current_category, level=current_level, duration=current_duration) }}">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-chevron-left"></i> Anterior</span>
+            </li>
+            {% endif %}
+
+            {% for page_num in courses.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+            {% if page_num %}
+            {% if page_num == courses.page %}
+            <li class="page-item active">
+                <span class="page-link">{{ page_num }}</span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="{{ url_for('courses.course_list', page=page_num, search=search_query, category=current_category, level=current_level, duration=current_duration) }}">{{
+                    page_num }}</a>
+            </li>
+            {% endif %}
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if courses.has_next %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="{{ url_for('courses.course_list', page=courses.next_num, search=search_query, category=current_category, level=current_level, duration=current_duration) }}">
+                    Próxima <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Próxima <i class="fas fa-chevron-right"></i></span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <!-- CTA - Chamada para ação -->
+    <div class="card bg-gradient-primary text-white mt-5 shadow rounded-lg">
+        <div class="card-body p-5">
+            <div class="row align-items-center">
+                <div class="col-lg-9">
+                    <h2 class="fw-bold mb-3">Transforme sua carreira com conhecimentos digitais</h2>
+                    <p class="lead mb-0">Explore nossos cursos e torne-se um profissional cada vez mais capacitado para
+                        enfrentar os desafios da era digital na administração pública.</p>
+                </div>
+                <div class="col-lg-3 text-lg-end mt-4 mt-lg-0">
+                    <a href="#" class="btn btn-light btn-lg px-4">
+                        <i class="fas fa-graduation-cap me-2"></i> Ver Todos os Cursos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conquistas e Estatísticas -->
+    <div class="stats-container bg-light p-4 rounded-3 shadow-sm mt-5">
+        <h3 class="text-center mb-4">Nossa Plataforma em Números</h3>
+        <div class="row text-center g-4">
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-icon mb-2">
+                        <i class="fas fa-users fa-3x text-primary"></i>
+                    </div>
+                    <h4 class="stat-number fw-bold">0</h4>
+                    <p class="stat-label">Servidores Capacitados</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-icon mb-2">
+                        <i class="fas fa-graduation-cap fa-3x text-success"></i>
+                    </div>
+                    <h4 class="stat-number fw-bold">25+</h4>
+                    <p class="stat-label">Cursos Disponíveis</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-icon mb-2">
+                        <i class="fas fa-certificate fa-3x text-warning"></i>
+                    </div>
+                    <h4 class="stat-number fw-bold">0</h4>
+                    <p class="stat-label">Certificados Emitidos</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-icon mb-2">
+                        <i class="fas fa-clock fa-3x text-danger"></i>
+                    </div>
+                    <h4 class="stat-number fw-bold">0</h4>
+                    <p class="stat-label">Horas de Conteúdo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Componente flutuante - Assistente IA -->
+<div class="ai-assistant-widget">
+    <button class="ai-assistant-toggle btn btn-primary rounded-circle shadow" data-bs-toggle="modal"
+        data-bs-target="#aiAssistantModal">
+        <i class="fas fa-robot"></i>
+    </button>
+</div>
+
+<!-- Modal do Assistente IA -->
+<div class="modal fade" id="aiAssistantModal" tabindex="-1" aria-labelledby="aiAssistantModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="aiAssistantModalLabel"><i class="fas fa-robot me-2"></i> Assistente IA</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="assistant-chat">
+                    <div class="assistant-message">
+                        <div class="assistant-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <p>Olá! Sou o assistente virtual da plataforma EdTech IA & Cyber. Como posso ajudar com sua
+                                jornada de aprendizado?</p>
+                        </div>
+                    </div>
+                    <div class="user-message">
+                        <div class="message-content">
+                            <p>Qual curso de IA você recomenda para iniciantes?</p>
+                        </div>
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <div class="assistant-message">
+                        <div class="assistant-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <p>Para iniciantes em IA, recomendo o curso "Fundamentos de Inteligência Artificial". Ele
+                                aborda os conceitos básicos e aplicações no setor público de forma acessível.</p>
+                            <p>Você também pode considerar "Aplicações Práticas de IA na Gestão Municipal" para uma
+                                abordagem mais orientada à prática.</p>
+                            <div class="assistant-actions">
+                                <a href="#" class="btn btn-sm btn-outline-primary">Ver curso recomendado</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="assistant-input mt-3">
+                    <form>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Digite sua pergunta...">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos CSS aprimorados -->
+<style>
+    /* Estilos gerais e variáveis de cores */
+    :root {
+        --primary-color: #0d6efd;
+        --info-color: #0dcaf0;
+        --danger-color: #dc3545;
+        --success-color: #198754;
+        --warning-color: #ffc107;
+    }
+
+    /* Cards de cursos */
+    .course-card {
+        transition: all 0.3s ease;
+        border-width: 1px;
+        overflow: hidden;
+    }
+
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+        border-color: var(--primary-color);
+    }
+
+    .course-card .card-img-top {
+        transition: all 0.5s ease;
+    }
+
+    .course-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+
+    /* Abas de navegação */
+    #courseAreaTabs .nav-link {
+        font-weight: 500;
+        padding: 1rem 1.5rem;
+        border: none;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+        color: #495057;
+    }
+
+    #courseAreaTabs .nav-link:hover {
+        color: var(--primary-color);
+    }
+
+    #courseAreaTabs .nav-link.active {
+        font-weight: 600;
+        border-bottom: 3px solid var(--primary-color);
+        color: var(--primary-color);
+        background-color: transparent;
+    }
+
+    /* Níveis de cursos */
+    .learning-level {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+
+    .learning-level::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 3rem;
+        bottom: 0;
+        width: 4px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+    }
+
+    /* Trilhas de aprendizado */
+    .learning-path-progress .progress {
+        border-radius: 0.5rem;
+        background-color: #e9ecef;
+    }
+
+    .learning-path-progress .progress-bar {
+        border-radius: 0.5rem;
+    }
+
+    .path-courses .fas.fa-check-circle {
+        color: var(--success-color);
+    }
+
+    /* Estatísticas */
+    .stat-item {
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        background-color: white;
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .05);
+        transform: translateY(-5px);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    /* Gradientes */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #0a58ca 100%);
+    }
+
+    /* Assistente IA */
+    .ai-assistant-widget {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 1000;
+    }
+
+    .ai-assistant-toggle {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .assistant-chat {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .assistant-message,
+    .user-message {
+        display: flex;
+        margin-bottom: 1rem;
+    }
+
+    .assistant-avatar,
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .assistant-avatar {
+        background-color: var(--primary-color);
+    }
+
+    .user-avatar {
+        background-color: #6c757d;
+    }
+
+    .message-content {
+        max-width: calc(100% - 60px);
+        background-color: #f8f9fa;
+        border-radius: 1rem;
+        padding: 0.75rem 1rem;
+        margin: 0 10px;
+    }
+
+    .assistant-message .message-content {
+        border-top-left-radius: 0;
+    }
+
+    .user-message .message-content {
+        background-color: #e9f5ff;
+        margin-left: auto;
+        border-top-right-radius: 0;
+    }
+
+    .user-message {
+        flex-direction: row-reverse;
+    }
+
+    .message-content p:last-child {
+        margin-bottom: 0;
+    }
+</style>
+
+<!-- Script para preservar a aba ativa -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Verificar se há uma aba salva no localStorage
+        const activeTab = localStorage.getItem('activeCoursesTab');
+        if (activeTab) {
+            const tab = document.querySelector(activeTab);
+            if (tab) {
+                const bsTab = new bootstrap.Tab(tab);
+                bsTab.show();
+            }
+        }
+
+        // Salvar a aba ativa quando mudar
+        const tabs = document.querySelectorAll('button[data-bs-toggle="tab"]');
+        tabs.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function (e) {
+                localStorage.setItem('activeCoursesTab', '#' + e.target.id);
+            });
+        });
+
+        // Animação suave para estatísticas
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const statsNumbers = document.querySelectorAll('.stat-number');
+                    statsNumbers.forEach(stat => {
+                        stat.classList.add('animate__animated', 'animate__fadeIn');
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        const statsContainer = document.querySelector('.stats-container');
+        if (statsContainer) {
+            observer.observe(statsContainer);
+        }
+    });
+</script>
+{% endblock %}
