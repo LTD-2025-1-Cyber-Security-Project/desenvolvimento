@@ -1,0 +1,145 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-info text-white">
+        <h4 class="mb-0"><i class="fas fa-history"></i> Histórico de Prompts</h4>
+    </div>
+    <div class="card-body">
+        {% if history|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-hover" id="historyTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Tipo de Documento</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in history|reverse %}
+                    <tr>
+                        <td>{{ entry.timestamp }}</td>
+                        <td>{{ entry.metadata.document_type|capitalize }}</td>
+                        <td><span class="badge bg-success">Concluído</span></td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-primary view-prompt" data-bs-toggle="modal" data-bs-target="#promptModal" 
+                                        data-timestamp="{{ entry.timestamp }}" 
+                                        data-prompt="{{ entry.prompt }}" 
+                                        data-response="{{ entry.response }}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <a href="{{ url_for('export_result', prompt_id=loop.index0) }}" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Usar como base">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Nenhum prompt foi gerado ainda. <a href="{{ url_for('generate_prompt') }}" class="alert-link">Crie seu primeiro prompt</a>.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal para visualizar o prompt e resposta -->
+<div class="modal fade" id="promptModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-file-alt"></i> Detalhes do Prompt</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6>Data/Hora</h6>
+                    <p id="modalTimestamp" class="text-muted"></p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Prompt Enviado</h6>
+                    <div class="p-3 bg-light rounded">
+                        <pre id="modalPrompt" class="mb-0" style="white-space: pre-wrap;"></pre>
+                    </div>
+                </div>
+                
+                <div>
+                    <h6>Resposta da IA</h6>
+                    <div class="p-3 border rounded">
+                        <div id="modalResponse"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="copyModalResponse">
+                    <i class="fas fa-copy"></i> Copiar Resposta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicialização de tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    
+    // Preenchimento do modal
+    const promptModal = document.getElementById('promptModal');
+    const viewPromptButtons = document.querySelectorAll('.view-prompt');
+    
+    viewPromptButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const timestamp = this.getAttribute('data-timestamp');
+            const prompt = this.getAttribute('data-prompt');
+            const response = this.getAttribute('data-response');
+            
+            document.getElementById('modalTimestamp').textContent = timestamp;
+            document.getElementById('modalPrompt').textContent = prompt;
+            document.getElementById('modalResponse').innerHTML = response;
+        });
+    });
+    
+    // Copiar resposta do modal
+    const copyModalResponseBtn = document.getElementById('copyModalResponse');
+    
+    copyModalResponseBtn.addEventListener('click', function() {
+        const responseText = document.getElementById('modalResponse').innerText;
+        
+        // Criar elemento temporário para copiar
+        const tempElement = document.createElement('textarea');
+        tempElement.value = responseText;
+        document.body.appendChild(tempElement);
+        tempElement.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempElement);
+        
+        // Feedback de cópia
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+        setTimeout(() => {
+            this.innerHTML = originalText;
+        }, 2000);
+    });
+    
+    // Filtro de tabela
+    if (document.getElementById('historyTable')) {
+        // Adicionar opção de filtro se necessário em implementação futura
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,389 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header {% if success %}bg-success{% else %}bg-warning{% endif %} text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">
+            {% if success %}
+            <i class="fas fa-check-circle"></i> Resultado Gerado
+            {% else %}
+            <i class="fas fa-exclamation-triangle"></i> Resultado com Erro
+            {% endif %}
+        </h4>
+        <div>
+            <span class="badge bg-light text-dark me-2">{{ timestamp }}</span>
+            <span class="badge bg-info">{{ model_used }}</span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <h5><i class="fas fa-info-circle"></i> Prompt Enviado:</h5>
+            <pre class="prompt-preview">{{ prompt }}</pre>
+        </div>
+        
+        <h5 class="mt-4 mb-3"><i class="fas fa-file-alt"></i> Conteúdo Gerado pela IA:</h5>
+
+        <!-- Tabs para alternar entre visualização renderizada e código fonte -->
+        <ul class="nav nav-tabs" id="responseTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview" type="button" role="tab">
+                    <i class="fas fa-eye"></i> Visualização
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="code-tab" data-bs-toggle="tab" data-bs-target="#code" type="button" role="tab">
+                    <i class="fas fa-code"></i> Código Fonte
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content border border-top-0 rounded-bottom p-3 mb-4" id="responseTabsContent">
+            <!-- Visualização renderizada -->
+            <div class="tab-pane fade show active" id="preview" role="tabpanel">
+                <div class="markdown-content">
+                    {{ response_html }}
+                </div>
+            </div>
+            
+            <!-- Código fonte -->
+            <div class="tab-pane fade" id="code" role="tabpanel">
+                <pre class="markdown-source border rounded bg-light p-3"><code>{{ response }}</code></pre>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between mt-4">
+            <div>
+                <button class="btn btn-outline-primary me-2" id="copyToClipboard">
+                    <i class="fas fa-copy"></i> Copiar
+                </button>
+                <div class="btn-group">
+                    <button class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" id="exportPDF"><i class="fas fa-file-pdf"></i> PDF</a></li>
+                        <li><a class="dropdown-item" href="#" id="exportDOC"><i class="fas fa-file-word"></i> DOCX</a></li>
+                        <li><a class="dropdown-item" href="#" id="exportTXT"><i class="fas fa-file-alt"></i> TXT</a></li>
+                        <li><a class="dropdown-item" href="#" id="exportMD"><i class="fas fa-file-code"></i> Markdown</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div>
+                <a href="{{ url_for('generate_prompt') }}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-redo"></i> Novo Prompt
+                </a>
+                {% if not success %}
+                <a href="{{ url_for('generate_prompt') }}" class="btn btn-primary">
+                    <i class="fas fa-sync"></i> Tentar com Outro Modelo
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if success %}
+<div class="card shadow">
+    <div class="card-header bg-light">
+        <h5 class="mb-0"><i class="fas fa-sliders-h"></i> Ajustes (Em desenvolvimento)</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Solicitar revisão</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Instrução para revisão...">
+                    <button class="btn btn-outline-secondary" type="button">Enviar</button>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Tipo de formatação</label>
+                <select class="form-select" id="formatSelector">
+                    <option value="original">Manter original</option>
+                    <option value="formal">Formal / Oficial</option>
+                    <option value="simple">Simplificado</option>
+                    <option value="bullets">Com marcadores</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Botões de amostra para recursos futuros -->
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-secondary btn-sm me-2" disabled>
+                <i class="fas fa-spell-check"></i> Verificar ortografia
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm me-2" disabled>
+                <i class="fas fa-language"></i> Adaptar linguagem
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                <i class="fas fa-compress-alt"></i> Resumir texto
+            </button>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card shadow">
+    <div class="card-header bg-light">
+        <h5 class="mb-0"><i class="fas fa-question-circle"></i> O que fazer em caso de erro</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <h6><i class="fas fa-sync text-primary"></i> Tentar com outro modelo</h6>
+                    <p class="small">Tente gerar o mesmo prompt usando um modelo de IA diferente que esteja disponível.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <h6><i class="fas fa-clock text-warning"></i> Aguardar alguns minutos</h6>
+                    <p class="small">Se o erro for de limite de requisições, aguarde alguns minutos antes de tentar novamente.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <h6><i class="fas fa-edit text-success"></i> Ajustar o prompt</h6>
+                    <p class="small">Tente simplificar o prompt ou fornecer informações mais específicas.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Função para copiar para área de transferência
+    const copyBtn = document.getElementById('copyToClipboard');
+    const currentTab = document.querySelector('.nav-link.active');
+    
+    copyBtn.addEventListener('click', function() {
+        // Determinar qual conteúdo copiar com base na aba ativa
+        let contentToCopy = '';
+        const activeTab = document.querySelector('.nav-link.active');
+        
+        if (activeTab.id === 'preview-tab') {
+            // Copiar texto da versão renderizada (sem HTML)
+            contentToCopy = document.querySelector('.markdown-content').innerText;
+        } else {
+            // Copiar código fonte markdown
+            contentToCopy = document.querySelector('.markdown-source code').innerText;
+        }
+        
+        // Criar elemento temporário para copiar
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = contentToCopy;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextArea);
+        
+        // Feedback visual de cópia
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+        }, 2000);
+    });
+    
+    // Atualizar texto do botão de cópia com base na aba ativa
+    document.querySelectorAll('.nav-link').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(e) {
+            if (e.target.id === 'preview-tab') {
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copiar Texto';
+            } else {
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copiar Markdown';
+            }
+        });
+    });
+    
+    // Funcionalidade de exportação
+    const exportPDF = document.getElementById('exportPDF');
+    const exportDOC = document.getElementById('exportDOC');
+    const exportTXT = document.getElementById('exportTXT');
+    const exportMD = document.getElementById('exportMD');
+    
+    function showExportFeedback(button) {
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            // Mostrar alerta de sucesso
+            utils.showToast('Documento exportado com sucesso!', 'success');
+        }, 1000);
+    }
+    
+    if(exportPDF) {
+        exportPDF.addEventListener('click', function(e) {
+            e.preventDefault();
+            showExportFeedback(this);
+        });
+    }
+    
+    if(exportDOC) {
+        exportDOC.addEventListener('click', function(e) {
+            e.preventDefault();
+            showExportFeedback(this);
+        });
+    }
+    
+    if(exportTXT) {
+        exportTXT.addEventListener('click', function(e) {
+            e.preventDefault();
+            showExportFeedback(this);
+        });
+    }
+    
+    if(exportMD) {
+        exportMD.addEventListener('click', function(e) {
+            e.preventDefault();
+            showExportFeedback(this);
+        });
+    }
+    
+    // Formatação de conteúdo
+    const formatSelector = document.getElementById('formatSelector');
+    if(formatSelector) {
+        formatSelector.addEventListener('change', function() {
+            const format = this.value;
+            utils.showToast('Recurso em desenvolvimento: Formatação ' + format, 'info');
+        });
+    }
+    
+    // Highlight de sintaxe para o prompt
+    const promptPreview = document.querySelector('.prompt-preview');
+    if (promptPreview) {
+        promptPreview.innerHTML = promptPreview.textContent
+            .replace(/CONTEXTO MUNICIPAL:/g, '<strong class="text-primary">CONTEXTO MUNICIPAL:</strong>')
+            .replace(/RESTRIÇÕES LEGAIS:/g, '<strong class="text-danger">RESTRIÇÕES LEGAIS:</strong>')
+            .replace(/PRAZO:/g, '<strong class="text-warning">PRAZO:</strong>')
+            .replace(/DETALHAMENTO:/g, '<strong class="text-success">DETALHAMENTO:</strong>');
+    }
+});
+</script>
+
+<style>
+/* Estilos para conteúdo markdown renderizado */
+.markdown-content {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+.markdown-content h1, 
+.markdown-content h2, 
+.markdown-content h3, 
+.markdown-content h4, 
+.markdown-content h5, 
+.markdown-content h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.markdown-content h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+.markdown-content h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+.markdown-content h3 { font-size: 1.25em; }
+.markdown-content h4 { font-size: 1em; }
+.markdown-content h5 { font-size: 0.875em; }
+.markdown-content h6 { font-size: 0.85em; color: #6a737d; }
+
+.markdown-content p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+    padding-left: 2em;
+    margin-bottom: 1rem;
+}
+
+.markdown-content li {
+    margin-bottom: 0.25rem;
+}
+
+.markdown-content blockquote {
+    padding: 0 1em;
+    color: #6a737d;
+    border-left: 0.25em solid #dfe2e5;
+    margin: 0 0 1rem 0;
+}
+
+.markdown-content pre {
+    padding: 16px;
+    overflow: auto;
+    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f6f8fa;
+    border-radius: 3px;
+    margin-bottom: 1rem;
+}
+
+.markdown-content code {
+    padding: 0.2em 0.4em;
+    margin: 0;
+    font-size: 85%;
+    background-color: rgba(27, 31, 35, 0.05);
+    border-radius: 3px;
+    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+.markdown-content pre code {
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    border: 0;
+    word-break: normal;
+    white-space: pre;
+}
+
+.markdown-content table {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-collapse: collapse;
+}
+
+.markdown-content table th,
+.markdown-content table td {
+    padding: 6px 13px;
+    border: 1px solid #dfe2e5;
+}
+
+.markdown-content table tr {
+    background-color: #fff;
+    border-top: 1px solid #c6cbd1;
+}
+
+.markdown-content table tr:nth-child(2n) {
+    background-color: #f6f8fa;
+}
+
+.markdown-content img {
+    max-width: 100%;
+    box-sizing: content-box;
+    background-color: #fff;
+}
+
+.markdown-content hr {
+    height: 0.25em;
+    padding: 0;
+    margin: 24px 0;
+    background-color: #e1e4e8;
+    border: 0;
+}
+
+.markdown-source {
+    font-family: monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+</style>
+{% endblock %}

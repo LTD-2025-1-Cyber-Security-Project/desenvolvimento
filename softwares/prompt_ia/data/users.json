@@ -1,0 +1,8 @@
+{
+    "admin": {
+        "password": "scrypt:32768:8:1$AKTBLsoRfA9dNjKV$89d0a4fb2f3a857f22665c69cfd70497f38490c5695460754621bc9205944e8ab51c9d383a757254211529b8348fdb45e822ed7ca280ec222dedb083d5ca4aaa",
+        "role": "admin",
+        "department": "TI",
+        "preferred_model": "google-gemini"
+    }
+}

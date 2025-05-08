@@ -1,0 +1,285 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-user-cog"></i> Preferências do Usuário</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('user_settings') }}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5><i class="fas fa-robot"></i> Modelo de IA Preferido</h5>
+                                <p class="text-muted">Escolha seu modelo de IA padrão para geração de prompts.</p>
+                                
+                                <div class="models-container">
+                                    {% for model_id, model in models.items() %}
+                                    <div class="card mb-2 model-option {% if model_id == preferred_model %}border-primary{% else %}border-light{% endif %}">
+                                        <div class="card-body py-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="preferred_model" id="model_{{ model_id }}" value="{{ model_id }}" {% if model_id == preferred_model %}checked{% endif %}>
+                                                <label class="form-check-label d-flex justify-content-between align-items-center" for="model_{{ model_id }}">
+                                                    <span>{{ model.name }}</span>
+                                                    
+                                                    {% if model.api_type == "google" %}
+                                                    <span class="badge bg-success">Pré-configurado</span>
+                                                    {% elif model.api_key %}
+                                                    <span class="badge bg-success">API Configurada</span>
+                                                    {% else %}
+                                                    <span class="badge bg-warning">Requer API</span>
+                                                    {% endif %}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h5><i class="fas fa-key"></i> Atualizar Senha</h5>
+                                <div class="mb-3">
+                                    <label for="new_password" class="form-label">Nova Senha</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="new_password" name="new_password">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="new_password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Deixe em branco para manter a senha atual.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="confirm_password" class="form-label">Confirmar Nova Senha</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5><i class="fas fa-key"></i> Minhas Chaves de API</h5>
+                                <p class="text-muted">Configure suas chaves de API pessoais para os modelos de IA.</p>
+                                
+                                <div class="accordion" id="apiKeysAccordion">
+                                    <!-- Google Gemini -->
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGemini">
+                                                <i class="fab fa-google me-2"></i> Google Gemini API
+                                                <span class="badge bg-success ms-2">Pré-configurado</span>
+                                            </button>
+                                        </h2>
+                                        <div id="collapseGemini" class="accordion-collapse collapse" data-bs-parent="#apiKeysAccordion">
+                                            <div class="accordion-body">
+                                                <div class="alert alert-info">
+                                                    <small>Já pré-configurado com a chave padrão: <code>AIzaSyCY5JQRIAZlq7Re-GNDtwn8b1Hmza_hk8Y</code></small>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Sua Chave API (opcional)</label>
+                                                    <div class="input-group">
+                                                        <input type="password" class="form-control" name="user_api_google" placeholder="Deixe em branco para usar a chave padrão">
+                                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="user_api_google">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="form-text">Se fornecida, sua chave terá prioridade sobre a chave padrão.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- OpenAI -->
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOpenAI">
+                                                <i class="fas fa-robot me-2"></i> OpenAI API
+                                            </button>
+                                        </h2>
+                                        <div id="collapseOpenAI" class="accordion-collapse collapse" data-bs-parent="#apiKeysAccordion">
+                                            <div class="accordion-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Sua Chave API OpenAI</label>
+                                                    <div class="input-group">
+                                                        <input type="password" class="form-control" name="user_api_openai" placeholder="sk-...">
+                                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="user_api_openai">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="form-text">Obtenha sua chave em <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Claude -->
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClaude">
+                                                <i class="fas fa-brain me-2"></i> Anthropic Claude API
+                                            </button>
+                                        </h2>
+                                        <div id="collapseClaude" class="accordion-collapse collapse" data-bs-parent="#apiKeysAccordion">
+                                            <div class="accordion-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Sua Chave API Claude</label>
+                                                    <div class="input-group">
+                                                        <input type="password" class="form-control" name="user_api_claude" placeholder="sk-ant-...">
+                                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="user_api_claude">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="form-text">Obtenha sua chave em <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Outros Modelos -->
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOthers">
+                                                <i class="fas fa-ellipsis-h me-2"></i> Outros Modelos
+                                            </button>
+                                        </h2>
+                                        <div id="collapseOthers" class="accordion-collapse collapse" data-bs-parent="#apiKeysAccordion">
+                                            <div class="accordion-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Perplexity AI</label>
+                                                    <div class="input-group">
+                                                        <input type="password" class="form-control" name="user_api_perplexity">
+                                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="user_api_perplexity">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">DeepSeek AI</label>
+                                                    <div class="input-group">
+                                                        <input type="password" class="form-control" name="user_api_deepseek">
+                                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="user_api_deepseek">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">xAI Grok</label>
+                                                    <div class="input-group">
+                                                        <input type="password" class="form-control" name="user_api_xai">
+                                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="user_api_xai">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">Blackbox AI</label>
+                                                    <div class="input-group">
+                                                        <input type="password" class="form-control" name="user_api_blackbox">
+                                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="user_api_blackbox">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </a>
+                        <button type="submit" class="btn btn-info text-white">
+                            <i class="fas fa-save"></i> Salvar Preferências
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Selecionar modelo ao clicar no card inteiro
+    const modelCards = document.querySelectorAll('.model-option');
+    modelCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            // Atualizar estilos
+            modelCards.forEach(c => {
+                c.classList.remove('border-primary');
+                c.classList.add('border-light');
+            });
+            this.classList.remove('border-light');
+            this.classList.add('border-primary');
+        });
+    });
+    
+    // Função para mostrar/ocultar senha
+    const toggleButtons = document.querySelectorAll('.toggle-password');
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const passwordInput = document.getElementById(targetId) || 
+                                 document.querySelector(`input[name="${targetId}"]`);
+            
+            if (passwordInput) {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                } else {
+                    passwordInput.type = 'password';
+                    this.innerHTML = '<i class="fas fa-eye"></i>';
+                }
+            }
+        });
+    });
+    
+    // Validação de formulário
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        const newPassword = document.getElementById('new_password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        
+        if (newPassword && newPassword !== confirmPassword) {
+            event.preventDefault();
+            alert('As senhas não coincidem!');
+        }
+        
+        if (newPassword && newPassword.length < 6) {
+            event.preventDefault();
+            alert('A senha deve ter pelo menos 6 caracteres!');
+        }
+    });
+});
+</script>
+
+<style>
+.model-option {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.model-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.models-container {
+    max-height: 300px;
+    overflow-y: auto;
+}
+</style>
+{% endblock %}

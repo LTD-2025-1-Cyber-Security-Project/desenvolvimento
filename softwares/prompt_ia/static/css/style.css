@@ -1,0 +1,261 @@
+/* Estilos globais */
+:root {
+  --primary-color: #0d6efd;
+  --secondary-color: #6c757d;
+  --success-color: #198754;
+  --info-color: #0dcaf0;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --light-color: #f8f9fa;
+  --dark-color: #212529;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.footer {
+  margin-top: auto;
+}
+
+/* Estilos de cabeçalho e navegação */
+.navbar-brand {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.nav-link {
+  font-weight: 500;
+}
+
+/* Cards e elementos de conteúdo */
+.card {
+  border: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card.shadow:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.card-header {
+  font-weight: 600;
+}
+
+/* Estilos para a página de login */
+.login-container {
+  max-width: 400px;
+  margin: 2rem auto;
+}
+
+/* Estilos para formulários */
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.input-group-text {
+  background-color: var(--light-color);
+}
+
+/* Botões estilizados */
+.btn {
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+/* Estilos para página de dashboard */
+.dashboard-card {
+  height: 100%;
+  border-radius: 0.5rem;
+}
+
+/* Estilos para página de resultado */
+.response-container {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.prompt-preview {
+  background-color: #f0f0f0;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  margin: 0;
+  font-family: monospace;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Estilos para página de histórico */
+#historyTable {
+  font-size: 0.9rem;
+}
+
+#historyTable th {
+  font-weight: 600;
+}
+
+/* Estilos para templates */
+.border-info, .border-success {
+  border-width: 2px !important;
+}
+
+/* Animações e efeitos */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .card-header {
+      padding: 0.75rem;
+  }
+  
+  .card-body {
+      padding: 1rem;
+  }
+  
+  .btn {
+      padding: 0.375rem 0.75rem;
+  }
+}
+
+/* Estilos específicos de elementos */
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+
+.alert {
+  border: none;
+  border-radius: 0.375rem;
+}
+
+/* Personalização de campos de formulário */
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+textarea.form-control {
+  min-height: 100px;
+}
+
+/* Estilos para tooltips e popovers */
+.tooltip {
+  font-size: 0.875rem;
+}
+
+.popover {
+  font-size: 0.875rem;
+  max-width: 276px;
+}
+
+/* Customização do modal */
+.modal-header {
+  padding: 1rem;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  padding: 1rem;
+}
+
+/* Destacando elementos importantes */
+.highlight {
+  background-color: rgba(255, 243, 205, 0.5);
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* Estilização de ícones */
+.fas, .far, .fab {
+  margin-right: 0.25rem;
+}
+
+/* Estilos para spinner de carregamento */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.loading-text {
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
+
+/* Estilos para ajustes de acessibilidade */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Colorização de código e formatação de texto */
+.code-highlight {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+
+/* Estilo para mensagens de erro */
+.error-message {
+  color: var(--danger-color);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Estilo para o tema do sistema */
+.theme-light {
+  --bg-color: #f5f5f5;
+  --text-color: #212529;
+}
+
+.theme-dark {
+  --bg-color: #212529;
+  --text-color: #f8f9fa;
+}

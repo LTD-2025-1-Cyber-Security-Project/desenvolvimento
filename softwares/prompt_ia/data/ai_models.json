@@ -1,0 +1,101 @@
+{
+    "google-gemini": {
+        "name": "Google Gemini 1.5 Pro",
+        "api_key": "",
+        "endpoint": "gemini-1.5-pro",
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "priority": 1,
+        "enabled": true,
+        "api_type": "google",
+        "default": true
+    },
+    "google-gemini-flash": {
+        "name": "Google Gemini 1.5 Flash",
+        "api_key": "",
+        "endpoint": "gemini-1.5-flash",
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "priority": 2,
+        "enabled": true,
+        "api_type": "google",
+        "default": false
+    },
+    "openai-gpt4": {
+        "name": "OpenAI GPT-4",
+        "api_key": "",
+        "endpoint": "gpt-4",
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "priority": 3,
+        "enabled": false,
+        "api_type": "openai",
+        "default": false
+    },
+    "openai-gpt35": {
+        "name": "OpenAI GPT-3.5 Turbo",
+        "api_key": "",
+        "endpoint": "gpt-3.5-turbo",
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "priority": 4,
+        "enabled": false,
+        "api_type": "openai",
+        "default": false
+    },
+    "anthropic-claude": {
+        "name": "Anthropic Claude 3",
+        "api_key": "",
+        "endpoint": "claude-3-opus-20240229",
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "priority": 5,
+        "enabled": false,
+        "api_type": "anthropic",
+        "default": false
+    },
+    "perplexity": {
+        "name": "Perplexity AI",
+        "api_key": "",
+        "endpoint": "sonar-medium-online",
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "priority": 6,
+        "enabled": false,
+        "api_type": "perplexity",
+        "default": false
+    },
+    "deepseek": {
+        "name": "DeepSeek AI",
+        "api_key": "",
+        "endpoint": "deepseek-coder",
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "priority": 7,
+        "enabled": false,
+        "api_type": "deepseek",
+        "default": false
+    },
+    "blackbox": {
+        "name": "Blackbox AI",
+        "api_key": "",
+        "endpoint": "blackbox-standard",
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "priority": 8,
+        "enabled": false,
+        "api_type": "blackbox",
+        "default": false
+    },
+    "xai-grok": {
+        "name": "xAI Grok",
+        "api_key": "",
+        "endpoint": "grok-1",
+        "max_tokens": 4096,
+        "temperature": 0.7,
+        "priority": 9,
+        "enabled": false,
+        "api_type": "xai",
+        "default": false
+    }
+}

@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Erro {{ error_code }}</h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="my-5">
+                    <h1 class="display-1 text-danger">{{ error_code }}</h1>
+                    <h3 class="mb-4">{{ error_message }}</h3>
+                    
+                    {% if error_code == 429 %}
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-info-circle"></i> Informações sobre o Limite de Requisições</h5>
+                        <p>A API do Google Gemini possui limites de uso gratuito:</p>
+                        <ul class="text-start">
+                            <li>60 solicitações por minuto</li>
+                            <li>60 solicitações por dia</li>
+                            <li>32.000 caracteres de entrada por minuto</li>
+                            <li>2.000.000 caracteres de saída por dia</li>
+                        </ul>
+                        <p>Saiba mais sobre os limites em: <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank">https://ai.google.dev/gemini-api/docs/rate-limits</a></p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Alternativas:</h5>
+                        <ol class="text-start">
+                            <li>Aguarde alguns minutos antes de tentar novamente</li>
+                            <li>Utilize templates salvos para reduzir o número de solicitações</li>
+                            <li>Considere atualizar para um plano pago da API para limites maiores</li>
+                        </ol>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-5">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary me-2">
+                            <i class="fas fa-home"></i> Voltar ao Início
+                        </a>
+                        {% if error_code == 429 %}
+                        <a href="https://ai.google.dev/pricing" target="_blank" class="btn btn-outline-info">
+                            <i class="fas fa-external-link-alt"></i> Ver Planos da API
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
