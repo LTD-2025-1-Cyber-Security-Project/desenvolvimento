@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Meus Certificados - EdTech IA & Cyber{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Cabeçalho da página -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h1 class="fw-bold mb-3">Meus Certificados</h1>
+            <p class="lead text-muted">Certificados de conclusão dos cursos da plataforma EdTech IA & Cyber.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end d-flex align-items-center justify-content-lg-end">
+            <a href="{{ url_for('courses.dashboard') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Contador e Resumo -->
+    <div class="card mb-4 bg-light border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2 class="h4 mb-3 mb-md-0">
+                        {% if certificate_data %}
+                            {{ certificate_data|length }} Certificado{% if certificate_data|length != 1 %}s{% endif %} Obtido{% if certificate_data|length != 1 %}s{% endif %}
+                        {% else %}
+                            Ainda sem certificados
+                        {% endif %}
+                    </h2>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span class="text-muted">Cursos Concluídos: {{ certificate_data|length }} de {{ current_user.courses|length }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Certificados -->
+    {% if certificate_data %}
+        <div class="row g-4">
+            {% for item in certificate_data %}
+                <div class="col-lg-6">
+                    <div class="card certificate-card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex mb-3">
+                                <!-- Ícone baseado na categoria -->
+                                {% if item.course.category == 'IA' or item.course.category == 'Inteligência Artificial' %}
+                                    <div class="certificate-icon bg-info text-white rounded-circle p-3 me-3">
+                                        <i class="fas fa-robot fa-2x"></i>
+                                    </div>
+                                {% elif item.course.category == 'Cybersegurança' %}
+                                    <div class="certificate-icon bg-danger text-white rounded-circle p-3 me-3">
+                                        <i class="fas fa-shield-alt fa-2x"></i>
+                                    </div>
+                                {% else %}
+                                    <div class="certificate-icon bg-primary text-white rounded-circle p-3 me-3">
+                                        <i class="fas fa-graduation-cap fa-2x"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <div>
+                                    <h5 class="card-title mb-1">{{ item.course.title }}</h5>
+                                    <p class="text-muted mb-0">{{ item.course.category }} - {{ item.course.level }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="certificate-details bg-light p-3 rounded mb-3">
+                                <div class="mb-2">
+                                    <small class="text-muted">Certificado Nº</small>
+                                    <p class="fw-bold mb-0">{{ item.certificate.certificate_number }}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Data de Emissão</small>
+                                    <p class="mb-0">{{ item.certificate.issue_date.strftime('%d/%m/%Y') }}</p>
+                                </div>
+                                <div>
+                                    <small class="text-muted">Status</small>
+                                    {% if item.certificate.is_valid() %}
+                                        <p class="mb-0 text-success"><i class="fas fa-check-circle me-1"></i> Válido</p>
+                                    {% else %}
+                                        <p class="mb-0 text-danger"><i class="fas fa-times-circle me-1"></i> {{ item.certificate.status|title }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="ribbon-container position-relative">
+                                {% if item.course.category == 'IA' or item.course.category == 'Inteligência Artificial' %}
+                                    <div class="ribbon bg-info">IA</div>
+                                {% elif item.course.category == 'Cybersegurança' %}
+                                    <div class="ribbon bg-danger">Cyber</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('courses.view_certificate', certificate_id=item.certificate.id) }}" class="btn btn-primary">
+                                    <i class="fas fa-eye me-2"></i> Visualizar Certificado
+                                </a>
+                                {% if item.certificate.pdf_url %}
+                                    <a href="{{ item.certificate.pdf_url }}" class="btn btn-outline-primary" download>
+                                        <i class="fas fa-download me-2"></i> Download PDF
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-outline-primary" onclick="generatePDF({{ item.certificate.id }})">
+                                        <i class="fas fa-download me-2"></i> Download PDF
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Estado vazio - Sem certificados -->
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="empty-state">
+                    <div class="empty-state-icon mb-4">
+                        <i class="fas fa-certificate fa-4x text-muted"></i>
+                    </div>
+                    <h3>Você ainda não possui certificados</h3>
+                    <p class="text-muted mb-4">Complete os cursos da plataforma para receber seus certificados.</p>
+                    
+                    <a href="{{ url_for('courses.course_list') }}" class="btn btn-lg btn-primary">
+                        <i class="fas fa-search me-2"></i> Explorar Cursos
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Informações sobre Certificados -->
+    <div class="card mt-4 bg-light border-0 shadow-sm">
+        <div class="card-body">
+            <h3 class="h5 mb-3">Sobre os Certificados</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-info-circle me-2 text-primary"></i> Como obter um certificado?</h6>
+                        <p class="text-muted small">Os certificados são concedidos automaticamente após a conclusão de todas as lições e avaliações de um curso.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-share-alt me-2 text-primary"></i> Compartilhando seu certificado</h6>
+                        <p class="text-muted small">Você pode compartilhar o link do certificado ou fazer o download em PDF para incluir em seu currículo.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-check-circle me-2 text-primary"></i> Verificação de autenticidade</h6>
+                        <p class="text-muted small">Cada certificado possui um número único que pode ser verificado através do site da plataforma.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div>
+                        <h6><i class="fas fa-medal me-2 text-primary"></i> Reconhecimento</h6>
+                        <p class="text-muted small">Os certificados são reconhecidos pelas prefeituras de Florianópolis e São José para fins de capacitação profissional.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos específicos para certificados -->
+<style>
+    .certificate-card {
+        transition: all 0.3s ease;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .certificate-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+    
+    .certificate-icon {
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .ribbon-container {
+        position: absolute;
+        top: 0;
+        right: 1rem;
+    }
+    
+    .ribbon {
+        color: white;
+        padding: 0.5rem 1rem;
+        position: relative;
+        top: -15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-weight: bold;
+        border-radius: 0 0 0.5rem 0.5rem;
+    }
+    
+    .empty-state {
+        padding: 2rem 0;
+    }
+    
+    .empty-state-icon {
+        opacity: 0.6;
+    }
+</style>
+
+<!-- Script para geração de PDF -->
+<script>
+    function generatePDF(certificateId) {
+        // Simulação de geração de PDF
+        const loadingBtn = document.querySelector(`button[onclick="generatePDF(${certificateId})"]`);
+        const originalText = loadingBtn.innerHTML;
+        
+        loadingBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Gerando PDF...`;
+        loadingBtn.disabled = true;
+        
+        // Simulação de tempo de processamento
+        setTimeout(() => {
+            // Após "geração" do PDF, redireciona para visualização
+            loadingBtn.innerHTML = originalText;
+            loadingBtn.disabled = false;
+            
+            // Aqui seria o redirecionamento para o PDF
+            // Por enquanto, apenas redireciona para visualização
+            window.location.href = `/certificate/${certificateId}`;
+        }, 2000);
+    }
+</script>
+{% endblock %}

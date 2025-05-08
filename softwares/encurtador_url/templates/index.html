@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Encurtador de URLs Inteligente - Prefeitura{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h2>Transforme URLs longas em links curtos e inteligentes</h2>
+    <p>Sistema de encurtamento de URLs com Inteligência Artificial para uso oficial da Prefeitura</p>
+</section>
+
+<section class="url-shortener">
+    <form id="shortenerForm">
+        <div class="input-group">
+            <input type="url" id="longUrl" placeholder="Cole a URL longa aqui..." required>
+            <button type="submit" id="shortenButton">Encurtar</button>
+        </div>
+    </form>
+
+    <div id="result" class="hidden">
+        <h3>URL Encurtada</h3>
+        <div class="result-box">
+            <input type="text" id="shortUrl" readonly>
+            <button id="copyButton">Copiar</button>
+        </div>
+        <p>A URL curta foi gerada com IA para refletir o conteúdo do link</p>
+    </div>
+
+    <div id="loading" class="hidden">
+        <div class="spinner"></div>
+        <p>Processando com IA...</p>
+    </div>
+
+    <div id="error" class="hidden">
+        <p>Ocorreu um erro. Por favor, tente novamente.</p>
+    </div>
+</section>
+
+<section class="features">
+    <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>Inteligência Artificial</h3>
+        <p>Usa IA para gerar códigos relacionados ao conteúdo da URL</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Estatísticas</h3>
+        <p>Acompanhe quantas vezes suas URLs são acessadas</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Segurança</h3>
+        <p>Sistema exclusivo para uso oficial da Prefeitura</p>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Armazenar a chave da API para uso no script
+    const geminiApiKey = "{{ api_key }}";
+</script>
+{% endblock %}

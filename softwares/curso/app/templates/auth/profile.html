@@ -1,0 +1,507 @@
+{% extends "base.html" %}
+
+{% block title %}Perfil do Usuário - EdTech IA & Cyber{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Menu lateral de perfil -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    {% if user.profile_pic %}
+                    <img src="{{ user.profile_pic }}" alt="{{ user.get_full_name() }}" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                    <div class="profile-placeholder rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center bg-primary text-white" style="width: 150px; height: 150px; font-size: 3rem;">
+                        {{ user.first_name[0] }}{{ user.last_name[0] }}
+                    </div>
+                    {% endif %}
+                    <h5 class="fw-bold">{{ user.get_full_name() }}</h5>
+                    <p class="text-muted">{{ user.job_title }}</p>
+                    <div class="mb-3">
+                        <span class="badge bg-primary">Nível {{ user.level }}</span>
+                        <span class="badge bg-secondary">{{ user.xp_points }} XP</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 10px;">
+                        {% set next_level = user.level + 1 %}
+                        {% set xp_for_next_level = next_level * 1000 %}
+                        {% set current_level_xp = user.level * 1000 %}
+                        {% set xp_progress = ((user.xp_points - current_level_xp) / 1000) * 100 %}
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ xp_progress }}%;" 
+                             aria-valuenow="{{ xp_progress }}" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted">{{ xp_for_next_level - user.xp_points }} XP para o próximo nível</small>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="#profile-info" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                        <i class="fas fa-user me-2"></i> Informações Pessoais
+                    </a>
+                    <a href="#profile-security" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-lock me-2"></i> Segurança
+                    </a>
+                    <a href="#profile-courses" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-graduation-cap me-2"></i> Meus Cursos
+                    </a>
+                    <a href="#profile-certificates" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-certificate me-2"></i> Certificados
+                    </a>
+                    <a href="#profile-badges" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-award me-2"></i> Conquistas
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Conteúdo principal -->
+        <div class="col-lg-9">
+            <div class="tab-content">
+                <!-- Informações do perfil -->
+                <div class="tab-pane fade show active" id="profile-info">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Informações Pessoais</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="{{ url_for('auth.profile') }}" method="POST" enctype="multipart/form-data">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="first_name" class="form-label">Nome</label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="last_name" class="form-label">Sobrenome</label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">E-mail</label>
+                                    <input type="email" class="form-control" id="email" value="{{ user.email }}" readonly>
+                                    <small class="text-muted">O e-mail não pode ser alterado.</small>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="department" class="form-label">Departamento</label>
+                                        <input type="text" class="form-control" id="department" name="department" value="{{ user.department }}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="job_title" class="form-label">Cargo</label>
+                                        <input type="text" class="form-control" id="job_title" name="job_title" value="{{ user.job_title }}">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="municipality" class="form-label">Município</label>
+                                    <select class="form-select" id="municipality" name="municipality">
+                                        <option value="Florianópolis" {% if user.municipality == 'Florianópolis' %}selected{% endif %}>Florianópolis</option>
+                                        <option value="São José" {% if user.municipality == 'São José' %}selected{% endif %}>São José</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="bio" class="form-label">Biografia</label>
+                                    <textarea class="form-control" id="bio" name="bio" rows="3">{{ user.bio or '' }}</textarea>
+                                    <small class="text-muted">Uma breve descrição sobre você (opcional).</small>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="profile_pic" class="form-label">Foto de Perfil</label>
+                                    <input type="file" class="form-control" id="profile_pic" name="profile_pic" accept="image/*">
+                                    <small class="text-muted">Formatos aceitos: JPG, PNG. Tamanho máximo: 2MB.</small>
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i> Salvar Alterações
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Segurança -->
+                <div class="tab-pane fade" id="profile-security">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Segurança da Conta</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <h6>Alteração de Senha</h6>
+                                <p class="text-muted">Altere sua senha periodicamente para manter sua conta segura.</p>
+                                <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-key me-2"></i> Alterar Senha
+                                </a>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="mb-4">
+                                <h6>Último Acesso</h6>
+                                <p>
+                                    {% if user.last_login %}
+                                    <i class="fas fa-calendar-alt me-2"></i> {{ user.last_login.strftime('%d/%m/%Y às %H:%M') }}
+                                    {% else %}
+                                    <i class="fas fa-calendar-alt me-2"></i> Não disponível
+                                    {% endif %}
+                                </p>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div>
+                                <h6>Configurações Avançadas</h6>
+                                <p class="text-muted">Faça o download dos seus dados ou gerencie outras configurações de segurança.</p>
+                                <div class="d-grid gap-2 d-md-flex">
+                                    <button class="btn btn-outline-primary">
+                                        <i class="fas fa-download me-2"></i> Baixar Meus Dados
+                                    </button>
+                                    <button class="btn btn-outline-danger">
+                                        <i class="fas fa-user-times me-2"></i> Desativar Conta
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Meus Cursos -->
+                <div class="tab-pane fade" id="profile-courses">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Meus Cursos</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if user.courses %}
+                                <div class="row g-4">
+                                    {% for course in user.courses %}
+                                    <div class="col-md-6">
+                                        <div class="card h-100 shadow-sm">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h6 class="card-title mb-0">{{ course.title }}</h6>
+                                                    {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                                                    <span class="badge bg-info text-white">IA</span>
+                                                    {% elif course.category == "Cybersegurança" %}
+                                                    <span class="badge bg-danger">Cyber</span>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                {% set progress = user.get_course_progress(course.id) %}
+                                                <div class="mb-2">
+                                                    <div class="d-flex justify-content-between mb-1">
+                                                        <small>Progresso</small>
+                                                        <small>{{ progress }}%</small>
+                                                    </div>
+                                                    <div class="progress" style="height: 8px;">
+                                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;" 
+                                                            aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-graduation-cap me-1"></i> {{ course.level }}
+                                                    </small>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-clock me-1"></i> {{ course.duration_hours or '?' }} horas
+                                                    </small>
+                                                </div>
+                                                
+                                                <div class="d-grid">
+                                                    <a href="{{ url_for('courses.course_detail', slug=course.slug) }}" class="btn btn-primary">
+                                                        {% if progress == 100 %}
+                                                        <i class="fas fa-check-circle me-2"></i> Concluído
+                                                        {% elif progress > 0 %}
+                                                        <i class="fas fa-play me-2"></i> Continuar
+                                                        {% else %}
+                                                        <i class="fas fa-book-open me-2"></i> Iniciar
+                                                        {% endif %}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                                    <h5>Você ainda não está matriculado em nenhum curso</h5>
+                                    <p class="text-muted">Explore nossos cursos de IA e Cybersegurança para começar sua jornada de aprendizado.</p>
+                                    <a href="{{ url_for('courses.course_list') }}" class="btn btn-primary mt-2">
+                                        <i class="fas fa-search me-2"></i> Explorar Cursos
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Certificados -->
+                <div class="tab-pane fade" id="profile-certificates">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Meus Certificados</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Listar certificados do usuário -->
+                            <div id="certificatesList">
+                                <!-- Verificar se há certificados -->
+                                {% set certificates = certificates|default([]) %}
+                                {% if certificates %}
+                                    <div class="row g-4">
+                                        {% for cert in certificates %}
+                                        <div class="col-md-6">
+                                            <div class="card border-success h-100 shadow-sm">
+                                                <div class="card-body">
+                                                    <div class="certificate-header d-flex align-items-center mb-3">
+                                                        <i class="fas fa-certificate text-success fa-2x me-3"></i>
+                                                        <div>
+                                                            <h6 class="mb-1">{{ cert.course.title }}</h6>
+                                                            <small class="text-muted">Emitido em {{ cert.issue_date.strftime('%d/%m/%Y') }}</small>
+                                                        </div>
+                                                    </div>
+                                                    <p class="certificate-number small mb-3">
+                                                        <strong>Certificado Nº:</strong> {{ cert.certificate_number }}
+                                                    </p>
+                                                    <div class="d-grid gap-2">
+                                                        <a href="{{ url_for('courses.view_certificate', certificate_id=cert.id) }}" class="btn btn-outline-success">
+                                                            <i class="fas fa-eye me-2"></i> Visualizar
+                                                        </a>
+                                                        <button class="btn btn-outline-primary">
+                                                            <i class="fas fa-download me-2"></i> Download
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
+                                        <h5>Você ainda não possui certificados</h5>
+                                        <p class="text-muted">Complete os cursos para obter seus certificados de conclusão.</p>
+                                        <a href="{{ url_for('courses.course_list') }}" class="btn btn-primary mt-2">
+                                            <i class="fas fa-graduation-cap me-2"></i> Ver Cursos Disponíveis
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conquistas e Badges -->
+                <div class="tab-pane fade" id="profile-badges">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Conquistas e Medalhas</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Estatísticas rápidas -->
+                            <div class="stats-container row text-center mb-4">
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded bg-light">
+                                        <div class="stat-icon mb-2">
+                                            <i class="fas fa-book fa-2x text-primary"></i>
+                                        </div>
+                                        <h3 class="stat-number fw-bold">{{ user.courses|length }}</h3>
+                                        <p class="stat-label text-muted mb-0">Cursos Matriculados</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded bg-light">
+                                        <div class="stat-icon mb-2">
+                                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                                        </div>
+                                        <h3 class="stat-number fw-bold">
+                                            {% set completed_lessons = completed_lessons|default(0) %}
+                                            {{ completed_lessons }}
+                                        </h3>
+                                        <p class="stat-label text-muted mb-0">Lições Concluídas</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 rounded bg-light">
+                                        <div class="stat-icon mb-2">
+                                            <i class="fas fa-award fa-2x text-warning"></i>
+                                        </div>
+                                        <h3 class="stat-number fw-bold">
+                                            {% if user.badges %}
+                                                {{ user.badges|length }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                        </h3>
+                                        <p class="stat-label text-muted mb-0">Medalhas Conquistadas</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Medalhas do usuário -->
+                            <h6 class="mb-3">Minhas Medalhas</h6>
+                            {% if user.badges %}
+                                <div class="row g-3">
+                                    {% for badge in user.badges %}
+                                    <div class="col-md-4 col-sm-6">
+                                        <div class="card badge-card border-0 h-100 shadow-sm">
+                                            <div class="card-body text-center">
+                                                <div class="badge-icon mb-2">
+                                                    {% if 'beginner' in badge.id|lower %}
+                                                    <i class="fas fa-star fa-3x text-success"></i>
+                                                    {% elif 'intermediate' in badge.id|lower %}
+                                                    <i class="fas fa-medal fa-3x text-primary"></i>
+                                                    {% elif 'expert' in badge.id|lower %}
+                                                    <i class="fas fa-trophy fa-3x text-warning"></i>
+                                                    {% elif 'quiz' in badge.id|lower %}
+                                                    <i class="fas fa-brain fa-3x text-info"></i>
+                                                    {% elif 'streak' in badge.id|lower %}
+                                                    <i class="fas fa-fire fa-3x text-danger"></i>
+                                                    {% else %}
+                                                    <i class="fas fa-award fa-3x text-purple"></i>
+                                                    {% endif %}
+                                                </div>
+                                                <h6 class="badge-title mb-1">{{ badge.name }}</h6>
+                                                <p class="badge-description small text-muted mb-2">{{ badge.description }}</p>
+                                                <!-- <small class="badge-date text-muted">
+                                                    Conquistada em {{ badge.earned_at|datetime }}
+                                                </small> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-award fa-3x text-muted mb-3"></i>
+                                    <h5>Você ainda não conquistou medalhas</h5>
+                                    <p class="text-muted">Complete cursos e desafios para ganhar medalhas e reconhecimento.</p>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Próximas medalhas disponíveis -->
+                            <h6 class="mt-5 mb-3">Medalhas Disponíveis</h6>
+                            <div class="row g-3">
+                                <!-- Estas são medalhas de exemplo que o usuário ainda não conquistou -->
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="card badge-card border-0 h-100 shadow-sm" style="opacity: 0.6;">
+                                        <div class="card-body text-center">
+                                            <div class="badge-icon mb-2">
+                                                <i class="fas fa-laptop-code fa-3x text-secondary"></i>
+                                            </div>
+                                            <h6 class="badge-title mb-1">Programador IA</h6>
+                                            <p class="badge-description small text-muted mb-2">Complete o curso de Programação com IA</p>
+                                            <small class="badge-requirement text-info">
+                                                <i class="fas fa-lock me-1"></i> Bloqueada
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="card badge-card border-0 h-100 shadow-sm" style="opacity: 0.6;">
+                                        <div class="card-body text-center">
+                                            <div class="badge-icon mb-2">
+                                                <i class="fas fa-shield-alt fa-3x text-secondary"></i>
+                                            </div>
+                                            <h6 class="badge-title mb-1">Defensor Digital</h6>
+                                            <p class="badge-description small text-muted mb-2">Complete 3 cursos de Cybersegurança</p>
+                                            <small class="badge-requirement text-info">
+                                                <i class="fas fa-lock me-1"></i> Bloqueada
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="card badge-card border-0 h-100 shadow-sm" style="opacity: 0.6;">
+                                        <div class="card-body text-center">
+                                            <div class="badge-icon mb-2">
+                                                <i class="fas fa-fire fa-3x text-secondary"></i>
+                                            </div>
+                                            <h6 class="badge-title mb-1">Dedicação</h6>
+                                            <p class="badge-description small text-muted mb-2">Acesse a plataforma por 7 dias consecutivos</p>
+                                            <small class="badge-requirement text-info">
+                                                <i class="fas fa-lock me-1"></i> Bloqueada
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos para badges */
+    .badge-card {
+        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+    }
+    
+    .badge-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+    
+    /* Estilo para blocos de estatísticas */
+    .stats-container .col-md-4 {
+        transition: all 0.3s ease;
+    }
+    
+    .stats-container .col-md-4:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Animação XP progress */
+    .progress-bar {
+        transition: width 1s ease-in-out;
+    }
+    
+    /* Estilo para cards de curso */
+    .card {
+        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ativar abas com base na URL
+        const url = new URL(window.location.href);
+        const hash = url.hash;
+        
+        if (hash) {
+            const tab = document.querySelector(`a[href="${hash}"]`);
+            if (tab) {
+                tab.click();
+            }
+        }
+        
+        // Validação de upload de imagem
+        const profilePicInput = document.getElementById('profile_pic');
+        if (profilePicInput) {
+            profilePicInput.addEventListener('change', function() {
+                const fileSize = this.files[0]?.size / 1024 / 1024; // em MB
+                if (fileSize > 2) {
+                    alert('A imagem selecionada é muito grande. O tamanho máximo permitido é 2MB.');
+                    this.value = '';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

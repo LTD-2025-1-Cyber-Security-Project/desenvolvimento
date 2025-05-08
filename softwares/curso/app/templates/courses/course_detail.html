@@ -1,0 +1,1102 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} - EdTech IA & Cyber{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Navegação de breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.course_list') }}">Cursos</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ course.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Informações principais do curso -->
+        <div class="col-lg-8">
+            <!-- Cabeçalho do curso -->
+            <div class="course-header mb-4">
+                <h1 class="fw-bold mb-3">{{ course.title }}</h1>
+
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                    <span class="badge bg-info">
+                        <i class="fas fa-robot me-1"></i> {{ course.category }}
+                    </span>
+                    {% elif course.category == "Cybersegurança" %}
+                    <span class="badge bg-danger">
+                        <i class="fas fa-shield-alt me-1"></i> {{ course.category }}
+                    </span>
+                    {% else %}
+                    <span class="badge bg-primary">
+                        <i class="fas fa-graduation-cap me-1"></i> {{ course.category }}
+                    </span>
+                    {% endif %}
+
+                    {% if course.level == "Básico" %}
+                    <span class="badge bg-success">{{ course.level }}</span>
+                    {% elif course.level == "Intermediário" %}
+                    <span class="badge bg-primary">{{ course.level }}</span>
+                    {% elif course.level == "Avançado" %}
+                    <span class="badge bg-warning text-dark">{{ course.level }}</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ course.level }}</span>
+                    {% endif %}
+
+                    <span class="badge bg-secondary">
+                        <i class="fas fa-clock me-1"></i> {{ course.duration_hours }} horas
+                    </span>
+
+                    <span class="badge bg-light text-dark border">
+                        <i class="fas fa-users me-1"></i> {{ course.enrollment_count }} alunos
+                    </span>
+                </div>
+
+                <p class="lead">{{ course.description }}</p>
+            </div>
+
+            <!-- Banner do curso -->
+            <div class="course-banner mb-5">
+                {% if course.thumbnail %}
+                <img src="{{ course.thumbnail }}" alt="{{ course.title }}" class="img-fluid rounded shadow-sm"
+                    style="width: 100%; max-height: 350px; object-fit: cover;">
+                {% else %}
+                {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                <img src="{{ url_for('static', filename='img/ai-course-banner.jpg') }}" alt="{{ course.title }}"
+                    class="img-fluid rounded shadow-sm" style="width: 100%; max-height: 350px; object-fit: cover;">
+                {% elif course.category == "Cybersegurança" %}
+                <img src="{{ url_for('static', filename='img/cyber-course-banner.jpg') }}" alt="{{ course.title }}"
+                    class="img-fluid rounded shadow-sm" style="width: 100%; max-height: 350px; object-fit: cover;">
+                {% else %}
+                <img src="{{ url_for('static', filename='img/course-banner.jpg') }}" alt="{{ course.title }}"
+                    class="img-fluid rounded shadow-sm" style="width: 100%; max-height: 350px; object-fit: cover;">
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Conteúdo do curso -->
+            <div class="course-content mb-5">
+                <h2 class="fw-bold mb-4">Conteúdo do Curso</h2>
+
+                <div class="accordion" id="courseModules">
+                    {% for module in modules %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ module.id }}">
+                            <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#collapse{{ module.id }}"
+                                aria-expanded="{% if loop.first %}true{% else %}false{% endif %}"
+                                aria-controls="collapse{{ module.id }}">
+                                <div class="w-100 d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <span class="fw-bold">Módulo {{ module.order }}:</span> {{ module.title }}
+                                    </span>
+                                    <span class="badge bg-light text-dark ms-2">{{ module.lesson_count }} lições</span>
+                                </div>
+                            </button>
+                        </h2>
+                        <div id="collapse{{ module.id }}"
+                            class="accordion-collapse collapse {% if loop.first %}show{% endif %}"
+                            aria-labelledby="heading{{ module.id }}" data-bs-parent="#courseModules">
+                            <div class="accordion-body">
+                                {% if module.description %}
+                                <p class="mb-3">{{ module.description }}</p>
+                                {% endif %}
+
+                                <div class="list-group">
+                                    {% for lesson in module.lessons.order_by(Lesson.order).all() %}
+                                    <a href="{% if is_enrolled %}{{ url_for('courses.lesson_view', lesson_id=lesson.id) }}{% else %}#{% endif %}"
+                                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if not is_enrolled %}disabled{% endif %}"
+                                        {% if not is_enrolled %} data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Matricule-se para acessar esta lição" {% endif %}>
+                                        <div>
+                                            <span class="me-2">
+                                                {% if lesson.lesson_type == 'text' %}
+                                                <i class="fas fa-file-alt text-primary"></i>
+                                                {% elif lesson.lesson_type == 'video' %}
+                                                <i class="fas fa-video text-danger"></i>
+                                                {% elif lesson.lesson_type == 'interactive' %}
+                                                <i class="fas fa-hands text-success"></i>
+                                                {% else %}
+                                                <i class="fas fa-book"></i>
+                                                {% endif %}
+                                            </span>
+                                            {{ lesson.title }}
+
+                                            {% if lesson.has_quiz() %}
+                                            <span class="badge bg-warning text-dark ms-2">Quiz</span>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-light text-dark">
+                                                <i class="fas fa-clock me-1"></i> {{ lesson.duration_minutes }} min
+                                            </span>
+
+                                            {% if is_enrolled %}
+                                            {% set lesson_progress =
+                                            lesson.progress_records.filter_by(user_id=current_user.id).first() %}
+                                            {% if lesson_progress and lesson_progress.status == 'completed' %}
+                                            <span class="badge bg-success ms-2">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                            {% elif lesson_progress and lesson_progress.status == 'in_progress' %}
+                                            <span class="badge bg-info ms-2">
+                                                <i class="fas fa-play"></i>
+                                            </span>
+                                            {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Objetivos de aprendizagem -->
+            <div class="course-objectives mb-5">
+                <h2 class="fw-bold mb-4">Objetivos de Aprendizagem</h2>
+
+                <div class="card border-0 bg-light">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="learning-objectives-list">
+                                    {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Compreender os conceitos
+                                        fundamentais de Inteligência Artificial</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Identificar aplicações
+                                        práticas de IA no serviço público</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Analisar dados utilizando
+                                        algoritmos de Machine Learning</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Implementar soluções de IA
+                                        para otimizar processos municipais</li>
+                                    {% elif course.category == "Cybersegurança" %}
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Identificar ameaças
+                                        digitais comuns em ambientes governamentais</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Implementar medidas de
+                                        proteção de dados sensíveis</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Aplicar técnicas de
+                                        segurança em sistemas de informação</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Desenvolver protocolos de
+                                        resposta a incidentes de segurança</li>
+                                    {% else %}
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Aprofundar conhecimentos
+                                        técnicos na área específica</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Aplicar conceitos
+                                        aprendidos em situações reais</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Desenvolver competências
+                                        profissionais avançadas</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Implementar soluções
+                                        inovadoras no ambiente municipal</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="learning-objectives-list">
+                                    {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Avaliar o impacto ético
+                                        das soluções de IA</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Desenvolver assistentes
+                                        virtuais para atendimento ao cidadão</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Criar modelos preditivos
+                                        para gestão pública</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Gerenciar projetos de
+                                        transformação digital com IA</li>
+                                    {% elif course.category == "Cybersegurança" %}
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Configurar sistemas
+                                        seguros em conformidade com a LGPD</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Realizar avaliações de
+                                        vulnerabilidade em sistemas</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Implementar políticas de
+                                        segurança da informação</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Capacitar equipes em
+                                        melhores práticas de segurança</li>
+                                    {% else %}
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Otimizar processos de
+                                        trabalho</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Promover melhorias no
+                                        atendimento ao cidadão</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Contribuir para a
+                                        modernização do serviço público</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i> Desenvolver projetos
+                                        inovadores na administração pública</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instrutor do curso -->
+            <div class="course-instructor mb-5">
+                <h2 class="fw-bold mb-4">Instrutor</h2>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="instructor-avatar me-3">
+                                {% if course.created_by and course.created_by.profile_pic %}
+                                <img src="{{ course.created_by.profile_pic }}"
+                                    alt="{{ course.created_by.get_full_name() }}" class="rounded-circle" width="80"
+                                    height="80">
+                                {% else %}
+                                <div class="instructor-placeholder rounded-circle d-flex align-items-center justify-content-center bg-primary text-white"
+                                    style="width: 80px; height: 80px; font-size: 2rem;">
+                                    {% if course.created_by %}
+                                    {{ course.created_by.first_name[0] }}{{ course.created_by.last_name[0] }}
+                                    {% else %}
+                                    EI
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    {% if course.created_by %}
+                                    {{ course.created_by.get_full_name() }}
+                                    {% else %}
+                                    Equipe EdTech IA & Cyber
+                                    {% endif %}
+                                </h5>
+                                <p class="text-muted mb-3">
+                                    {% if course.created_by %}
+                                    {{ course.created_by.job_title }}
+                                    {% else %}
+                                    Especialista em {{ course.category }}
+                                    {% endif %}
+                                </p>
+                                <p class="mb-0">
+                                    {% if course.created_by and course.created_by.bio %}
+                                    {{ course.created_by.bio }}
+                                    {% else %}
+                                    Especialista com ampla experiência na área, dedicado à capacitação de servidores
+                                    públicos para os desafios da transformação digital.
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avaliações do curso -->
+            <div class="course-reviews mb-5">
+                <h2 class="fw-bold mb-4">Avaliações do Curso</h2>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="course-rating me-3">
+                                <span class="display-4 fw-bold">4.8</span>
+                            </div>
+                            <div class="rating-stars">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                                <div class="text-muted">Baseado em 24 avaliações</div>
+                            </div>
+                        </div>
+
+                        <div class="review-list">
+                            <div class="review-item mb-3 pb-3 border-bottom">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="reviewer-info">
+                                        <strong>Carlos Silva</strong>
+                                        <small class="text-muted ms-2">Florianópolis</small>
+                                    </div>
+                                    <div class="review-rating">
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                    </div>
+                                </div>
+                                <p class="review-text mb-0">Excelente curso! Conteúdo muito bem estruturado e com
+                                    aplicações práticas para o dia a dia na prefeitura. Já estou implementando o que
+                                    aprendi.</p>
+                            </div>
+
+                            <div class="review-item mb-3 pb-3 border-bottom">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="reviewer-info">
+                                        <strong>Maria Oliveira</strong>
+                                        <small class="text-muted ms-2">São José</small>
+                                    </div>
+                                    <div class="review-rating">
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="far fa-star text-warning"></i>
+                                    </div>
+                                </div>
+                                <p class="review-text mb-0">Material didático de alta qualidade. Os módulos são bem
+                                    divididos e os quizzes ajudam a fixar o conteúdo.</p>
+                            </div>
+
+                            <div class="review-item">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="reviewer-info">
+                                        <strong>Paulo Santos</strong>
+                                        <small class="text-muted ms-2">Florianópolis</small>
+                                    </div>
+                                    <div class="review-rating">
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star-half-alt text-warning"></i>
+                                    </div>
+                                </div>
+                                <p class="review-text mb-0">O curso superou minhas expectativas. O instrutor domina o
+                                    assunto e apresenta de forma clara. Recomendo para todos os servidores da área.</p>
+                            </div>
+                        </div>
+
+                        <a href="#" class="btn btn-outline-primary mt-3">
+                            <i class="fas fa-comments me-2"></i> Ver todas as avaliações
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="course-faq">
+                <h2 class="fw-bold mb-4">Perguntas Frequentes</h2>
+
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faqCollapseOne" aria-expanded="true" aria-controls="faqCollapseOne">
+                                Preciso de conhecimento prévio para fazer este curso?
+                            </button>
+                        </h2>
+                        <div id="faqCollapseOne" class="accordion-collapse collapse show" aria-labelledby="faqOne"
+                            data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% if course.level == "Básico" %}
+                                Não é necessário conhecimento prévio. Este é um curso de nível básico que aborda os
+                                fundamentos da área, sendo ideal para iniciantes.
+                                {% elif course.level == "Intermediário" %}
+                                Recomendamos conhecimentos básicos de {{ course.category }}. Se você é iniciante
+                                completo, sugerimos começar por nossos cursos de nível básico antes de avançar para
+                                este.
+                                {% else %}
+                                Sim, este é um curso de nível avançado que pressupõe conhecimentos prévios na área.
+                                Recomendamos que tenha concluído os cursos de nível básico e intermediário antes de
+                                iniciar este.
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faqCollapseTwo" aria-expanded="false" aria-controls="faqCollapseTwo">
+                                Quanto tempo tenho para concluir o curso?
+                            </button>
+                        </h2>
+                        <div id="faqCollapseTwo" class="accordion-collapse collapse" aria-labelledby="faqTwo"
+                            data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Não há prazo para conclusão. Você pode realizar o curso no seu próprio ritmo,
+                                conciliando com suas atividades profissionais. Recomendamos dedicar pelo menos algumas
+                                horas por semana para obter melhores resultados.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faqCollapseThree" aria-expanded="false"
+                                aria-controls="faqCollapseThree">
+                                Recebo um certificado ao concluir o curso?
+                            </button>
+                        </h2>
+                        <div id="faqCollapseThree" class="accordion-collapse collapse" aria-labelledby="faqThree"
+                            data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Sim, ao completar todas as lições e avaliações do curso, você receberá automaticamente
+                                um certificado de conclusão. Este certificado é reconhecido pelas prefeituras de
+                                Florianópolis e São José para fins de capacitação profissional.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faqCollapseFour" aria-expanded="false" aria-controls="faqCollapseFour">
+                                Como posso obter ajuda se tiver dúvidas durante o curso?
+                            </button>
+                        </h2>
+                        <div id="faqCollapseFour" class="accordion-collapse collapse" aria-labelledby="faqFour"
+                            data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                A plataforma oferece um assistente virtual baseado em IA que pode responder dúvidas
+                                sobre o conteúdo. Além disso, você pode entrar em contato com o instrutor através do
+                                fórum de discussão disponível em cada lição.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra lateral -->
+        <div class="col-lg-4">
+            <div class="course-sidebar">
+                <!-- Card de matrícula/progresso -->
+                <div class="card sticky-top course-enrollment-card shadow-sm mb-4" style="top: 2rem;">
+                    <div class="card-body">
+                        {% if is_enrolled %}
+                        <h5 class="card-title fw-bold mb-4">Seu Progresso</h5>
+
+                        <div class="progress-container mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Progresso geral</span>
+                                <span class="fw-bold">{{ progress }}%</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;"
+                                    aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                        {% if progress > 0 %}
+                        <!-- Buscar a próxima lição não completada -->
+                        {% set continue_lesson = None %}
+                        {% for mod in modules %}
+                        {% for les in mod.lessons.order_by(Lesson.order).all() %}
+                        {% set les_progress = les.progress_records.filter_by(user_id=current_user.id).first() %}
+                        {% if not les_progress or les_progress.status != 'completed' %}
+                        {% if not continue_lesson %}
+                        {% set continue_lesson = les %}
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                        {% endfor %}
+
+                        {% if continue_lesson %}
+                        <a href="{{ url_for('courses.lesson_view', lesson_id=continue_lesson.id) }}"
+                            class="btn btn-primary w-100 mb-3" id="continueLearningBtn">
+                            <i class="fas fa-play-circle me-2"></i> Continuar Aprendendo
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('courses.lesson_view', lesson_id=modules[0].lessons.first().id) }}"
+                            class="btn btn-primary w-100 mb-3" id="reviewCourseBtn">
+                            <i class="fas fa-redo me-2"></i> Revisar o Curso
+                        </a>
+                        {% endif %}
+                        {% else %}
+                        <a href="{{ url_for('courses.lesson_view', lesson_id=modules[0].lessons.first().id) }}"
+                            class="btn btn-primary w-100 mb-3" id="startCourseBtn">
+                            <i class="fas fa-play-circle me-2"></i> Iniciar Curso
+                        </a>
+                        {% endif %}
+
+                        <hr>
+
+                        <div class="course-stats mb-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="course-stat text-center p-2">
+                                        <div class="stat-value fw-bold">{{ modules|length }}</div>
+                                        <div class="stat-label small text-muted">Módulos</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="course-stat text-center p-2">
+                                        {% set total_lessons = 0 %}
+                                        {% for module in modules %}
+                                        {% set total_lessons = total_lessons + module.lessons.count() %}
+                                        {% endfor %}
+                                        <div class="stat-value fw-bold">{{ total_lessons }}</div>
+                                        <div class="stat-label small text-muted">Lições</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if progress == 100 %}
+                        <div class="text-center mt-3">
+                            <div class="completion-badge mb-2">
+                                <i class="fas fa-medal fa-3x text-warning"></i>
+                            </div>
+                            <h6>Curso Concluído!</h6>
+                            <p class="small text-muted mb-3">Parabéns por concluir este curso.</p>
+                            <a href="{{ url_for('courses.user_certificates') }}" class="btn btn-outline-success w-100"
+                                id="viewCertificateBtn">
+                                <i class="fas fa-certificate me-2"></i> Ver Certificado
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <h5 class="card-title fw-bold mb-4">Matricule-se Agora</h5>
+
+                        <ul class="course-features list-unstyled mb-4">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Acesso completo ao
+                                conteúdo</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Certificado de
+                                conclusão</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Recursos interativos
+                            </li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Avaliações e quizzes
+                            </li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Suporte via
+                                assistente virtual</li>
+                        </ul>
+
+                        <!-- Substitua o formulário de matrícula existente por este código -->
+                        <!-- Formulário de matrícula com redirecionamento direto -->
+                        <!-- Substituir o formulário de matrícula por um link/botão direto -->
+                        <a href="{{ url_for('courses.course_enrollment', course_id=course.id) }}"
+                            class="btn btn-primary btn-lg w-100" id="enrollBtn">
+                            <i class="fas fa-graduation-cap me-2"></i> Matricular-se Gratuitamente
+                        </a>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const enrollmentForm = document.getElementById('enrollmentForm');
+                                if (enrollmentForm) {
+                                    enrollmentForm.addEventListener('submit', function () {
+                                        // Mostra indicador visual de progresso
+                                        const enrollBtn = document.getElementById('enrollBtn');
+                                        if (enrollBtn) {
+                                            enrollBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
+                                            enrollBtn.disabled = true;
+                                        }
+
+                                        // Armazena a tentativa de matrícula no localStorage para verificação após o redirecionamento
+                                        localStorage.setItem('enrolling_course_id', '{{ course.id }}');
+
+                                        // Deixa o formulário ser enviado normalmente
+                                        return true;
+                                    });
+                                }
+
+                                // Verifica se acabamos de tentar matricular neste curso (após redirecionamento)
+                                const enrollingCourseId = localStorage.getItem('enrolling_course_id');
+                                if (enrollingCourseId === '{{ course.id }}') {
+                                    // Limpa o localStorage
+                                    localStorage.removeItem('enrolling_course_id');
+
+                                    // Verifica se o usuário está matriculado
+                                    const isEnrolled = {% if is_enrolled %} true{% else %} false{% endif %};
+
+                                if (isEnrolled) {
+                                    // Se estiver matriculado, redireciona para a primeira lição
+                                    {% if modules | length > 0 and modules[0].lessons.first() %}
+                                    window.location.href = "{{ url_for('courses.lesson_view', lesson_id=modules[0].lessons.first().id) }}";
+                                    {% endif %}
+                                }
+                            }
+                            });
+                        </script>
+                        <hr>
+
+                        <div class="course-stats mb-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="course-stat text-center p-2">
+                                        <div class="stat-value fw-bold">{{ modules|length }}</div>
+                                        <div class="stat-label small text-muted">Módulos</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="course-stat text-center p-2">
+                                        {% set total_lessons = 0 %}
+                                        {% for module in modules %}
+                                        {% set total_lessons = total_lessons + module.lessons.count() %}
+                                        {% endfor %}
+                                        <div class="stat-value fw-bold">{{ total_lessons }}</div>
+                                        <div class="stat-label small text-muted">Lições</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Compartilhar curso -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3">Compartilhar Curso</h5>
+                        <div class="d-flex justify-content-between">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}"
+                                target="_blank" class="btn btn-outline-primary" aria-label="Compartilhar no Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?text=Estou%20aprendendo%20{{ course.title|urlencode }}%20na%20plataforma%20EdTech%20IA%20%26%20Cyber&url={{ request.url|urlencode }}"
+                                target="_blank" class="btn btn-outline-info" aria-label="Compartilhar no Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="https://api.whatsapp.com/send?text=Estou%20aprendendo%20{{ course.title|urlencode }}%20na%20plataforma%20EdTech%20IA%20%26%20Cyber:%20{{ request.url|urlencode }}"
+                                target="_blank" class="btn btn-outline-success" aria-label="Compartilhar no WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            <a href="mailto:?subject=Recomendação%20de%20Curso:%20{{ course.title|urlencode }}&body=Olá,%0D%0A%0D%0AAchei%20este%20curso%20interessante%20e%20gostaria%20de%20compartilhar:%0D%0A%0D%0A{{ course.title }}%0D%0A{{ request.url }}"
+                                class="btn btn-outline-secondary" aria-label="Compartilhar por email">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Materiais complementares -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3">Materiais Complementares</h5>
+                        <ul class="materials-list list-unstyled">
+                            {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                            <li class="mb-2">
+                                <a href="#" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <div class="material-icon me-2 bg-danger text-white rounded p-2">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div>
+                                        <div class="material-title">Introdução à IA (PDF)</div>
+                                        <small class="text-muted">2.3 MB</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="#" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <div class="material-icon me-2 bg-primary text-white rounded p-2">
+                                        <i class="fas fa-file-word"></i>
+                                    </div>
+                                    <div>
+                                        <div class="material-title">Glossário de Termos de IA</div>
+                                        <small class="text-muted">1.1 MB</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="#" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <div class="material-icon me-2 bg-success text-white rounded p-2">
+                                        <i class="fas fa-file-excel"></i>
+                                    </div>
+                                    <div>
+                                        <div class="material-title">Datasets para Prática</div>
+                                        <small class="text-muted">3.5 MB</small>
+                                    </div>
+                                </a>
+                            </li>
+                            {% elif course.category == "Cybersegurança" %}
+                            <li class="mb-2">
+                                <a href="#" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <div class="material-icon me-2 bg-danger text-white rounded p-2">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div>
+                                        <div class="material-title">Manual de Boas Práticas</div>
+                                        <small class="text-muted">4.2 MB</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="#" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <div class="material-icon me-2 bg-primary text-white rounded p-2">
+                                        <i class="fas fa-file-word"></i>
+                                    </div>
+                                    <div>
+                                        <div class="material-title">Checklist de Segurança</div>
+                                        <small class="text-muted">0.8 MB</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="#" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <div class="material-icon me-2 bg-success text-white rounded p-2">
+                                        <i class="fas fa-file-excel"></i>
+                                    </div>
+                                    <div>
+                                        <div class="material-title">Planilha de Avaliação de Riscos</div>
+                                        <small class="text-muted">1.7 MB</small>
+                                    </div>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="mb-2">
+                                <a href="#" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <div class="material-icon me-2 bg-danger text-white rounded p-2">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div>
+                                        <div class="material-title">Material Complementar (PDF)</div>
+                                        <small class="text-muted">2.5 MB</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="#" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <div class="material-icon me-2 bg-primary text-white rounded p-2">
+                                        <i class="fas fa-file-word"></i>
+                                    </div>
+                                    <div>
+                                        <div class="material-title">Documentação Técnica</div>
+                                        <small class="text-muted">1.3 MB</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="#" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <div class="material-icon me-2 bg-success text-white rounded p-2">
+                                        <i class="fas fa-file-excel"></i>
+                                    </div>
+                                    <div>
+                                        <div class="material-title">Planilha de Dados</div>
+                                        <small class="text-muted">0.9 MB</small>
+                                    </div>
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <a href="#" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <div class="material-icon me-2 bg-info text-white rounded p-2">
+                                        <i class="fas fa-link"></i>
+                                    </div>
+                                    <div>
+                                        <div class="material-title">Recursos Online Adicionais</div>
+                                        <small class="text-muted">Links externos</small>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Cursos relacionados -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3">Cursos Relacionados</h5>
+                        <div class="related-courses-list">
+                            {% if course.category == "IA" or course.category == "Inteligência Artificial" %}
+                            <div class="related-course mb-3">
+                                <a href="{{ url_for('courses.course_list') }}?category=IA"
+                                    class="d-flex text-decoration-none text-dark">
+                                    <div class="related-course-img me-2">
+                                        <img src="{{ url_for('static', filename='img/ai-related-1.jpg') }}"
+                                            alt="Machine Learning" class="rounded" width="80" height="60"
+                                            style="object-fit: cover;">
+                                    </div>
+                                    <div>
+                                        <div class="related-course-title fw-bold">Machine Learning para Gestão Pública
+                                        </div>
+                                        <div class="d-flex">
+                                            <span class="badge bg-info me-1">IA</span>
+                                            <span class="badge bg-primary">Intermediário</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="related-course mb-3">
+                                <a href="{{ url_for('courses.course_list') }}?category=IA"
+                                    class="d-flex text-decoration-none text-dark">
+                                    <div class="related-course-img me-2">
+                                        <img src="{{ url_for('static', filename='img/ai-related-2.jpg') }}" alt="NLP"
+                                            class="rounded" width="80" height="60" style="object-fit: cover;">
+                                    </div>
+                                    <div>
+                                        <div class="related-course-title fw-bold">Processamento de Linguagem Natural
+                                        </div>
+                                        <div class="d-flex">
+                                            <span class="badge bg-info me-1">IA</span>
+                                            <span class="badge bg-primary">Intermediário</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            {% elif course.category == "Cybersegurança" %}
+                            <div class="related-course mb-3">
+                                <a href="{{ url_for('courses.course_list') }}?category=Cybersegurança"
+                                    class="d-flex text-decoration-none text-dark">
+                                    <div class="related-course-img me-2">
+                                        <img src="{{ url_for('static', filename='img/cyber-related-1.jpg') }}"
+                                            alt="Segurança de Dados" class="rounded" width="80" height="60"
+                                            style="object-fit: cover;">
+                                    </div>
+                                    <div>
+                                        <div class="related-course-title fw-bold">Segurança de Dados na Administração
+                                            Pública</div>
+                                        <div class="d-flex">
+                                            <span class="badge bg-danger me-1">Cyber</span>
+                                            <span class="badge bg-success">Básico</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="related-course mb-3">
+                                <a href="{{ url_for('courses.course_list') }}?category=Cybersegurança"
+                                    class="d-flex text-decoration-none text-dark">
+                                    <div class="related-course-img me-2">
+                                        <img src="{{ url_for('static', filename='img/cyber-related-2.jpg') }}"
+                                            alt="Prevenção de Ataques" class="rounded" width="80" height="60"
+                                            style="object-fit: cover;">
+                                    </div>
+                                    <div>
+                                        <div class="related-course-title fw-bold">Prevenção de Ataques Cibernéticos
+                                        </div>
+                                        <div class="d-flex">
+                                            <span class="badge bg-danger me-1">Cyber</span>
+                                            <span class="badge bg-primary">Intermediário</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endif %}
+                            <div class="related-course">
+                                <a href="{{ url_for('courses.course_list') }}"
+                                    class="d-flex text-decoration-none text-dark">
+                                    <div class="related-course-img me-2">
+                                        <img src="{{ url_for('static', filename='img/course-related-3.jpg') }}"
+                                            alt="Curso Relacionado" class="rounded" width="80" height="60"
+                                            style="object-fit: cover;">
+                                    </div>
+                                    <div>
+                                        <div class="related-course-title fw-bold">Transformação Digital no Setor Público
+                                        </div>
+                                        <div class="d-flex">
+                                            <span class="badge bg-secondary me-1">Geral</span>
+                                            <span class="badge bg-success">Básico</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <a href="{{ url_for('courses.course_list') }}" class="btn btn-outline-primary mt-3 w-100">
+                                <i class="fas fa-th-list me-2"></i> Ver Todos os Cursos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos específicos para a página do curso -->
+<style>
+    .course-enrollment-card {
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+
+    .course-stat {
+        background-color: rgba(0, 0, 0, 0.03);
+        border-radius: 0.5rem;
+    }
+
+    .learning-objectives-list li {
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: flex-start;
+    }
+
+    .learning-objectives-list li i {
+        margin-top: 0.25rem;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(13, 110, 253, 0.05);
+        color: #0d6efd;
+        font-weight: 600;
+    }
+
+    .accordion-button:focus {
+        box-shadow: none;
+    }
+
+    .related-course {
+        transition: all 0.3s ease;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+    }
+
+    .related-course:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+
+    .materials-list li a {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .materials-list li a:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+
+    .material-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .course-features li {
+        padding-left: 1.5rem;
+        position: relative;
+    }
+
+    .course-features li i {
+        position: absolute;
+        left: 0;
+        top: 0.25rem;
+    }
+
+    /* Animações */
+    .completion-badge {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inicializa tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Animar a barra de progresso ao carregar a página
+        const progressBar = document.querySelector('.progress-bar');
+        if (progressBar) {
+            const width = progressBar.style.width;
+            progressBar.style.width = '0%';
+            setTimeout(() => {
+                progressBar.style.width = width;
+                progressBar.style.transition = 'width 1s ease-in-out';
+            }, 300);
+        }
+
+        // Verificação de formulário de matrícula
+        const enrollmentForm = document.getElementById('enrollmentForm');
+        if (enrollmentForm) {
+            enrollmentForm.addEventListener('submit', function (event) {
+                // Adiciona classe loading ao botão
+                const enrollBtn = document.getElementById('enrollBtn');
+                if (enrollBtn) {
+                    enrollBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
+                    enrollBtn.disabled = true;
+                }
+            });
+        }
+
+        // Monitora cliques nos botões de navegação da lição
+        const startCourseBtn = document.getElementById('startCourseBtn');
+        const continueLearningBtn = document.getElementById('continueLearningBtn');
+        const reviewCourseBtn = document.getElementById('reviewCourseBtn');
+        const viewCertificateBtn = document.getElementById('viewCertificateBtn');
+
+        // Função para registrar atividade
+        function logActivity(buttonId) {
+            const activityData = {
+                courseId: {{ course.id }
+        },
+        action: buttonId,
+            timestamp: new Date().toISOString()
+    };
+
+    // Registra no localStorage para persistência local
+    const activities = JSON.parse(localStorage.getItem('course_activities') || '[]');
+    activities.push(activityData);
+    localStorage.setItem('course_activities', JSON.stringify(activities));
+
+    // Opcionalmente, enviar para o servidor
+    try {
+        fetch('/api/log-activity', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(activityData)
+        });
+    } catch (error) {
+        console.error('Erro ao registrar atividade:', error);
+    }
+        }
+
+    // Adiciona ouvintes de eventos aos botões
+    if (startCourseBtn) startCourseBtn.addEventListener('click', () => logActivity('start_course'));
+    if (continueLearningBtn) continueLearningBtn.addEventListener('click', () => logActivity('continue_learning'));
+    if (reviewCourseBtn) reviewCourseBtn.addEventListener('click', () => logActivity('review_course'));
+    if (viewCertificateBtn) viewCertificateBtn.addEventListener('click', () => logActivity('view_certificate'));
+
+    // Correção para desabilitação de lições bloqueadas
+    const disabledLessons = document.querySelectorAll('.list-group-item.disabled');
+    disabledLessons.forEach(lesson => {
+        lesson.addEventListener('click', function (e) {
+            e.preventDefault();
+            const tooltipInstance = bootstrap.Tooltip.getInstance(this);
+            if (tooltipInstance) {
+                tooltipInstance.show();
+                setTimeout(() => tooltipInstance.hide(), 2000);
+            }
+        });
+    });
+
+    // Restauração de posição do accordion ao retornar à página
+    const lastOpenModuleId = sessionStorage.getItem('lastOpenModule');
+    if (lastOpenModuleId) {
+        const moduleElement = document.getElementById('collapse' + lastOpenModuleId);
+        if (moduleElement) {
+            // Abrir o módulo que estava aberto anteriormente
+            const bsCollapse = new bootstrap.Collapse(moduleElement, {
+                toggle: true
+            });
+
+            // Rolar para a posição
+            setTimeout(() => {
+                const moduleHeader = document.getElementById('heading' + lastOpenModuleId);
+                if (moduleHeader) {
+                    moduleHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
+        }
+    }
+
+    // Salvar módulo aberto atual
+    const accordionButtons = document.querySelectorAll('.accordion-button');
+    accordionButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const moduleId = this.getAttribute('data-bs-target').replace('#collapse', '');
+            if (this.classList.contains('collapsed')) {
+                // O módulo está sendo fechado
+                if (moduleId === sessionStorage.getItem('lastOpenModule')) {
+                    sessionStorage.removeItem('lastOpenModule');
+                }
+            } else {
+                // O módulo está sendo aberto
+                sessionStorage.setItem('lastOpenModule', moduleId);
+            }
+        });
+    });
+    });
+</script>
+{% endblock %}

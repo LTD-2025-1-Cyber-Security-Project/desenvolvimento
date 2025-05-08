@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.title }} - EdTech IA & Cyber{% endblock %}
+
+{% block content %}
+<div class="lesson-container">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Barra lateral com sumário do curso -->
+            <div class="col-lg-3 course-sidebar p-0">
+                <div class="course-sidebar-inner h-100 bg-light">
+                    <!-- Cabeçalho do curso -->
+                    <div class="p-3 bg-primary text-white">
+                        <h5 class="mb-2">{{ course.title }}</h5>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress.progress_percentage }}%;" aria-valuenow="{{ progress.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small>Progresso: {{ progress.progress_percentage|round|int }}%</small>
+                            <small>{{ current_user.get_course_progress(course.id)|round|int }}% do curso</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Navegação do curso -->
+                    <div class="course-nav p-0">
+                        <div class="list-group list-group-flush">
+                            {% for mod in course_modules %}
+                            <div class="module-item">
+                                <div class="module-header p-3 {% if mod.id == module.id %}active{% endif %}" data-bs-toggle="collapse" data-bs-target="#module{{ mod.id }}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="module-title">
+                                            <strong>Módulo {{ mod.order }}:</strong> {{ mod.title }}
+                                        </div>
+                                        <div class="module-toggle">
+                                            <i class="fas {% if mod.id == module.id %}fa-chevron-down{% else %}fa-chevron-right{% endif %}"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="collapse {% if mod.id == module.id %}show{% endif %}" id="module{{ mod.id }}">
+                                    <div class="list-group list-group-flush">
+                                        {% for les in mod.lessons.order_by('order') %}
+                                        <a href="{{ url_for('courses.lesson_view', lesson_id=les.id) }}" class="list-group-item list-group-item-action {% if les.id == lesson.id %}active{% endif %}">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="lesson-icon me-2">
+                                                        {% if les.lesson_type == 'text' %}
+                                                        <i class="fas fa-file-alt"></i>
+                                                        {% elif les.lesson_type == 'video' %}
+                                                        <i class="fas fa-video"></i>
+                                                        {% elif les.lesson_type == 'interactive' %}
+                                                        <i class="fas fa-hands"></i>
+                                                        {% else %}
+                                                        <i class="fas fa-book"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="lesson-title">{{ les.title }}</div>
+                                                </div>
+                                                <div class="lesson-status">
+                                                    {% set les_progress = les.progress_records.filter_by(user_id=current_user.id).first() %}
+                                                    {% if les_progress and les_progress.status == 'completed' %}
+                                                    <i class="fas fa-check-circle text-success"></i>
+                                                    {% elif les_progress and les_progress.status == 'in_progress' %}
+                                                    <i class="fas fa-play-circle text-primary"></i>
+                                                    {% else %}
+                                                    <i class="far fa-circle text-muted"></i>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Conteúdo principal da lição -->
+            <div class="col-lg-9 lesson-content">
+                <div class="lesson-header bg-white border-bottom p-3">
+                    <div class="container-fluid">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <a href="{{ url_for('courses.course_detail', slug=course.slug) }}" class="btn btn-sm btn-outline-secondary me-3">
+                                    <i class="fas fa-arrow-left"></i> Voltar ao curso
+                                </a>
+                                <h1 class="h4 mb-0">{{ lesson.title }}</h1>
+                            </div>
+                            <div class="lesson-controls">
+                                <!-- Navegação entre lições -->
+                                <div class="btn-group" role="group">
+                                    {% set prev_lesson = module_lessons|selectattr('order', 'lt', lesson.order)|list|last %}
+                                    {% set next_lesson = module_lessons|selectattr('order', 'gt', lesson.order)|list|first %}
+                                    
+                                    {% if prev_lesson %}
+                                    <a href="{{ url_for('courses.lesson_view', lesson_id=prev_lesson.id) }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-chevron-left me-1"></i> Anterior
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% if next_lesson %}
+                                    <a href="{{ url_for('courses.lesson_view', lesson_id=next_lesson.id) }}" class="btn btn-outline-primary">
+                                        Próxima <i class="fas fa-chevron-right ms-1"></i>
+                                    </a>
+                                    {% else %}
+                                        {% set next_module = course_modules|selectattr('order', 'gt', module.order)|list|first %}
+                                        {% if next_module %}
+                                            {% set first_lesson_next_module = next_module.lessons.order_by('order').first() %}
+                                            {% if first_lesson_next_module %}
+                                            <a href="{{ url_for('courses.lesson_view', lesson_id=first_lesson_next_module.id) }}" class="btn btn-outline-primary">
+                                                Próximo Módulo <i class="fas fa-chevron-right ms-1"></i>
+                                            </a>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lesson-body p-4">
+                    <div class="container-fluid">
+                        <!-- Tipo de conteúdo da lição -->
+                        {% if lesson.lesson_type == 'video' and lesson.video_url %}
+                        <div class="mb-4">
+                            <div class="ratio ratio-16x9">
+                                <iframe src="{{ lesson.video_url }}" title="{{ lesson.title }}" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Conteúdo da lição processado com Markdown -->
+                        <div class="lesson-content-text">
+                            {{ lesson.content|markdown }}
+                        </div>
+                        
+                        <!-- Material complementar -->
+                        {% if lesson.attachment_url %}
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <h5><i class="fas fa-paperclip me-2"></i> Material Complementar</h5>
+                            <a href="{{ lesson.attachment_url }}" class="btn btn-sm btn-primary mt-2" target="_blank">
+                                <i class="fas fa-download me-2"></i> Baixar material
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Vídeos relacionados do YouTube -->
+                        {% if related_videos %}
+                        <div class="mt-5">
+                            <h4>Vídeos Relacionados</h4>
+                            <div class="row mt-3">
+                                {% for video in related_videos %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <img src="{{ video.thumbnail }}" class="card-img-top" alt="{{ video.title }}">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ video.title|truncate(60) }}</h5>
+                                            <p class="card-text small text-muted">{{ video.channel }}</p>
+                                            <a href="{{ video.watch_url }}" class="btn btn-sm btn-outline-danger" target="_blank">
+                                                <i class="fab fa-youtube me-1"></i> Assistir no YouTube
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Quiz da lição, se houver -->
+                        {% if lesson.has_quiz() %}
+                        <div class="mt-5 p-4 bg-light rounded">
+                            <h4><i class="fas fa-question-circle me-2"></i> Quiz da Lição</h4>
+                            <p>Teste seus conhecimentos sobre este conteúdo.</p>
+                            
+                            {% set quiz = lesson.quizzes.first() %}
+                            {% if quiz %}
+                            <a href="{{ url_for('quizzes.quiz_view', quiz_id=quiz.id) }}" class="btn btn-primary">
+                                <i class="fas fa-play-circle me-2"></i> Iniciar Quiz
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="lesson-footer bg-white border-top p-3">
+                    <div class="container-fluid">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-primary me-2">XP: {{ lesson.xp_reward }}</span>
+                                <span class="badge bg-secondary">{{ lesson.duration_minutes }} min</span>
+                            </div>
+                            
+                            <!-- Botão para marcar lição como concluída -->
+                            {% if progress and progress.status != 'completed' %}
+                            <form action="{{ url_for('courses.complete_lesson', lesson_id=lesson.id) }}" method="POST">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check-circle me-2"></i> Marcar como Concluída
+                                </button>
+                            </form>
+                            {% elif progress and progress.status == 'completed' %}
+                            <button class="btn btn-outline-success" disabled>
+                                <i class="fas fa-check-circle me-2"></i> Lição Concluída
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Seção de discussão/comentários -->
+                <div class="lesson-discussion p-4">
+                    <div class="container-fluid">
+                        <h4 class="mb-4">Perguntas e Discussão</h4>
+                        
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Assistente Virtual</h5>
+                                <p class="card-text">Tem alguma dúvida sobre esta lição? Pergunte ao nosso assistente virtual!</p>
+                                
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" placeholder="Digite sua pergunta aqui..." id="aiQuestion">
+                                    <button class="btn btn-primary" type="button" id="askAiButton">
+                                        <i class="fas fa-robot me-2"></i> Perguntar
+                                    </button>
+                                </div>
+                                
+                                <div id="aiResponse" class="mt-3 p-3 bg-light rounded" style="display: none;">
+                                    <div class="d-flex align-items-start">
+                                        <div class="ai-avatar me-3">
+                                            <i class="fas fa-robot fa-2x text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-2">Assistente EdTech</h6>
+                                            <div id="aiResponseText"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Comentários da lição -->
+                        <div class="comments-section">
+                            <h5 class="mb-3">Comentários dos Participantes</h5>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <!-- Formulário de comentário -->
+                                    <form class="mb-4">
+                                        <div class="mb-3">
+                                            <textarea class="form-control" rows="3" placeholder="Deixe seu comentário ou dúvida..."></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Enviar</button>
+                                    </form>
+                                    
+                                    <!-- Lista de comentários -->
+                                    <div class="comments-list">
+                                        <div class="comment mb-3 pb-3 border-bottom">
+                                            <div class="d-flex">
+                                                <div class="comment-avatar me-3">
+                                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">JO</div>
+                                                </div>
+                                                <div class="comment-content">
+                                                    <div class="comment-header">
+                                                        <strong>João Oliveira</strong>
+                                                        <small class="text-muted ms-2">há 3 dias</small>
+                                                    </div>
+                                                    <div class="comment-text">
+                                                        <p>Excelente material! Consegui aplicar este conhecimento no meu departamento e já estamos vendo resultados.</p>
+                                                    </div>
+                                                    <div class="comment-actions">
+                                                        <button class="btn btn-sm btn-link">Responder</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="comment mb-3">
+                                            <div class="d-flex">
+                                                <div class="comment-avatar me-3">
+                                                    <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">MS</div>
+                                                </div>
+                                                <div class="comment-content">
+                                                    <div class="comment-header">
+                                                        <strong>Maria Santos</strong>
+                                                        <small class="text-muted ms-2">há 1 semana</small>
+                                                    </div>
+                                                    <div class="comment-text">
+                                                        <p>Alguém poderia explicar melhor a parte sobre implementação prática? Estou com dificuldade em entender como aplicar isso no contexto da nossa secretaria.</p>
+                                                    </div>
+                                                    <div class="comment-actions">
+                                                        <button class="btn btn-sm btn-link">Responder</button>
+                                                    </div>
+                                                    
+                                                    <!-- Resposta a um comentário -->
+                                                    <div class="comment-reply mt-3 ms-4">
+                                                        <div class="d-flex">
+                                                            <div class="comment-avatar me-3">
+                                                                <div class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">CP</div>
+                                                            </div>
+                                                            <div class="comment-content">
+                                                                <div class="comment-header">
+                                                                    <strong>Carlos Pereira</strong>
+                                                                    <small class="text-muted ms-2">há 5 dias</small>
+                                                                </div>
+                                                                <div class="comment-text">
+                                                                    <p>Maria, na secretaria de finanças estamos utilizando esta metodologia para automatizar a análise de processos. Posso te ajudar se quiser, me envie uma mensagem!</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos específicos para a página de lição -->
+<style>
+    body {
+        overflow-x: hidden;
+    }
+    
+    .lesson-container {
+        position: relative;
+        min-height: calc(100vh - 56px);
+    }
+    
+    .course-sidebar {
+        height: calc(100vh - 56px);
+        overflow-y: auto;
+        position: sticky;
+        top: 56px;
+    }
+    
+    .course-sidebar-inner {
+        overflow-y: auto;
+    }
+    
+    .lesson-content {
+        min-height: calc(100vh - 56px);
+        background-color: #f8f9fa;
+    }
+    
+    .module-header {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .module-header:hover, .module-header.active {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    
+    .module-header.active {
+        font-weight: 600;
+    }
+    
+    .lesson-content-text {
+        line-height: 1.8;
+        font-size: 1.05rem;
+    }
+    
+    .lesson-content-text h1, .lesson-content-text h2, .lesson-content-text h3 {
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .lesson-content-text p {
+        margin-bottom: 1.2rem;
+    }
+    
+    .lesson-content-text ul, .lesson-content-text ol {
+        margin-bottom: 1.2rem;
+        padding-left: 1.5rem;
+    }
+    
+    .lesson-content-text li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .lesson-content-text pre {
+        background-color: #f6f8fa;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        overflow: auto;
+        margin-bottom: 1.2rem;
+    }
+    
+    .lesson-content-text blockquote {
+        border-left: 4px solid #dee2e6;
+        padding-left: 1rem;
+        margin-left: 0;
+        margin-right: 0;
+        font-style: italic;
+    }
+    
+    .lesson-content-text table {
+        width: 100%;
+        margin-bottom: 1.2rem;
+        border-collapse: collapse;
+    }
+    
+    .lesson-content-text table th, .lesson-content-text table td {
+        padding: 0.5rem;
+        border: 1px solid #dee2e6;
+    }
+    
+    .lesson-content-text table th {
+        background-color: #f8f9fa;
+    }
+    
+    @media (max-width: 991px) {
+        .course-sidebar {
+            height: auto;
+            position: relative;
+            top: 0;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Solicitar ao servidor para marcar a lição como "em progresso" via AJAX
+        fetch('/api/mark-lesson-progress/{{ lesson.id }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        });
+        
+        // Interação com o assistente virtual
+        const aiQuestion = document.getElementById('aiQuestion');
+        const askAiButton = document.getElementById('askAiButton');
+        const aiResponse = document.getElementById('aiResponse');
+        const aiResponseText = document.getElementById('aiResponseText');
+        
+        askAiButton.addEventListener('click', function() {
+            const question = aiQuestion.value.trim();
+            
+            if (!question) return;
+            
+            // Mostrar indicador de carregamento
+            aiResponse.style.display = 'block';
+            aiResponseText.innerHTML = '<div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Processando sua pergunta...';
+            
+            // Chamada à API do assistente virtual
+            fetch('/api/ai/ask-assistant', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    question: question,
+                    lesson_id: {{ lesson.id }},
+                    course_id: {{ course.id }}
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                aiResponseText.innerHTML = data.response.replace(/\n/g, '<br>');
+            })
+            .catch(error => {
+                aiResponseText.innerHTML = 'Desculpe, não foi possível processar sua pergunta. Por favor, tente novamente mais tarde.';
+                console.error('Erro:', error);
+            });
+        });
+        
+        // Permitir pressionar Enter para enviar pergunta
+        aiQuestion.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                askAiButton.click();
+            }
+        });
+        
+        // Rastrear tempo gasto na lição
+        let startTime = Date.now();
+        let timeSpentSeconds = 0;
+        
+        // Atualizar tempo a cada minuto
+        setInterval(function() {
+            timeSpentSeconds = Math.floor((Date.now() - startTime) / 1000);
+            
+            // A cada 5 minutos, enviar o tempo para o servidor
+            if (timeSpentSeconds % 300 === 0 && timeSpentSeconds > 0) {
+                fetch('/api/lesson-time/{{ lesson.id }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        seconds: 300
+                    })
+                });
+            }
+        }, 60000); // a cada minuto
+        
+        // Enviar tempo ao sair da página
+        window.addEventListener('beforeunload', function() {
+            navigator.sendBeacon('/api/lesson-time/{{ lesson.id }}', JSON.stringify({
+                seconds: timeSpentSeconds
+            }));
+        });
+    });
+</script>
+{% endblock %}
