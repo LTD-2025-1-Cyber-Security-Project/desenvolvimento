@@ -1,0 +1,143 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <h2 class="card-title me-3"><i class="fas fa-tachometer-alt"></i> Painel de Controle</h2>
+                    {% if not has_enabled_model %}
+                    <span class="badge bg-danger">Nenhum modelo IA habilitado</span>
+                    {% endif %}
+                </div>
+                <p class="card-text">Bem-vindo ao Sistema Multi-IA da Prefeitura, <strong>{{ username }}</strong>!</p>
+                <p>Use este sistema para criar prompts de comando otimizados para modelos de IA, ajudando na geração de documentos e análises para a administração municipal.</p>
+                
+                {% if preferred_model %}
+                <div class="alert alert-info">
+                    <i class="fas fa-robot"></i> Seu modelo de IA preferido: <strong>{{ preferred_model }}</strong>
+                    <a href="{{ url_for('user_settings') }}" class="alert-link"><i class="fas fa-cog"></i> Alterar</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-body text-center">
+                <h3><i class="fas fa-robot fa-3x text-primary mb-3"></i></h3>
+                <h4>Gerar Prompt</h4>
+                <p>Crie prompts de comando personalizados para a IA baseados nas suas necessidades</p>
+                <div class="d-grid">
+                    <a href="{{ url_for('generate_prompt') }}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> Novo Prompt
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-body text-center">
+                <h3><i class="fas fa-history fa-3x text-success mb-3"></i></h3>
+                <h4>Histórico</h4>
+                <p>Acesse seu histórico de prompts e respostas geradas pela IA</p>
+                <div class="d-grid">
+                    <a href="{{ url_for('view_history') }}" class="btn btn-success">
+                        <i class="fas fa-list"></i> Ver Histórico
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-body text-center">
+                <h3><i class="fas fa-save fa-3x text-info mb-3"></i></h3>
+                <h4>Templates</h4>
+                <p>Gerencie templates de prompts para tarefas recorrentes</p>
+                <div class="d-grid">
+                    <a href="{{ url_for('templates') }}" class="btn btn-info text-white">
+                        <i class="fas fa-folder"></i> Gerenciar Templates
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modelos de IA Disponíveis -->
+<div class="card shadow mt-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="fas fa-brain"></i> Modelos de IA Disponíveis</h4>
+    </div>
+    <div class="card-body">
+        {% if active_models|length > 0 %}
+        <div class="row row-cols-1 row-cols-md-3 row-cols-xl-4 g-4">
+            {% for model in active_models %}
+            <div class="col">
+                <div class="card h-100 border-primary">
+                    <div class="card-header {% if model.default %}bg-primary text-white{% else %}bg-light{% endif %}">
+                        <h5 class="mb-0">{{ model.name }}</h5>
+                        {% if model.default %}<span class="badge bg-warning">Padrão</span>{% endif %}
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text small">Modelo de IA para geração de conteúdo baseado em prompts.</p>
+                        <div class="small text-muted mb-2">
+                            <div><strong>Temperatura:</strong> {{ model.temperature }}</div>
+                            <div><strong>Tipo:</strong> {{ model.api_type|upper }}</div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="{{ url_for('generate_prompt') }}" class="btn btn-sm btn-outline-primary">Usar este modelo</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-danger">
+            <h5><i class="fas fa-exclamation-triangle"></i> Nenhum modelo de IA está habilitado!</h5>
+            <p>O administrador precisa configurar pelo menos um modelo de IA nas configurações do sistema.</p>
+            
+            {% if session.get('role') == 'admin' %}
+            <div class="mt-3">
+                <a href="{{ url_for('ai_settings') }}" class="btn btn-danger">
+                    <i class="fas fa-cog"></i> Configurar Modelos de IA
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if session.get('role') == 'admin' %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-warning">
+                <h4 class="mb-0"><i class="fas fa-shield-alt"></i> Administração</h4>
+            </div>
+            <div class="card-body">
+                <p>Como administrador, você pode gerenciar usuários e configurações do sistema.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('register') }}" class="btn btn-warning">
+                        <i class="fas fa-user-plus"></i> Cadastrar Novo Usuário
+                    </a>
+                    <a href="{{ url_for('ai_settings') }}" class="btn btn-warning">
+                        <i class="fas fa-cogs"></i> Configurar Modelos de IA
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

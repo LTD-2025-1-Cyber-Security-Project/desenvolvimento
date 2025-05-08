@@ -1,0 +1,388 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="fas fa-cogs"></i> Configurações de Modelos de IA</h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('ai_settings') }}">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle"></i> Informações Importantes</h5>
+                <p>Configure as APIs de IA disponíveis no sistema. Pelo menos um modelo deve estar habilitado.</p>
+                <p>As chaves de API são sensíveis e devem ser mantidas em segurança.</p>
+                <p><strong>Nota:</strong> Os modelos Google Gemini já vêm pré-configurados com a chave API padrão.</p>
+            </div>
+
+            <!-- Modelo padrão -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Modelo de IA Padrão</label>
+                <select name="default_model" class="form-select">
+                    {% for model_id, model in models.items() %}
+                        {% if model.enabled %}
+                        <option value="{{ model_id }}" {% if model.default %}selected{% endif %}>{{ model.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <div class="form-text">Este modelo será usado como padrão quando nenhum outro for especificado.</div>
+            </div>
+
+            <!-- Navegação de abas para grupos de modelos -->
+            <ul class="nav nav-tabs mb-4" id="aiModelTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="google-tab" data-bs-toggle="tab" data-bs-target="#google" type="button" role="tab">
+                        <i class="fab fa-google"></i> Google Gemini
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="openai-tab" data-bs-toggle="tab" data-bs-target="#openai" type="button" role="tab">
+                        <i class="fas fa-robot"></i> OpenAI
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="anthropic-tab" data-bs-toggle="tab" data-bs-target="#anthropic" type="button" role="tab">
+                        <i class="fas fa-brain"></i> Anthropic
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#other" type="button" role="tab">
+                        <i class="fas fa-ellipsis-h"></i> Outros Modelos
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Conteúdo das abas -->
+            <div class="tab-content" id="aiModelTabsContent">
+                <!-- Google Gemini -->
+                <div class="tab-pane fade show active" id="google" role="tabpanel" aria-labelledby="google-tab">
+                    <div class="alert alert-success mb-4">
+                        <i class="fas fa-check-circle"></i> Os modelos Google Gemini vêm pré-configurados com a chave API <code>AIzaSyCY5JQRIAZlq7Re-GNDtwn8b1Hmza_hk8Y</code>
+                    </div>
+                    
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        {% for model_id, model in models.items() if model.api_type == "google" %}
+                        <div class="col">
+                            <div class="card h-100 {% if model.enabled %}border-success{% else %}border-secondary{% endif %}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">{{ model.name }}</h5>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="enabled_{{ model_id }}" id="enabled_{{ model_id }}" {% if model.enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="enabled_{{ model_id }}">Habilitado</label>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="api_key_{{ model_id }}" class="form-label">Chave de API</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control api-key-field" id="api_key_{{ model_id }}" name="api_key_{{ model_id }}" value="{{ model.api_key }}" autocomplete="off" placeholder="Usando chave API padrão">
+                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="api_key_{{ model_id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text">Opcional: Substitua a chave padrão por sua própria chave API do Google Gemini</div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="temperature_{{ model_id }}" class="form-label">Temperatura</label>
+                                            <input type="number" class="form-control" id="temperature_{{ model_id }}" name="temperature_{{ model_id }}" value="{{ model.temperature }}" min="0" max="1" step="0.1">
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="max_tokens_{{ model_id }}" class="form-label">Máx. Tokens</label>
+                                            <input type="number" class="form-control" id="max_tokens_{{ model_id }}" name="max_tokens_{{ model_id }}" value="{{ model.max_tokens }}" min="100" max="100000">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info mt-3">
+                                        <small><i class="fas fa-link"></i> <a href="https://ai.google.dev/" target="_blank">Documentação Gemini API</a></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- OpenAI -->
+                <div class="tab-pane fade" id="openai" role="tabpanel" aria-labelledby="openai-tab">
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        {% for model_id, model in models.items() if model.api_type == "openai" %}
+                        <div class="col">
+                            <div class="card h-100 {% if model.enabled %}border-success{% else %}border-secondary{% endif %}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">{{ model.name }}</h5>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="enabled_{{ model_id }}" id="enabled_{{ model_id }}" {% if model.enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="enabled_{{ model_id }}">Habilitado</label>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="api_key_{{ model_id }}" class="form-label">Chave de API <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control api-key-field" id="api_key_{{ model_id }}" name="api_key_{{ model_id }}" value="{{ model.api_key }}" autocomplete="off" placeholder="sk-..." {% if not model.api_key %}required{% endif %}>
+                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="api_key_{{ model_id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text">Insira sua chave API OpenAI</div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="temperature_{{ model_id }}" class="form-label">Temperatura</label>
+                                            <input type="number" class="form-control" id="temperature_{{ model_id }}" name="temperature_{{ model_id }}" value="{{ model.temperature }}" min="0" max="1" step="0.1">
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="max_tokens_{{ model_id }}" class="form-label">Máx. Tokens</label>
+                                            <input type="number" class="form-control" id="max_tokens_{{ model_id }}" name="max_tokens_{{ model_id }}" value="{{ model.max_tokens }}" min="100" max="100000">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info mt-3">
+                                        <small><i class="fas fa-link"></i> <a href="https://platform.openai.com/docs/" target="_blank">Documentação OpenAI API</a></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Anthropic -->
+                <div class="tab-pane fade" id="anthropic" role="tabpanel" aria-labelledby="anthropic-tab">
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        {% for model_id, model in models.items() if model.api_type == "anthropic" %}
+                        <div class="col">
+                            <div class="card h-100 {% if model.enabled %}border-success{% else %}border-secondary{% endif %}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">{{ model.name }}</h5>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="enabled_{{ model_id }}" id="enabled_{{ model_id }}" {% if model.enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="enabled_{{ model_id }}">Habilitado</label>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="api_key_{{ model_id }}" class="form-label">Chave de API <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control api-key-field" id="api_key_{{ model_id }}" name="api_key_{{ model_id }}" value="{{ model.api_key }}" autocomplete="off" placeholder="sk-ant-..." {% if not model.api_key %}required{% endif %}>
+                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="api_key_{{ model_id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text">Insira sua chave API Anthropic</div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="temperature_{{ model_id }}" class="form-label">Temperatura</label>
+                                            <input type="number" class="form-control" id="temperature_{{ model_id }}" name="temperature_{{ model_id }}" value="{{ model.temperature }}" min="0" max="1" step="0.1">
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="max_tokens_{{ model_id }}" class="form-label">Máx. Tokens</label>
+                                            <input type="number" class="form-control" id="max_tokens_{{ model_id }}" name="max_tokens_{{ model_id }}" value="{{ model.max_tokens }}" min="100" max="100000">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info mt-3">
+                                        <small><i class="fas fa-link"></i> <a href="https://docs.anthropic.com/claude/reference/getting-started-with-the-api" target="_blank">Documentação Claude API</a></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Outros Modelos -->
+                <div class="tab-pane fade" id="other" role="tabpanel" aria-labelledby="other-tab">
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        {% for model_id, model in models.items() if model.api_type not in ["google", "openai", "anthropic"] %}
+                        <div class="col">
+                            <div class="card h-100 {% if model.enabled %}border-success{% else %}border-secondary{% endif %}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">{{ model.name }}</h5>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="enabled_{{ model_id }}" id="enabled_{{ model_id }}" {% if model.enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="enabled_{{ model_id }}">Habilitado</label>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="api_key_{{ model_id }}" class="form-label">Chave de API <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control api-key-field" id="api_key_{{ model_id }}" name="api_key_{{ model_id }}" value="{{ model.api_key }}" autocomplete="off" {% if not model.api_key %}required{% endif %}>
+                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="api_key_{{ model_id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text">Insira sua chave API para {{ model.name }}</div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="temperature_{{ model_id }}" class="form-label">Temperatura</label>
+                                            <input type="number" class="form-control" id="temperature_{{ model_id }}" name="temperature_{{ model_id }}" value="{{ model.temperature }}" min="0" max="1" step="0.1">
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="max_tokens_{{ model_id }}" class="form-label">Máx. Tokens</label>
+                                            <input type="number" class="form-control" id="max_tokens_{{ model_id }}" name="max_tokens_{{ model_id }}" value="{{ model.max_tokens }}" min="100" max="100000">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Endpoint</label>
+                                        <input type="text" class="form-control" value="{{ model.endpoint }}" disabled>
+                                    </div>
+                                    
+                                    {% if model.api_type == "perplexity" %}
+                                    <div class="alert alert-info mt-3">
+                                        <small><i class="fas fa-link"></i> <a href="https://docs.perplexity.ai/" target="_blank">Documentação Perplexity AI</a></small>
+                                    </div>
+                                    {% elif model.api_type == "deepseek" %}
+                                    <div class="alert alert-info mt-3">
+                                        <small><i class="fas fa-link"></i> <a href="https://www.deepseek.com/" target="_blank">Site oficial DeepSeek AI</a></small>
+                                    </div>
+                                    {% elif model.api_type == "xai" %}
+                                    <div class="alert alert-info mt-3">
+                                        <small><i class="fas fa-link"></i> <a href="https://grok.x.ai/" target="_blank">Site oficial xAI Grok</a></small>
+                                    </div>
+                                    {% elif model.api_type == "blackbox" %}
+                                    <div class="alert alert-info mt-3">
+                                        <small><i class="fas fa-link"></i> <a href="https://www.blackbox.ai/" target="_blank">Site oficial Blackbox AI</a></small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Cartão informativo -->
+<div class="card shadow mt-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Sobre as Chaves de API</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fab fa-google text-danger"></i> Google Gemini API</h6>
+                <p>Chave padrão já está configurada: <code>AIzaSyCY5JQRIAZlq7Re-GNDtwn8b1Hmza_hk8Y</code></p>
+                <p>Para obter sua própria chave: <a href="https://ai.google.dev/" target="_blank">Google AI Studio</a></p>
+                
+                <h6 class="mt-4"><i class="fas fa-robot text-success"></i> OpenAI API</h6>
+                <p>Formato da chave: <code>sk-...</code></p>
+                <p>Para obter: <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Keys</a></p>
+            </div>
+            
+            <div class="col-md-6">
+                <h6><i class="fas fa-brain text-primary"></i> Anthropic Claude API</h6>
+                <p>Formato da chave: <code>sk-ant-...</code></p>
+                <p>Para obter: <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a></p>
+                
+                <h6 class="mt-4"><i class="fas fa-cogs text-secondary"></i> Outros Modelos</h6>
+                <p>Cada modelo tem seu próprio formato de chave e processo de registro.</p>
+                <p>Consulte a documentação específica de cada provedor para obter suas chaves de API.</p>
+            </div>
+        </div>
+        
+        <div class="alert alert-warning mt-3">
+            <i class="fas fa-exclamation-triangle"></i> <strong>Importante:</strong> Proteja suas chaves de API. Não compartilhe ou exponha publicamente suas chaves.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Botões para mostrar/ocultar chaves de API
+    const toggleButtons = document.querySelectorAll('.toggle-password');
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const inputField = document.getElementById(targetId);
+            
+            if (inputField.type === 'password') {
+                inputField.type = 'text';
+                this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                inputField.type = 'password';
+                this.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        });
+    });
+    
+    // Verificação de pelo menos um modelo habilitado
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        const enabledCheckboxes = document.querySelectorAll('input[type="checkbox"][name^="enabled_"]:checked');
+        if (enabledCheckboxes.length === 0) {
+            event.preventDefault();
+            alert('Pelo menos um modelo de IA deve estar habilitado!');
+        }
+        
+        // Verificar se modelos habilitados têm chave API (exceto Google Gemini)
+        let hasError = false;
+        enabledCheckboxes.forEach(checkbox => {
+            const modelId = checkbox.id.replace('enabled_', '');
+            const apiType = modelId.split('-')[0]; // Extrai o tipo de API do ID do modelo
+            
+            if (apiType !== 'google') {
+                const apiKeyField = document.getElementById('api_key_' + modelId);
+                if (!apiKeyField.value) {
+                    hasError = true;
+                    apiKeyField.classList.add('is-invalid');
+                    // Adiciona mensagem de erro
+                    if (!apiKeyField.nextElementSibling || !apiKeyField.nextElementSibling.classList.contains('invalid-feedback')) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback';
+                        errorDiv.textContent = 'A chave API é obrigatória para este modelo.';
+                        apiKeyField.parentNode.appendChild(errorDiv);
+                    }
+                }
+            }
+        });
+        
+        if (hasError) {
+            event.preventDefault();
+            alert('Alguns modelos habilitados não têm chave API. Por favor, forneça todas as chaves necessárias.');
+        }
+    });
+    
+    // Atualização visual ao habilitar/desabilitar modelos
+    const enabledSwitches = document.querySelectorAll('input[type="checkbox"][name^="enabled_"]');
+    enabledSwitches.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const card = this.closest('.card');
+            if (this.checked) {
+                card.classList.remove('border-secondary');
+                card.classList.add('border-success');
+            } else {
+                card.classList.remove('border-success');
+                card.classList.add('border-secondary');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,327 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="fas fa-robot"></i> Gerar Prompt de Comando</h4>
+    </div>
+    <div class="card-body">
+        <!-- Seleção de Modelo de IA -->
+        <div class="mb-4">
+            <h5><i class="fas fa-brain"></i> Selecione o Modelo de IA</h5>
+            <div class="row ai-model-selection">
+                {% for model_id, model in models.items() %}
+                <div class="col-md-4 col-lg-3 mb-3">
+                    <div class="card h-100 model-card {% if model.default %}border-primary{% else %}border-light{% endif %}" data-model-id="{{ model_id }}">
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="ai_model" id="model_{{ model_id }}" value="{{ model_id }}" {% if model.default %}checked{% endif %}>
+                                <label class="form-check-label" for="model_{{ model_id }}">
+                                    <strong>{{ model.name }}</strong>
+                                </label>
+                            </div>
+                            <div class="small text-muted mt-2">
+                                {% if model.api_type == "google" %}
+                                <span class="badge bg-success">Pré-configurado</span>
+                                {% else %}
+                                <span class="badge {% if model.api_key %}bg-success{% else %}bg-warning{% endif %}">
+                                    {% if model.api_key %}API Configurada{% else %}Requer API{% endif %}
+                                </span>
+                                {% endif %}
+                                <div class="mt-1">Tipo: {{ model.api_type|upper }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('generate_prompt') }}" id="promptForm">
+            <!-- Campo oculto para o modelo selecionado -->
+            <input type="hidden" id="selected_model" name="ai_model" value="{{ models|selectattr('default', 'equalto', true)|map(attribute='id')|first }}">
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label for="document_type" class="form-label">Tipo de Documento/Serviço</label>
+                    <select class="form-select" id="document_type" name="document_type" required>
+                        <option value="" selected disabled>Selecione uma opção</option>
+                        <option value="ofício">Ofício</option>
+                        <option value="memorando">Memorando</option>
+                        <option value="parecer técnico">Parecer Técnico</option>
+                        <option value="análise de projeto">Análise de Projeto</option>
+                        <option value="plano de ação">Plano de Ação</option>
+                        <option value="relatório de situação">Relatório de Situação</option>
+                        <option value="edital">Edital</option>
+                        <option value="termo de referência">Termo de Referência</option>
+                        <option value="resposta ao cidadão">Resposta ao Cidadão</option>
+                        <option value="proposta de projeto">Proposta de Projeto</option>
+                        <option value="outro">Outro (especificar nos detalhes)</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="detail_level" class="form-label">Nível de Detalhamento</label>
+                    <select class="form-select" id="detail_level" name="detail_level" required>
+                        <option value="resumido">Resumido</option>
+                        <option value="padrão" selected>Padrão</option>
+                        <option value="detalhado">Detalhado</option>
+                        <option value="técnico">Técnico</option>
+                        <option value="cidadão">Linguagem Cidadã</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="deadline" class="form-label">Prazo</label>
+                    <input type="text" class="form-control" id="deadline" name="deadline" placeholder="Ex: Urgente, 5 dias, etc.">
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label for="context" class="form-label">Contexto Municipal</label>
+                <textarea class="form-control" id="context" name="context" rows="4" placeholder="Descreva o contexto e o objetivo deste documento/serviço..." required></textarea>
+                <div class="form-text">Forneça informações sobre a situação atual, departamentos envolvidos e objetivo.</div>
+            </div>
+            
+            <div class="mb-4">
+                <label for="legal_restrictions" class="form-label">Restrições Legais</label>
+                <textarea class="form-control" id="legal_restrictions" name="legal_restrictions" rows="2" placeholder="Informe leis, decretos, normativas ou restrições aplicáveis..."></textarea>
+                <div class="form-text">Opcional: Mencione qualquer lei ou regulamento específico a ser considerado.</div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-outline-secondary" id="saveTemplateBtn">
+                    <i class="fas fa-save"></i> Salvar como Template
+                </button>
+                <div>
+                    <button type="reset" class="btn btn-outline-danger me-2">
+                        <i class="fas fa-eraser"></i> Limpar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="generateBtn">
+                        <i class="fas fa-cog"></i> Gerar com IA
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Informações sobre os Modelos de IA -->
+<div class="card shadow mt-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Sobre os Modelos de IA</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="border-bottom pb-2">Modelos Disponíveis</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>Google Gemini (1.5 Pro e Flash)</strong>
+                        <span class="badge bg-success">Pré-configurado</span>
+                        <div class="small text-muted">API padrão já configurada</div>
+                    </li>
+                    <li class="mb-2">
+                        <strong>OpenAI GPT (3.5 e 4)</strong>
+                        <div class="small text-muted">Requer configuração de API</div>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Anthropic Claude</strong>
+                        <div class="small text-muted">Requer configuração de API</div>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Perplexity AI</strong>
+                        <div class="small text-muted">Requer configuração de API</div>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6 class="border-bottom pb-2">Modelos Adicionais</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>DeepSeek AI</strong>
+                        <div class="small text-muted">Requer configuração de API</div>
+                    </li>
+                    <li class="mb-2">
+                        <strong>xAI Grok</strong>
+                        <div class="small text-muted">Requer configuração de API</div>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Blackbox AI</strong>
+                        <div class="small text-muted">Requer configuração de API</div>
+                    </li>
+                </ul>
+                
+                <div class="mt-3">
+                    <a href="{{ url_for('user_settings') }}" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-cog"></i> Configurar Minhas Chaves API
+                    </a>
+                    {% if session.get('role') == 'admin' %}
+                    <a href="{{ url_for('ai_settings') }}" class="btn btn-sm btn-outline-info ms-2">
+                        <i class="fas fa-cogs"></i> Administrar Modelos
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para salvar template -->
+<div class="modal fade" id="saveTemplateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-save"></i> Salvar Template</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('save_template') }}" method="POST" id="saveTemplateForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="template_name" class="form-label">Nome do Template</label>
+                        <input type="text" class="form-control" id="template_name" name="template_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="template_description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="template_description" name="template_description" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_public" name="is_public">
+                        <label class="form-check-label" for="is_public">Template público (visível para todos)</label>
+                    </div>
+                    <!-- Campos ocultos para armazenar os valores do formulário -->
+                    <input type="hidden" id="template_document_type" name="document_type">
+                    <input type="hidden" id="template_context" name="context">
+                    <input type="hidden" id="template_legal_restrictions" name="legal_restrictions">
+                    <input type="hidden" id="template_deadline" name="deadline">
+                    <input type="hidden" id="template_detail_level" name="detail_level">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info text-white">Salvar Template</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Seleção de modelo de IA
+    const modelCards = document.querySelectorAll('.model-card');
+    const modelRadios = document.querySelectorAll('input[name="ai_model"]');
+    const selectedModelInput = document.getElementById('selected_model');
+    
+    // Estilizar o cartão selecionado
+    modelCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remover seleção de todos os cartões
+            modelCards.forEach(c => c.classList.remove('border-primary', 'border-2'));
+            c.classList.add('border-light');
+            
+            // Selecionar este cartão
+            this.classList.remove('border-light');
+            this.classList.add('border-primary', 'border-2');
+            
+            // Marcar o radio button correspondente
+            const modelId = this.getAttribute('data-model-id');
+            document.getElementById('model_' + modelId).checked = true;
+            
+            // Atualizar o campo oculto
+            selectedModelInput.value = modelId;
+        });
+    });
+    
+    // Quando um radio button é selecionado, atualizar o cartão
+    modelRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                const modelId = this.value;
+                selectedModelInput.value = modelId;
+                
+                // Atualizar cartões
+                modelCards.forEach(card => {
+                    if (card.getAttribute('data-model-id') === modelId) {
+                        card.classList.remove('border-light');
+                        card.classList.add('border-primary', 'border-2');
+                    } else {
+                        card.classList.remove('border-primary', 'border-2');
+                        card.classList.add('border-light');
+                    }
+                });
+            }
+        });
+    });
+    
+    // Manipulação do modal de template
+    const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+    const saveTemplateModal = new bootstrap.Modal(document.getElementById('saveTemplateModal'));
+    
+    saveTemplateBtn.addEventListener('click', function() {
+        // Copiar valores do formulário principal para o formulário do modal
+        document.getElementById('template_document_type').value = document.getElementById('document_type').value;
+        document.getElementById('template_context').value = document.getElementById('context').value;
+        document.getElementById('template_legal_restrictions').value = document.getElementById('legal_restrictions').value;
+        document.getElementById('template_deadline').value = document.getElementById('deadline').value;
+        document.getElementById('template_detail_level').value = document.getElementById('detail_level').value;
+        
+        saveTemplateModal.show();
+    });
+    
+    // Exibir indicador de carregamento ao gerar resposta
+    const promptForm = document.getElementById('promptForm');
+    const generateBtn = document.getElementById('generateBtn');
+    
+    promptForm.addEventListener('submit', function() {
+        generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Gerando...';
+        generateBtn.disabled = true;
+    });
+    
+    // Processar parâmetros de URL (para templates)
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Preencher campos de formulário com base em parâmetros da URL
+    const formFields = [
+        'document_type',
+        'context',
+        'legal_restrictions',
+        'deadline',
+        'detail_level'
+    ];
+    
+    formFields.forEach(field => {
+        const value = urlParams.get(field);
+        const element = document.getElementById(field);
+        
+        if (value && element) {
+            if (element.tagName === 'SELECT') {
+                // Para elementos select, verificar se a opção existe
+                const option = Array.from(element.options).find(opt => opt.value === value);
+                if (option) {
+                    element.value = value;
+                }
+            } else {
+                // Para inputs e textareas
+                element.value = value;
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.model-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.model-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.ai-model-selection .form-check-input {
+    margin-top: 0.3rem;
+}
+</style>
+{% endblock %}

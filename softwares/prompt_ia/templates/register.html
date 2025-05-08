@@ -1,0 +1,157 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-warning">
+                <h4 class="mb-0"><i class="fas fa-user-plus"></i> Cadastrar Novo Usuário</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('register') }}">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Nome de Usuário</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="form-text">O nome de usuário deve ser único no sistema.</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="password" class="form-label">Senha</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">A senha deve ter pelo menos 6 caracteres.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="role" class="form-label">Tipo de Acesso</label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="user">Usuário Padrão</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                            <div class="form-text">Administradores podem gerenciar usuários e configurações.</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="department" class="form-label">Departamento</label>
+                            <select class="form-select" id="department" name="department">
+                                <option value="administrativo">Administrativo</option>
+                                <option value="obras">Obras e Infraestrutura</option>
+                                <option value="saude">Saúde</option>
+                                <option value="educacao">Educação</option>
+                                <option value="assistencia">Assistência Social</option>
+                                <option value="financas">Finanças</option>
+                                <option value="juridico">Jurídico</option>
+                                <option value="planejamento">Planejamento</option>
+                                <option value="cultura">Cultura</option>
+                                <option value="esportes">Esportes</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="permissions" class="form-label">Permissões</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_create" name="permissions[]" value="create" checked>
+                                    <label class="form-check-label" for="perm_create">Criar Prompts</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_view" name="permissions[]" value="view" checked>
+                                    <label class="form-check-label" for="perm_view">Visualizar Histórico</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_template" name="permissions[]" value="template" checked>
+                                    <label class="form-check-label" for="perm_template">Gerenciar Templates</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_export" name="permissions[]" value="export" checked>
+                                    <label class="form-check-label" for="perm_export">Exportar Resultados</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="perm_admin" name="permissions[]" value="admin">
+                                    <label class="form-check-label" for="perm_admin">Administração</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-user-plus"></i> Cadastrar Usuário
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Função para mostrar/ocultar senha
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.querySelector('i').classList.toggle('fa-eye');
+        this.querySelector('i').classList.toggle('fa-eye-slash');
+    });
+    
+    // Atualização dinâmica de permissões com base no papel
+    const roleSelect = document.getElementById('role');
+    const adminPermission = document.getElementById('perm_admin');
+    
+    roleSelect.addEventListener('change', function() {
+        if (this.value === 'admin') {
+            adminPermission.checked = true;
+        } else {
+            adminPermission.checked = false;
+        }
+    });
+    
+    // Validação do formulário
+    const form = document.querySelector('form');
+    
+    form.addEventListener('submit', function(event) {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        
+        if (username.length < 3) {
+            event.preventDefault();
+            alert('O nome de usuário deve ter pelo menos 3 caracteres.');
+            return;
+        }
+        
+        if (password.length < 6) {
+            event.preventDefault();
+            alert('A senha deve ter pelo menos 6 caracteres.');
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}

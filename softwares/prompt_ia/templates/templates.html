@@ -1,0 +1,178 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-info text-white">
+        <h4 class="mb-0"><i class="fas fa-save"></i> Templates Salvos</h4>
+    </div>
+    <div class="card-body">
+        {% if templates|length > 0 %}
+        <div class="row">
+            {% for template in templates %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-info">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ template.template_name }}</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit"></i> Editar</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-trash-alt"></i> Excluir</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ template.template_description }}</p>
+                        <div class="small text-muted mb-2">
+                            <div><strong>Tipo:</strong> {{ template.document_type|capitalize }}</div>
+                            <div><strong>Detalhamento:</strong> {{ template.detail_level }}</div>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary use-template" 
+                                    data-document-type="{{ template.document_type }}"
+                                    data-context="{{ template.context }}"
+                                    data-legal-restrictions="{{ template.legal_restrictions }}"
+                                    data-deadline="{{ template.deadline }}"
+                                    data-detail-level="{{ template.detail_level }}">
+                                <i class="fas fa-play"></i> Usar Template
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted small">
+                        <div class="d-flex justify-content-between">
+                            <span>Criado por: {{ template.created_by }}</span>
+                            <span>{{ template.created_at }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Nenhum template foi salvo ainda. Você pode salvar um novo template ao criar um prompt.
+        </div>
+        {% endif %}
+        
+        <div class="d-flex justify-content-center mt-4">
+            <a href="{{ url_for('generate_prompt') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Criar Novo Prompt
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Seção de Exemplos Predefinidos -->
+<div class="card shadow mt-4">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0"><i class="fas fa-lightbulb"></i> Templates Predefinidos</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Template predefinido 1 -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-success">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Ofício de Solicitação</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Template para criar ofícios de solicitação de recursos, informações ou serviços entre departamentos.</p>
+                        <div class="small text-muted mb-2">
+                            <div><strong>Tipo:</strong> Ofício</div>
+                            <div><strong>Detalhamento:</strong> Padrão</div>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-outline-success use-predefined-template" 
+                                    data-document-type="ofício"
+                                    data-context="Solicitação de recursos ou informações entre departamentos municipais."
+                                    data-legal-restrictions="Lei Orgânica Municipal e procedimentos administrativos internos."
+                                    data-deadline="10 dias úteis"
+                                    data-detail-level="padrão">
+                                <i class="fas fa-play"></i> Usar Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Template predefinido 2 -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-success">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Resposta ao Cidadão</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Template para elaborar respostas formais a solicitações, reclamações ou sugestões de cidadãos.</p>
+                        <div class="small text-muted mb-2">
+                            <div><strong>Tipo:</strong> Resposta ao cidadão</div>
+                            <div><strong>Detalhamento:</strong> Cidadão</div>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-outline-success use-predefined-template" 
+                                    data-document-type="resposta ao cidadão"
+                                    data-context="Resposta formal a uma solicitação, reclamação ou sugestão enviada por um munícipe através dos canais oficiais."
+                                    data-legal-restrictions="Lei de Acesso à Informação (LAI) e Código de Defesa do Consumidor quando aplicável."
+                                    data-deadline="30 dias"
+                                    data-detail-level="cidadão">
+                                <i class="fas fa-play"></i> Usar Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Template predefinido 3 -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-success">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Parecer Técnico</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Template para elaboração de pareceres técnicos sobre projetos, obras ou serviços municipais.</p>
+                        <div class="small text-muted mb-2">
+                            <div><strong>Tipo:</strong> Parecer técnico</div>
+                            <div><strong>Detalhamento:</strong> Técnico</div>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-outline-success use-predefined-template" 
+                                    data-document-type="parecer técnico"
+                                    data-context="Análise técnica de projeto, obra ou serviço municipal, considerando viabilidade, conformidade e recomendações."
+                                    data-legal-restrictions="Legislação urbanística, ambiental e normas técnicas específicas."
+                                    data-deadline="15 dias úteis"
+                                    data-detail-level="técnico">
+                                <i class="fas fa-play"></i> Usar Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Funcionalidade para usar templates salvos
+    const useTemplateButtons = document.querySelectorAll('.use-template, .use-predefined-template');
+    
+    useTemplateButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Redirecionar para página de criação de prompt com parâmetros
+            const params = new URLSearchParams({
+                document_type: this.getAttribute('data-document-type'),
+                context: this.getAttribute('data-context'),
+                legal_restrictions: this.getAttribute('data-legal-restrictions'),
+                deadline: this.getAttribute('data-deadline'),
+                detail_level: this.getAttribute('data-detail-level')
+            });
+            
+            window.location.href = "{{ url_for('generate_prompt') }}?" + params.toString();
+        });
+    });
+});
+</script>
+{% endblock %}
