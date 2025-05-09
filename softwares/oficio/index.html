@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Ofício - Prefeitura de Florianópolis</title>
+  <style>
+    :root {
+      --primary: #003366;
+      --secondary: #f5faff;
+      --accent: #004c99;
+      --text: #222;
+      --error: #d32f2f;
+      --success: #2e7d32;
+      --radius: 6px;
+      --transition: 0.3s;
+      --font-sans: 'Helvetica', Arial, sans-serif;
+      --font-serif: 'Georgia', serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-serif);
+      background: var(--secondary);
+      color: var(--text);
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      font-family: var(--font-sans);
+      color: var(--primary);
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: 1px;
+    }
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+      gap: 1.5rem;
+    }
+    .full {
+      grid-column: 1 / -1;
+    }
+    .group {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-family: var(--font-sans);
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    input, select, textarea {
+      font-family: var(--font-serif);
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 6px rgba(0,76,153,0.3);
+      outline: none;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+    .error-msg {
+      font-size: 0.85rem;
+      color: var(--error);
+      position: absolute;
+      bottom: -1.2rem;
+      left: 0;
+      display: none;
+    }
+    .invalid .error-msg { display: block; }
+    .invalid input, .invalid textarea, .invalid select { border-color: var(--error); }
+    button {
+      grid-column: 1 / -1;
+      padding: 0.9rem;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background var(--transition), transform 0.1s;
+    }
+    button:hover { background: var(--accent); transform: scale(1.02); }
+    button:active { transform: scale(0.98); }
+    .status {
+      grid-column: 1 / -1;
+      margin-top: 1rem;
+      padding: 0.6rem;
+      text-align: center;
+      font-size: 0.9rem;
+      border-radius: var(--radius);
+      display: none;
+    }
+    .status.success { background: #e8f5e9; color: var(--success); display: block; }
+    .status.error { background: #ffebee; color: var(--error); display: block; }
+    .toolbar {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: -0.5rem;
+    }
+    .toolbar button {
+      grid-column: auto;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.9rem;
+      background: #e0e0e0;
+      color: var(--text);
+    }
+    .toolbar button:hover {
+      background: #d0d0d0;
+    }
+    .history {
+      grid-column: 1 / -1;
+      border-top: 1px solid #eee;
+      margin-top: 1rem;
+      padding-top: 1rem;
+    }
+    .history h3 {
+      font-family: var(--font-sans);
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    .history-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      padding: 0.5rem;
+      border-radius: var(--radius);
+    }
+    .history-item {
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .history-item:last-child {
+      border-bottom: none;
+    }
+    .history-item button {
+      padding: 0.1rem 0.3rem;
+      font-size: 0.8rem;
+      grid-column: auto;
+    }
+    .template-selector {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .signature-preview {
+      max-width: 200px;
+      max-height: 80px;
+      margin-top: 0.5rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Gerador de Ofício - PMF</h1>
+    <form id="form">
+      <div class="group full">
+        <label for="logo">Logotipo (opcional):</label>
+        <input type="file" id="logo" accept="image/png,image/jpeg">
+        <span class="error-msg">Formato inválido</span>
+      </div>
+      
+      <div class="group">
+        <label for="numero">Número do Ofício</label>
+        <input id="numero" readonly>
+        <span class="error-msg">Obrigatório</span>
+      </div>
+      
+      <div class="group">
+        <label for="protocolo">Protocolo (OE)</label>
+        <input id="protocolo" placeholder="279305/17 - OE" required>
+        <span class="error-msg">Obrigatório</span>
+      </div>
+      
+      <div class="group">
+        <label for="cidade">Cidade</label>
+        <input id="cidade" value="Florianópolis" required>
+        <span class="error-msg">Obrigatório</span>
+      </div>
+      
+      <div class="group">
+        <label for="data">Data</label>
+        <input type="date" id="data" required>
+        <span class="error-msg">Obrigatório</span>
+      </div>
+      
+      <div class="group full">
+        <label for="assunto">Assunto</label>
+        <input id="assunto" placeholder="Em resposta a Indicação 155.2025 do Vereador Bruno Ziliotto" required>
+        <span class="error-msg">Obrigatório</span>
+      </div>
+      
+      <div class="group full">
+        <label for="corpo">Texto do Ofício</label>
+        <div class="toolbar">
+          <button type="button" onclick="formatText('bold')"><b>N</b></button>
+          <button type="button" onclick="formatText('italic')"><i>I</i></button>
+          <button type="button" onclick="formatText('underline')"><u>S</u></button>
+          <button type="button" onclick="insertTemplate('cumprimentos')">Cumprimentos</button>
+          <button type="button" onclick="insertTemplate('despedida')">Despedida</button>
+        </div>
+        <textarea id="corpo" placeholder="Digite o conteúdo do ofício aqui..." required></textarea>
+        <span class="error-msg">Obrigatório</span>
+      </div>
+      
+      <div class="group">
+        <label for="destinatario">Destinatário</label>
+        <input id="destinatario" placeholder="Ronaldo Brito Freire" required>
+        <span class="error-msg">Obrigatório</span>
+      </div>
+      
+      <div class="group">
+        <label for="cargoDest">Cargo do Destinatário</label>
+        <input id="cargoDest" placeholder="Secretário Municipal da Casa Civil" required>
+        <span class="error-msg">Obrigatório</span>
+      </div>
+      
+      <div class="group">
+        <label for="remetente">Remetente</label>
+        <input id="remetente" placeholder="Ivan da Silva Couto Júnior" required>
+        <span class="error-msg">Obrigatório</span>
+      </div>
+      
+      <div class="group">
+        <label for="cargoRem">Cargo do Remetente</label>
+        <input id="cargoRem" placeholder="Subsecretário de Obras e Transporte" required>
+        <span class="error-msg">Obrigatório</span>
+      </div>
+      
+      <div class="group full">
+        <label for="assinatura">Assinatura (opcional)</label>
+        <input type="file" id="assinatura" accept="image/png,image/jpeg">
+        <img id="signature-preview" class="signature-preview">
+      </div>
+      
+      <div class="group full template-selector">
+        <label for="template">Modelo:</label>
+        <select id="template" onchange="loadTemplate(this.value)">
+          <option value="">Personalizado</option>
+          <option value="resposta">Resposta a Indicação</option>
+          <option value="solicitacao">Solicitação de Informações</option>
+          <option value="encaminhamento">Encaminhamento de Processo</option>
+        </select>
+      </div>
+      
+      <button type="submit">Gerar PDF</button>
+      <div id="status" class="status"></div>
+      
+      <div class="history">
+        <h3>Histórico de Ofícios</h3>
+        <div class="history-list" id="history-list">
+          <!-- Histórico será preenchido por JavaScript -->
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const { jsPDF } = window.jspdf;
+    const form = document.getElementById('form');
+    const status = document.getElementById('status');
+    const fields = ['protocolo','cidade','data','assunto','corpo','destinatario','cargoDest','remetente','cargoRem'];
+    let signatureImage = null;
+    
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', function() {
+      // Configura data atual como padrão
+      document.getElementById('data').valueAsDate = new Date();
+      
+      // Carrega número sequencial
+      getNextNumber().then(num => {
+        document.getElementById('numero').value = num;
+      });
+      
+      // Carrega histórico
+      loadHistory();
+      
+      // Carrega dados salvos do remetente
+      loadSavedData();
+      
+      // Configura preview da assinatura
+      document.getElementById('assinatura').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            signatureImage = event.target.result;
+            const preview = document.getElementById('signature-preview');
+            preview.src = signatureImage;
+            preview.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+    
+    // Gera número sequencial persistente
+    async function getNextNumber() {
+      if ('indexedDB' in window) {
+        try {
+          const db = await new Promise((resolve, reject) => {
+            const request = indexedDB.open('OficioDB', 1);
+            
+            request.onupgradeneeded = (e) => {
+              const db = e.target.result;
+              if (!db.objectStoreNames.contains('numeracao')) {
+                db.createObjectStore('numeracao', { keyPath: 'id' });
+              }
+              if (!db.objectStoreNames.contains('historico')) {
+                db.createObjectStore('historico', { keyPath: 'id', autoIncrement: true });
+              }
+            };
+            
+            request.onsuccess = (e) => resolve(e.target.result);
+            request.onerror = (e) => reject(e.target.error);
+          });
+          
+          const tx = db.transaction('numeracao', 'readwrite');
+          const store = tx.objectStore('numeracao');
+          
+          const current = await new Promise((resolve) => {
+            const getRequest = store.get('current');
+            getRequest.onsuccess = () => resolve(getRequest.result ? getRequest.result.value : 0);
+            getRequest.onerror = () => resolve(0);
+          });
+          
+          const next = current + 1;
+          await new Promise((resolve) => {
+            const putRequest = store.put({ id: 'current', value: next });
+            putRequest.onsuccess = () => resolve();
+            putRequest.onerror = () => resolve();
+          });
+          
+          return `${new Date().getFullYear()}-${next.toString().padStart(4, '0')}`;
+        } catch (error) {
+          console.error('Erro no IndexedDB:', error);
+          return fallbackNumber();
+        }
+      }
+      return fallbackNumber();
+    }
+    
+    function fallbackNumber() {
+      return `${new Date().getFullYear()}-${Math.floor(Math.random()*9000+1000)}`;
+    }
+    
+    // Validação do formulário
+    function validar() {
+      let ok = true;
+      fields.forEach(id => {
+        const el = document.getElementById(id), grp = el.parentElement;
+        if (!el.value.trim()) { grp.classList.add('invalid'); ok = false; }
+        else grp.classList.remove('invalid');
+      });
+      return ok;
+    }
+    
+    // Formatação de data
+    function formatarData(d) {
+      const options = { day: '2-digit', month: 'long', year: 'numeric' };
+      return new Date(d).toLocaleDateString('pt-BR', options);
+    }
+    
+    // Formatação de texto
+    function formatText(format) {
+      const textarea = document.getElementById('corpo');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end);
+      let newText = '';
+      
+      switch(format) {
+        case 'bold':
+          newText = `<b>${selectedText}</b>`;
+          break;
+        case 'italic':
+          newText = `<i>${selectedText}</i>`;
+          break;
+        case 'underline':
+          newText = `<u>${selectedText}</u>`;
+          break;
+      }
+      
+      textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
+    }
+    
+    // Inserção de templates
+    function insertTemplate(type) {
+      const textarea = document.getElementById('corpo');
+      let template = '';
+      
+      switch(type) {
+        case 'cumprimentos':
+          template = 'Cumprimentando-o cordialmente, ';
+          break;
+        case 'despedida':
+          template = '\n\nSem mais para o momento, colocamo-nos à disposição de Vossa Senhoria para eventuais esclarecimentos.';
+          break;
+      }
+      
+      const cursorPos = textarea.selectionStart;
+      textarea.value = textarea.value.substring(0, cursorPos) + template + textarea.value.substring(cursorPos);
+      textarea.focus();
+      textarea.setSelectionRange(cursorPos + template.length, cursorPos + template.length);
+    }
+    
+    // Carrega templates pré-definidos
+    function loadTemplate(template) {
+      if (!template) return;
+      
+      switch(template) {
+        case 'resposta':
+          document.getElementById('assunto').value = 'Em resposta a Indicação 155.2025 do Vereador Bruno Ziliotto';
+          document.getElementById('corpo').value = `Em atenção à indicação supracitada, informamos que:\n\n[Descrever aqui as informações solicitadas]\n\nAgradecemos a oportunidade de prestar os esclarecimentos solicitados.`;
+          break;
+        case 'solicitacao':
+          document.getElementById('assunto').value = 'Solicitação de Informações';
+          document.getElementById('corpo').value = `Vimos por meio deste solicitar informações sobre:\n\n[Descrever o que está sendo solicitado]\n\nAgradecemos desde já pela atenção dispensada ao presente ofício.`;
+          break;
+        case 'encaminhamento':
+          document.getElementById('assunto').value = 'Encaminhamento de Processo';
+          document.getElementById('corpo').value = `Encaminhamos para conhecimento e providências o processo referente a:\n\n[Descrever o processo]\n\nSolicitamos o devido andamento do referido processo.`;
+          break;
+      }
+    }
+    
+    // Carrega dados salvos do remetente
+    function loadSavedData() {
+      if (localStorage.getItem('remetente')) {
+        document.getElementById('remetente').value = localStorage.getItem('remetente');
+      }
+      if (localStorage.getItem('cargoRem')) {
+        document.getElementById('cargoRem').value = localStorage.getItem('cargoRem');
+      }
+    }
+    
+    // Salva dados do remetente
+    function saveSenderData() {
+      localStorage.setItem('remetente', document.getElementById('remetente').value);
+      localStorage.setItem('cargoRem', document.getElementById('cargoRem').value);
+    }
+    
+    // Adiciona documento ao histórico
+    async function addToHistory(data) {
+      if ('indexedDB' in window) {
+        try {
+          const db = await new Promise((resolve, reject) => {
+            const request = indexedDB.open('OficioDB', 1);
+            request.onsuccess = (e) => resolve(e.target.result);
+            request.onerror = (e) => reject(e.target.error);
+          });
+          
+          const tx = db.transaction('historico', 'readwrite');
+          const store = tx.objectStore('historico');
+          
+          await new Promise((resolve) => {
+            const addRequest = store.add({
+              numero: data.numero,
+              assunto: data.assunto,
+              destinatario: data.destinatario,
+              data: data.data,
+              timestamp: new Date().getTime()
+            });
+            addRequest.onsuccess = () => resolve();
+            addRequest.onerror = () => resolve();
+          });
+          
+          loadHistory();
+        } catch (error) {
+          console.error('Erro ao salvar histórico:', error);
+        }
+      }
+    }
+    
+    // Carrega histórico de documentos
+    async function loadHistory() {
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '';
+      
+      if ('indexedDB' in window) {
+        try {
+          const db = await new Promise((resolve, reject) => {
+            const request = indexedDB.open('OficioDB', 1);
+            request.onsuccess = (e) => resolve(e.target.result);
+            request.onerror = (e) => reject(e.target.error);
+          });
+          
+          const tx = db.transaction('historico', 'readonly');
+          const store = tx.objectStore('historico');
+          const request = store.getAll();
+          
+          request.onsuccess = (e) => {
+            const items = e.target.result.sort((a, b) => b.timestamp - a.timestamp).slice(0, 10);
+            
+            if (items.length === 0) {
+              historyList.innerHTML = '<div class="history-item">Nenhum documento gerado ainda</div>';
+              return;
+            }
+            
+            items.forEach(item => {
+              const div = document.createElement('div');
+              div.className = 'history-item';
+              div.innerHTML = `
+                <span>${item.numero} - ${item.assunto.substring(0, 30)}${item.assunto.length > 30 ? '...' : ''}</span>
+                <button onclick="loadFromHistory(${item.id})">Carregar</button>
+              `;
+              historyList.appendChild(div);
+            });
+          };
+        } catch (error) {
+          console.error('Erro ao carregar histórico:', error);
+          historyList.innerHTML = '<div class="history-item">Erro ao carregar histórico</div>';
+        }
+      } else {
+        historyList.innerHTML = '<div class="history-item">Navegador não suporta histórico</div>';
+      }
+    }
+    
+    // Carrega dados do histórico
+    async function loadFromHistory(id) {
+      if ('indexedDB' in window) {
+        try {
+          const db = await new Promise((resolve, reject) => {
+            const request = indexedDB.open('OficioDB', 1);
+            request.onsuccess = (e) => resolve(e.target.result);
+            request.onerror = (e) => reject(e.target.error);
+          });
+          
+          const tx = db.transaction('historico', 'readonly');
+          const store = tx.objectStore('historico');
+          const request = store.get(id);
+          
+          request.onsuccess = (e) => {
+            const item = e.target.result;
+            if (item) {
+              document.getElementById('numero').value = item.numero;
+              document.getElementById('assunto').value = item.assunto;
+              document.getElementById('destinatario').value = item.destinatario;
+              document.getElementById('data').valueAsDate = new Date(item.timestamp);
+              status.className = 'status success';
+              status.textContent = 'Dados carregados do histórico';
+              status.style.display = 'block';
+            }
+          };
+        } catch (error) {
+          console.error('Erro ao carregar do histórico:', error);
+          status.className = 'status error';
+          status.textContent = 'Erro ao carregar do histórico';
+          status.style.display = 'block';
+        }
+      }
+    }
+    
+    // Geração do PDF
+    form.onsubmit = async e => {
+      e.preventDefault(); 
+      status.style.display = 'none';
+      
+      if (!validar()) {
+        status.className = 'status error';
+        status.textContent = 'Preencha os campos obrigatórios!';
+        status.style.display = 'block';
+        return;
+      }
+      
+      try {
+        // Salva dados do remetente
+        saveSenderData();
+        
+        const doc = new jsPDF({ unit: 'mm', format: 'a4' }); 
+        let y = 20;
+        
+        // Adiciona logotipo se fornecido
+        const logoFile = document.getElementById('logo').files[0];
+        if (logoFile) {
+          const logoReader = new FileReader();
+          logoReader.readAsDataURL(logoFile);
+          await new Promise(r => logoReader.onload = r);
+          doc.addImage(logoReader.result, 'PNG', 20, y, 30, 30);
+        }
+        
+        // Cabeçalho
+        doc.setFont('helvetica', 'bold').setFontSize(14).text('PREFEITURA MUNICIPAL DE FLORIANÓPOLIS', 105, y, { align: 'center' });
+        y += 5;
+        doc.text('OFÍCIO', 105, y, { align: 'center' }); 
+        y += 12;
+        
+        // Data e número
+        const cidade = document.getElementById('cidade').value;
+        const data = formatarData(document.getElementById('data').value);
+        doc.setFont('helvetica', 'normal').setFontSize(12)
+           .text(`${cidade}, ${data}`, 200, y, { align: 'right' })
+           .text(`Ofício nº ${document.getElementById('numero').value}`, 20, y);
+        
+        y += 6;
+        doc.text(document.getElementById('protocolo').value, 20, y); 
+        y += 12;
+        
+        // Destinatário
+        doc.text('Ao Senhor', 20, y); 
+        y += 6;
+        doc.text(document.getElementById('destinatario').value, 20, y); 
+        y += 6;
+        doc.text(document.getElementById('cargoDest').value, 20, y); 
+        y += 6;
+        doc.text('Prefeitura Municipal de Florianópolis', 20, y); 
+        y += 8;
+        
+        // Assunto
+        doc.setFont('helvetica', 'bold')
+           .text(`Assunto: ${document.getElementById('assunto').value}`, 20, y); 
+        y += 12;
+        
+        // Corpo do texto
+        doc.setFont('helvetica', 'normal')
+           .text(`Senhor(a) ${document.getElementById('destinatario').value},`, 20, y); 
+        y += 8;
+        
+        const corpoText = document.getElementById('corpo').value;
+        const lines = doc.splitTextToSize(corpoText, 170);
+        doc.text(lines, 20, y); 
+        y += lines.length * 6 + 8;
+        
+        // Assinatura
+        if (signatureImage) {
+          doc.addImage(signatureImage, 'PNG', 20, y, 40, 15);
+          y += 20;
+        } else {
+          y += 10;
+        }
+        
+        doc.setFont('helvetica', 'bold')
+           .text(document.getElementById('remetente').value, 20, y); 
+        y += 6;
+        doc.setFont('helvetica', 'normal')
+           .text(document.getElementById('cargoRem').value, 20, y);
+        
+        // Rodapé institucional
+        doc.setFontSize(10)
+           .setTextColor(100)
+           .text('Prefeitura Municipal de Florianópolis - Secretaria Municipal de Governo', 105, 287, { align: 'center' });
+        
+        // Salva PDF
+        const fileName = `Oficio_${document.getElementById('numero').value}.pdf`;
+        doc.save(fileName);
+        
+        // Adiciona ao histórico
+        addToHistory({
+          numero: document.getElementById('numero').value,
+          assunto: document.getElementById('assunto').value,
+          destinatario: document.getElementById('destinatario').value,
+          data: document.getElementById('data').value,
+          corpo: document.getElementById('corpo').value
+        });
+        
+        // Mensagem de sucesso
+        status.className = 'status success'; 
+        status.textContent = 'PDF gerado com sucesso!'; 
+        status.style.display = 'block';
+        
+        // Gera novo número para próximo ofício
+        getNextNumber().then(num => {
+          document.getElementById('numero').value = num;
+        });
+      } catch (error) {
+        console.error('Erro ao gerar PDF:', error);
+        status.className = 'status error'; 
+        status.textContent = 'Erro ao gerar PDF'; 
+        status.style.display = 'block';
+      }
+    };
+  </script>
+</body>
+</html>

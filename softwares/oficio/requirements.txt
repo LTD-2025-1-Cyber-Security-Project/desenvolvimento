@@ -1,0 +1,24 @@
+# Sistema Gerador de Ofícios - Requirements
+# Requisitos do projeto - Prefeituras de Florianópolis e São José
+
+# Interface gráfica (Tkinter já vem incluído na instalação padrão do Python)
+# Não é necessário instalar o Tkinter via pip
+
+# Processamento de imagens
+Pillow>=9.4.0
+
+# Geração de PDFs
+reportlab>=3.6.12
+
+# Bibliotecas para criptografia e segurança
+pycryptodome>=3.17.0
+
+# Bibliotecas para manipulação de datas
+python-dateutil>=2.8.2
+
+# Banco de dados SQLite (incluído na biblioteca padrão do Python)
+
+# Para execução em ambiente de desenvolvimento
+pytest>=7.3.1
+black>=23.3.0
+flake8>=6.0.0
