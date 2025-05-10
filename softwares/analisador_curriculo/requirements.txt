@@ -1,10 +1,7 @@
-flask
-Werkzeug
-PyPDF2
-python-dotenv
-langchain
-google-generativeai
-nltk
-pdfminer.six
-scikit-learn
-gunicorn
+flask==2.2.3
+python-dotenv==1.0.0
+werkzeug==2.2.3
+PyPDF2==3.0.1
+pyinstaller==5.13.0
+google-generativeai>=0.1.0
+langchain>=0.0.267
