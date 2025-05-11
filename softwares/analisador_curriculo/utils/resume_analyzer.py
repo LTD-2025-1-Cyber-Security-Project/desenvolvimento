@@ -41,189 +41,6 @@ def preprocess_text(text):
     
     return text
 
-def generate_fallback_analysis(resume_text, tipo_analise, nivel, stack_area, skills, text_metrics):
-    """
-    Gera uma análise básica de fallback quando a API do Google Gemini falha.
-    """
-    # Analisar parágrafos e seções
-    paragraphs = text_metrics['paragraph_count']
-    words = text_metrics['word_count']
-    sentences = text_metrics['sentence_count']
-    
-    # Definir skill_count aqui, antes de usá-lo
-    skill_count = len(skills)
-    
-    # Identificar tipos comuns de palavras de ação
-    action_words = ['desenvolvi', 'implementei', 'gerenciei', 'liderei', 'criei', 'otimizei', 
-                    'aumentei', 'reduzi', 'melhorei', 'coordenei', 'supervisionei', 'projetei']
-    
-    # Verificar se o currículo contém palavras de ação
-    has_action_words = any(word in resume_text.lower() for word in action_words)
-    
-    # Calcular pontuação básica
-    format_score = 60  # Valor padrão médio
-    
-    # Definir structure_issue aqui antes de usá-lo
-    if paragraphs < 3:
-        format_score -= 20
-        structure_issue = "O currículo parece ter poucas seções ou parágrafos."
-    elif paragraphs > 20:
-        format_score -= 10
-        structure_issue = "O currículo parece ter muitas seções, o que pode dificultar a leitura."
-    else:
-        structure_issue = "A estrutura do currículo parece adequada em termos de número de seções."
-    
-    # Ajustar com base no comprimento
-    if words < 200:
-        format_score -= 15
-        length_issue = "O currículo é muito curto, o que pode indicar falta de informações importantes."
-    elif words > 1000:
-        format_score -= 10
-        length_issue = "O currículo é bastante extenso. Considere condensar para melhorar a legibilidade."
-    else:
-        length_issue = "O comprimento do currículo parece adequado."
-        
-    # Ajustar com base nas habilidades encontradas
-    if skill_count == 0:
-        format_score -= 15
-        skills_issue = f"Não foram identificadas habilidades específicas para a área de {stack_area}."
-    elif skill_count < 3:
-        format_score -= 10
-        skills_issue = f"Poucas habilidades específicas para {stack_area} foram identificadas."
-    else:
-        format_score += 10
-        skills_issue = f"Foram identificadas várias habilidades relevantes para {stack_area}."
-    
-    # Determinar nível atual baseado em análise básica
-    experience_indicators = ['gerenciei', 'liderei', 'coordenei', 'dirigi', 'chefiei', 'supervisionei']
-    has_leadership = any(word in resume_text.lower() for word in experience_indicators)
-    
-    years_experience = 0
-    # Tentar extrair anos de experiência do texto
-    experience_patterns = [
-        r'(\d+)\s+anos\s+de\s+experiência',
-        r'experiência\s+de\s+(\d+)\s+anos',
-        r'(\d+)\s+anos\s+na\s+área'
-    ]
-    
-    for pattern in experience_patterns:
-        matches = re.findall(pattern, resume_text.lower())
-        if matches:
-            try:
-                years_experience = max(years_experience, int(matches[0]))
-            except ValueError:
-                pass
-    
-    # Determinar nível com base em experiência e indicadores
-    current_level = "estagiário"
-    if years_experience > 8 or (years_experience > 5 and has_leadership):
-        current_level = "sênior"
-    elif years_experience > 3 or (years_experience > 2 and skill_count > 5):
-        current_level = "pleno"
-    elif years_experience > 1 or skill_count > 3:
-        current_level = "júnior"
-    
-    # Recomendações para próximo nível
-    next_level_map = {
-        'estagiário': 'júnior',
-        'júnior': 'pleno',
-        'pleno': 'sênior',
-        'sênior': 'especialista/líder técnico'
-    }
-    
-    next_level = next_level_map.get(current_level, 'especialista')
-    
-    next_level_reqs = {
-        'júnior': 'Desenvolva projetos práticos, aprimore habilidades técnicas fundamentais e busque experiência para consolidar conhecimentos.',
-        'pleno': 'Aprofunde suas especialidades técnicas, comece a liderar pequenos projetos e desenvolva habilidades de mentoria.',
-        'sênior': 'Desenvolva habilidades de liderança técnica, tome decisões importantes e influencie a direção dos projetos.',
-        'especialista/líder técnico': 'Torne-se referência em sua área, compartilhe conhecimento através de publicações ou palestras e lidere inovações.'
-    }
-    
-    next_level_req = next_level_reqs.get(next_level, next_level_reqs['júnior'])
-    
-    # Gerar recomendações genéricas de cursos e certificações (que serão substituídas pela IA real quando disponível)
-    fallback_courses = [
-        f"Curso especializado em {stack_area}",
-        f"Pós-graduação ou especialização em {stack_area}",
-        f"Workshops práticos sobre {stack_area}",
-        "Cursos de gestão de projetos",
-        "Cursos de desenvolvimento de soft skills"
-    ]
-    
-    fallback_certifications = [
-        f"Certificação profissional em {stack_area}",
-        "Certificações de ferramentas específicas da área",
-        "Certificações reconhecidas internacionalmente",
-        "Certificações de gestão",
-        "Certificações de metodologias aplicáveis à área"
-    ]
-    
-    fallback_tech_skills = [
-        f"Habilidades fundamentais em {stack_area}",
-        "Conhecimento de tecnologias emergentes na área",
-        "Metodologias aplicáveis à função",
-        "Ferramentas específicas do setor",
-        "Técnicas avançadas de resolução de problemas"
-    ]
-    
-    fallback_soft_skills = [
-        "Comunicação eficaz",
-        "Trabalho em equipe",
-        "Resolução de problemas",
-        "Adaptabilidade",
-        "Inteligência emocional"
-    ]
-    
-    # Construir o resultado final
-    return {
-        "pontuacao_geral": format_score,
-        "nivel_atual": current_level,
-        "resumo_executivo": f"Análise básica para currículo na área de {stack_area} com {words} palavras e {skill_count} habilidades relevantes identificadas. Este currículo indica um profissional de nível {current_level}. A avaliação básica sugere uma pontuação de {format_score}/100.",
-        
-        "analise_detalhada": {
-            "formatacao_apresentacao": f"O texto extraído contém {paragraphs} parágrafos, o que sugere uma estrutura {paragraphs < 3 and 'simples' or paragraphs > 10 and 'detalhada' or 'adequada'}.",
-            "estrutura_organizacao": structure_issue,
-            "qualidade_descricoes": f"O currículo contém aproximadamente {sentences} sentenças. {has_action_words and 'Foram identificados verbos de ação, o que é positivo para descrições de experiência.' or 'Não foram identificados muitos verbos de ação, o que pode indicar descrições passivas.'}",
-            "relevancia_habilidades": skills_issue,
-            "destaque_conquistas": f"{'Verbos de ação que indicam conquistas foram identificados' if has_action_words else 'Não foram identificados muitos verbos que indicam conquistas mensuráveis'}. Recomenda-se utilizar verbos de ação e métricas específicas para destacar realizações.",
-            "adequacao_nivel": f"O currículo sugere um profissional de nível {current_level}, enquanto o nível alvo é {nivel}. {current_level == nivel and 'Há alinhamento entre o perfil atual e o desejado.' or 'Há uma lacuna entre o perfil atual e o desejado que pode ser trabalhada com as recomendações fornecidas.'}"
-        },
-        
-        "pontos_fortes": [
-            f"O currículo possui {paragraphs} parágrafos, indicando uma estrutura organizada" if paragraphs >= 3 else "O currículo é conciso",
-            f"Foram identificadas {skill_count} habilidades relevantes para a área de {stack_area}" if skill_count > 0 else "O currículo tem potencial para destacar mais habilidades específicas",
-            "O texto apresenta verbos de ação, o que é positivo para descrições de experiência" if has_action_words else "O currículo tem estrutura básica que pode ser aprimorada",
-            f"O comprimento do currículo ({words} palavras) está dentro do esperado" if 300 <= words <= 800 else f"O currículo tem {words} palavras, o que {'pode precisar de mais detalhes' if words < 300 else 'é bastante detalhado'}"
-        ],
-        
-        "oportunidades_melhoria": [
-            "Adicione mais verbos de ação e resultados quantificáveis" if not has_action_words else "Refine as descrições com mais dados quantitativos",
-            f"Inclua mais habilidades específicas para a área de {stack_area}" if skill_count < 5 else "Continue mantendo as habilidades relevantes atualizadas",
-            "Estruture o currículo com seções claras (Experiência, Formação, Habilidades, etc.)" if paragraphs < 3 else "Mantenha a organização das seções",
-            "Adicione mais detalhes sobre suas experiências profissionais" if words < 300 else "Mantenha o foco nas experiências mais relevantes",
-            "Verifique se o currículo está adaptado para sistemas ATS, usando palavras-chave da vaga"
-        ],
-        
-        "otimizacao_ats": f"O currículo contém {skill_count} palavras-chave relevantes para a área de {stack_area}, o que {'pode ser suficiente' if skill_count >= 3 else 'pode ser insuficiente'} para passar por sistemas ATS (Applicant Tracking Systems). Recomenda-se incluir mais palavras-chave específicas da vaga e da área sem exageros que possam prejudicar a legibilidade.",
-        
-        "recomendacoes": [
-            f"Inclua mais palavras-chave relevantes para a área de {stack_area}" if skill_count < 3 else "Continue mantendo as palavras-chave relevantes",
-            "Utilize verbos de ação para descrever suas experiências (desenvolvi, implementei, gerenciei)" if not has_action_words else "Adicione resultados quantificáveis às suas experiências",
-            "Estruture seu currículo com seções claras e bem definidas" if paragraphs < 3 else "Mantenha a boa estruturação do currículo",
-            "Adapte seu currículo para cada vaga, incluindo palavras-chave do anúncio",
-            f"Para o nível {nivel}, enfatize {'sua capacidade de aprendizado e adaptação' if nivel == 'estagiario' or nivel == 'junior' else 'suas habilidades técnicas e realizações' if nivel == 'pleno' else 'sua liderança e impacto nos resultados' if nivel == 'senior' or nivel == 'lideranca' else 'suas habilidades específicas'}"
-        ],
-        
-        "plano_desenvolvimento": {
-            "cursos_recomendados": fallback_courses,
-            "certificacoes": fallback_certifications,
-            "habilidades_tecnicas": fallback_tech_skills,
-            "habilidades_comportamentais": fallback_soft_skills,
-            "proximo_nivel": f"Para avançar de {current_level} para {next_level}: {next_level_req}"
-        }
-    }
-    
 def extract_skills(text, stack_area):
     """
     Extrai habilidades técnicas relevantes do texto do currículo.
@@ -381,7 +198,7 @@ def extract_skills(text, stack_area):
             found_skills.append(skill)
     
     return found_skills
-    
+
 def basic_text_analysis(text):
     """
     Realiza uma análise básica do texto usando NLTK em vez de spaCy
@@ -512,6 +329,192 @@ def analyze_resume_with_gemini(resume_text, tipo_analise, nivel, stack_area, ski
                 raise ValueError(f"Não foi possível extrair um JSON válido da resposta do modelo Gemini")
     else:
         raise ValueError(f"Não foi possível identificar JSON na resposta: {response_text}")
+
+def generate_fallback_analysis(resume_text, tipo_analise, nivel, stack_area, skills, text_metrics):
+    """
+    Gera uma análise básica de fallback quando a API do Google Gemini falha.
+    """
+    # Analisar parágrafos e seções
+    paragraphs = text_metrics['paragraph_count']
+    words = text_metrics['word_count']
+    sentences = text_metrics['sentence_count']
+    
+    # Definir skill_count aqui, antes de usá-lo
+    skill_count = len(skills)
+    
+    # Identificar tipos comuns de palavras de ação
+    action_words = ['desenvolvi', 'implementei', 'gerenciei', 'liderei', 'criei', 'otimizei', 
+                    'aumentei', 'reduzi', 'melhorei', 'coordenei', 'supervisionei', 'projetei']
+    
+    # Verificar se o currículo contém palavras de ação
+    has_action_words = any(word in resume_text.lower() for word in action_words)
+    
+    # Calcular pontuação básica
+    format_score = 60  # Valor padrão médio
+    
+    # Definir structure_issue aqui antes de usá-lo
+    if paragraphs < 3:
+        format_score -= 20
+        structure_issue = "O currículo parece ter poucas seções ou parágrafos."
+    elif paragraphs > 20:
+        format_score -= 10
+        structure_issue = "O currículo parece ter muitas seções, o que pode dificultar a leitura."
+    else:
+        structure_issue = "A estrutura do currículo parece adequada em termos de número de seções."
+    
+    # Ajustar com base no comprimento
+    if words < 200:
+        format_score -= 15
+        length_issue = "O currículo é muito curto, o que pode indicar falta de informações importantes."
+    elif words > 1000:
+        format_score -= 10
+        length_issue = "O currículo é bastante extenso. Considere condensar para melhorar a legibilidade."
+    else:
+        length_issue = "O comprimento do currículo parece adequado."
+        
+    # Ajustar com base nas habilidades encontradas
+    # Continuação da função generate_fallback_analysis em utils/resume_analyzer.py:
+    # Ajustar com base nas habilidades encontradas
+    if skill_count == 0:
+        format_score -= 15
+        skills_issue = f"Não foram identificadas habilidades específicas para a área de {stack_area}."
+    elif skill_count < 3:
+        format_score -= 10
+        skills_issue = f"Poucas habilidades específicas para {stack_area} foram identificadas."
+    else:
+        format_score += 10
+        skills_issue = f"Foram identificadas várias habilidades relevantes para {stack_area}."
+    
+    # Determinar nível atual baseado em análise básica
+    experience_indicators = ['gerenciei', 'liderei', 'coordenei', 'dirigi', 'chefiei', 'supervisionei']
+    has_leadership = any(word in resume_text.lower() for word in experience_indicators)
+    
+    years_experience = 0
+    # Tentar extrair anos de experiência do texto
+    experience_patterns = [
+        r'(\d+)\s+anos\s+de\s+experiência',
+        r'experiência\s+de\s+(\d+)\s+anos',
+        r'(\d+)\s+anos\s+na\s+área'
+    ]
+    
+    for pattern in experience_patterns:
+        matches = re.findall(pattern, resume_text.lower())
+        if matches:
+            try:
+                years_experience = max(years_experience, int(matches[0]))
+            except ValueError:
+                pass
+    
+    # Determinar nível com base em experiência e indicadores
+    current_level = "estagiário"
+    if years_experience > 8 or (years_experience > 5 and has_leadership):
+        current_level = "sênior"
+    elif years_experience > 3 or (years_experience > 2 and skill_count > 5):
+        current_level = "pleno"
+    elif years_experience > 1 or skill_count > 3:
+        current_level = "júnior"
+    
+    # Recomendações para próximo nível
+    next_level_map = {
+        'estagiário': 'júnior',
+        'júnior': 'pleno',
+        'pleno': 'sênior',
+        'sênior': 'especialista/líder técnico'
+    }
+    
+    next_level = next_level_map.get(current_level, 'especialista')
+    
+    next_level_reqs = {
+        'júnior': 'Desenvolva projetos práticos, aprimore habilidades técnicas fundamentais e busque experiência para consolidar conhecimentos.',
+        'pleno': 'Aprofunde suas especialidades técnicas, comece a liderar pequenos projetos e desenvolva habilidades de mentoria.',
+        'sênior': 'Desenvolva habilidades de liderança técnica, tome decisões importantes e influencie a direção dos projetos.',
+        'especialista/líder técnico': 'Torne-se referência em sua área, compartilhe conhecimento através de publicações ou palestras e lidere inovações.'
+    }
+    
+    next_level_req = next_level_reqs.get(next_level, next_level_reqs['júnior'])
+    
+    # Gerar recomendações genéricas de cursos e certificações (que serão substituídas pela IA real quando disponível)
+    fallback_courses = [
+        f"Curso especializado em {stack_area}",
+        f"Pós-graduação ou especialização em {stack_area}",
+        f"Workshops práticos sobre {stack_area}",
+        "Cursos de gestão de projetos",
+        "Cursos de desenvolvimento de soft skills"
+    ]
+    
+    fallback_certifications = [
+        f"Certificação profissional em {stack_area}",
+        "Certificações de ferramentas específicas da área",
+        "Certificações reconhecidas internacionalmente",
+        "Certificações de gestão",
+        "Certificações de metodologias aplicáveis à área"
+    ]
+    
+    fallback_tech_skills = [
+        f"Habilidades fundamentais em {stack_area}",
+        "Conhecimento de tecnologias emergentes na área",
+        "Metodologias aplicáveis à função",
+        "Ferramentas específicas do setor",
+        "Técnicas avançadas de resolução de problemas"
+    ]
+    
+    fallback_soft_skills = [
+        "Comunicação eficaz",
+        "Trabalho em equipe",
+        "Resolução de problemas",
+        "Adaptabilidade",
+        "Inteligência emocional"
+    ]
+    
+    # Construir o resultado final
+    return {
+        "pontuacao_geral": format_score,
+        "nivel_atual": current_level,
+        "resumo_executivo": f"Análise básica para currículo na área de {stack_area} com {words} palavras e {skill_count} habilidades relevantes identificadas. Este currículo indica um profissional de nível {current_level}. A avaliação básica sugere uma pontuação de {format_score}/100.",
+        
+        "analise_detalhada": {
+            "formatacao_apresentacao": f"O texto extraído contém {paragraphs} parágrafos, o que sugere uma estrutura {paragraphs < 3 and 'simples' or paragraphs > 10 and 'detalhada' or 'adequada'}.",
+            "estrutura_organizacao": structure_issue,
+            "qualidade_descricoes": f"O currículo contém aproximadamente {sentences} sentenças. {has_action_words and 'Foram identificados verbos de ação, o que é positivo para descrições de experiência.' or 'Não foram identificados muitos verbos de ação, o que pode indicar descrições passivas.'}",
+            "relevancia_habilidades": skills_issue,
+            "destaque_conquistas": f"{'Verbos de ação que indicam conquistas foram identificados' if has_action_words else 'Não foram identificados muitos verbos que indicam conquistas mensuráveis'}. Recomenda-se utilizar verbos de ação e métricas específicas para destacar realizações.",
+            "adequacao_nivel": f"O currículo sugere um profissional de nível {current_level}, enquanto o nível alvo é {nivel}. {current_level == nivel and 'Há alinhamento entre o perfil atual e o desejado.' or 'Há uma lacuna entre o perfil atual e o desejado que pode ser trabalhada com as recomendações fornecidas.'}"
+        },
+        
+        "pontos_fortes": [
+            f"O currículo possui {paragraphs} parágrafos, indicando uma estrutura organizada" if paragraphs >= 3 else "O currículo é conciso",
+            f"Foram identificadas {skill_count} habilidades relevantes para a área de {stack_area}" if skill_count > 0 else "O currículo tem potencial para destacar mais habilidades específicas",
+            "O texto apresenta verbos de ação, o que é positivo para descrições de experiência" if has_action_words else "O currículo tem estrutura básica que pode ser aprimorada",
+            f"O comprimento do currículo ({words} palavras) está dentro do esperado" if 300 <= words <= 800 else f"O currículo tem {words} palavras, o que {'pode precisar de mais detalhes' if words < 300 else 'é bastante detalhado'}"
+        ],
+        
+        "oportunidades_melhoria": [
+            "Adicione mais verbos de ação e resultados quantificáveis" if not has_action_words else "Refine as descrições com mais dados quantitativos",
+            f"Inclua mais habilidades específicas para a área de {stack_area}" if skill_count < 5 else "Continue mantendo as habilidades relevantes atualizadas",
+            "Estruture o currículo com seções claras (Experiência, Formação, Habilidades, etc.)" if paragraphs < 3 else "Mantenha a organização das seções",
+            "Adicione mais detalhes sobre suas experiências profissionais" if words < 300 else "Mantenha o foco nas experiências mais relevantes",
+            "Verifique se o currículo está adaptado para sistemas ATS, usando palavras-chave da vaga"
+        ],
+        
+        "otimizacao_ats": f"O currículo contém {skill_count} palavras-chave relevantes para a área de {stack_area}, o que {'pode ser suficiente' if skill_count >= 3 else 'pode ser insuficiente'} para passar por sistemas ATS (Applicant Tracking Systems). Recomenda-se incluir mais palavras-chave específicas da vaga e da área sem exageros que possam prejudicar a legibilidade.",
+        
+        "recomendacoes": [
+            f"Inclua mais palavras-chave relevantes para a área de {stack_area}" if skill_count < 3 else "Continue mantendo as palavras-chave relevantes",
+            "Utilize verbos de ação para descrever suas experiências (desenvolvi, implementei, gerenciei)" if not has_action_words else "Adicione resultados quantificáveis às suas experiências",
+            "Estruture seu currículo com seções claras e bem definidas" if paragraphs < 3 else "Mantenha a boa estruturação do currículo",
+            "Adapte seu currículo para cada vaga, incluindo palavras-chave do anúncio",
+            f"Para o nível {nivel}, enfatize {'sua capacidade de aprendizado e adaptação' if nivel == 'estagiario' or nivel == 'junior' else 'suas habilidades técnicas e realizações' if nivel == 'pleno' else 'sua liderança e impacto nos resultados' if nivel == 'senior' or nivel == 'lideranca' else 'suas habilidades específicas'}"
+        ],
+        
+        "plano_desenvolvimento": {
+            "cursos_recomendados": fallback_courses,
+            "certificacoes": fallback_certifications,
+            "habilidades_tecnicas": fallback_tech_skills,
+            "habilidades_comportamentais": fallback_soft_skills,
+            "proximo_nivel": f"Para avançar de {current_level} para {next_level}: {next_level_req}"
+        }
+    }
+
 
 def analyze_resume(resume_text, tipo_analise, nivel, stack_area):
     """

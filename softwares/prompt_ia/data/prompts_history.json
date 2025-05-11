@@ -153,5 +153,22 @@
             "deadline": "Urgente",
             "detail_level": "padr\u00e3o"
         }
+    },
+    {
+        "id": "bd2b8331-65d5-4601-b422-df03da371dda",
+        "timestamp": "2025-05-10 16:51:36",
+        "user": "admin",
+        "prompt": "\n        Como especialista em administra\u00e7\u00e3o p\u00fablica municipal, crie um of\u00edcio considerando:\n        \n        CONTEXTO MUNICIPAL: Gostaria de oficio para a prefeitura de florianopolis\n        \n        RESTRI\u00c7\u00d5ES LEGAIS: \n        \n        PRAZO: 5 dias\n        \n        DETALHAMENTO: resumido\n        \n        Forne\u00e7a uma resposta estruturada, profissional e aplic\u00e1vel ao contexto de gest\u00e3o municipal.\n        ",
+        "response": "[Seu Nome/Nome da Empresa]\n[Seu Endere\u00e7o]\n[Seu Telefone]\n[Seu Email]\n\n[Data]\n\nPrefeitura Municipal de Florian\u00f3polis\nSecretaria [Nome da Secretaria - especificar a secretaria correta]\n[Endere\u00e7o da Secretaria]\nFlorian\u00f3polis - SC - CEP [CEP]\n\n**Assunto: Solicita\u00e7\u00e3o de [Assunto resumido e objetivo, ex: Informa\u00e7\u00e3o sobre Licenciamento Ambiental]**\n\nPrezado(a) Senhor(a) Secret\u00e1rio(a),\n\nPor meio desta, solicitamos informa\u00e7\u00f5es/autoriza\u00e7\u00e3o/documenta\u00e7\u00e3o [escolha a op\u00e7\u00e3o que se aplica ao seu caso] referente a [assunto espec\u00edfico e conciso].\n\nNecessitamos desta informa\u00e7\u00e3o/autoriza\u00e7\u00e3o/documenta\u00e7\u00e3o em at\u00e9 5 (cinco) dias \u00fateis, a contar da data de recebimento deste of\u00edcio, para [justificativa breve e objetiva do prazo, ex: cumprimento de prazo legal para licita\u00e7\u00e3o].\n\nSolicitamos a gentileza de nos contatar atrav\u00e9s do telefone [seu telefone] ou e-mail [seu email] para confirma\u00e7\u00e3o do recebimento e andamento da solicita\u00e7\u00e3o.\n\nAgradecemos a aten\u00e7\u00e3o e a presteza.\n\nAtenciosamente,\n\n[Seu Nome/Nome do Representante Legal]\n[Seu Cargo/Fun\u00e7\u00e3o]\n[Seu CPF/CNPJ]\n\n\n**Observa\u00e7\u00f5es:**\n\n* Substitua os colchetes \"[...]\" pelas informa\u00e7\u00f5es espec\u00edficas da sua solicita\u00e7\u00e3o.\n*  A escolha da Secretaria Municipal \u00e9 crucial.  Direcione o of\u00edcio para a secretaria respons\u00e1vel pelo assunto tratado.  Por exemplo, se o assunto for licenciamento ambiental, o of\u00edcio deve ser direcionado \u00e0 Secretaria Municipal do Meio Ambiente.\n*  Se necess\u00e1rio, anexe documentos comprobat\u00f3rios. Mencione a anexa\u00e7\u00e3o no corpo do of\u00edcio.\n*  Mantenha a linguagem formal e objetiva.\n*  Este modelo \u00e9 um guia. Adapte-o de acordo com as necessidades espec\u00edficas da sua solicita\u00e7\u00e3o.\n\n\nEste of\u00edcio garante a formalidade e o registro da solicita\u00e7\u00e3o, cumprindo com os requisitos de prazo e detalhamento resumido.  Lembre-se de adaptar o conte\u00fado ao contexto espec\u00edfico da sua necessidade.\n",
+        "success": true,
+        "model_used": "google-gemini",
+        "error": "",
+        "metadata": {
+            "document_type": "of\u00edcio",
+            "context": "Gostaria de oficio para a prefeitura de florianopolis",
+            "legal_restrictions": "",
+            "deadline": "5 dias",
+            "detail_level": "resumido"
+        }
     }
 ]

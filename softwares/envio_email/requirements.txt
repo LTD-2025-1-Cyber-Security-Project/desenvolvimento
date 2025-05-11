@@ -12,3 +12,4 @@ pyinstaller
 # git config --global --add safe.directory F:/Documents/LTD/app-envio-de-emails
 # pyinstaller --onefile --add-data "checklist_data.json:." run.py
 # pyinstaller --onefile run.py
+# pyinstaller --onefile --windowed app.py

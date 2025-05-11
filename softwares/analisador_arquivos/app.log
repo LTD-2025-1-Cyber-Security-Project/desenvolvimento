@@ -1,1 +1,143 @@
 2025-05-04 21:30:50,331 ERROR: Conversion error: FileConverter.pdf_to_text() got an unexpected keyword argument 'output_path' [in /Users/cliente/Desktop/conversor-arquivos1/app.py:198]
+2025-05-10 13:20:39,593 ERROR: Exception on / [GET] [in flask\app.py:875]
+Traceback (most recent call last):
+  File "sqlalchemy\engine\base.py", line 1964, in _exec_single_context
+  File "sqlalchemy\engine\default.py", line 945, in do_execute
+sqlite3.OperationalError: no such table: document
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "flask\app.py", line 1511, in wsgi_app
+  File "flask\app.py", line 919, in full_dispatch_request
+  File "flask_cors\extension.py", line 176, in wrapped_function
+  File "flask\app.py", line 917, in full_dispatch_request
+  File "flask\app.py", line 902, in dispatch_request
+  File "app.py", line 71, in index
+    recent_files = Document.query.order_by(Document.upload_date.desc()).limit(10).all()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "sqlalchemy\orm\query.py", line 2704, in all
+  File "sqlalchemy\orm\query.py", line 2858, in _iter
+  File "sqlalchemy\orm\session.py", line 2365, in execute
+  File "sqlalchemy\orm\session.py", line 2251, in _execute_internal
+  File "sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+  File "sqlalchemy\engine\base.py", line 1416, in execute
+  File "sqlalchemy\sql\elements.py", line 523, in _execute_on_connection
+  File "sqlalchemy\engine\base.py", line 1638, in _execute_clauseelement
+  File "sqlalchemy\engine\base.py", line 1843, in _execute_context
+  File "sqlalchemy\engine\base.py", line 1983, in _exec_single_context
+  File "sqlalchemy\engine\base.py", line 2352, in _handle_dbapi_exception
+  File "sqlalchemy\engine\base.py", line 1964, in _exec_single_context
+  File "sqlalchemy\engine\default.py", line 945, in do_execute
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: document
+[SQL: SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.upload_date AS document_upload_date, document.category AS document_category, document.tags AS document_tags, document.processed AS document_processed, document.file_hash AS document_file_hash, document.user_id AS document_user_id 
+FROM document ORDER BY document.upload_date DESC
+ LIMIT ? OFFSET ?]
+[parameters: (10, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-05-10 13:20:42,234 ERROR: Exception on / [GET] [in flask\app.py:875]
+Traceback (most recent call last):
+  File "sqlalchemy\engine\base.py", line 1964, in _exec_single_context
+  File "sqlalchemy\engine\default.py", line 945, in do_execute
+sqlite3.OperationalError: no such table: document
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "flask\app.py", line 1511, in wsgi_app
+  File "flask\app.py", line 919, in full_dispatch_request
+  File "flask_cors\extension.py", line 176, in wrapped_function
+  File "flask\app.py", line 917, in full_dispatch_request
+  File "flask\app.py", line 902, in dispatch_request
+  File "app.py", line 71, in index
+    recent_files = Document.query.order_by(Document.upload_date.desc()).limit(10).all()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "sqlalchemy\orm\query.py", line 2704, in all
+  File "sqlalchemy\orm\query.py", line 2858, in _iter
+  File "sqlalchemy\orm\session.py", line 2365, in execute
+  File "sqlalchemy\orm\session.py", line 2251, in _execute_internal
+  File "sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+  File "sqlalchemy\engine\base.py", line 1416, in execute
+  File "sqlalchemy\sql\elements.py", line 523, in _execute_on_connection
+  File "sqlalchemy\engine\base.py", line 1638, in _execute_clauseelement
+  File "sqlalchemy\engine\base.py", line 1843, in _execute_context
+  File "sqlalchemy\engine\base.py", line 1983, in _exec_single_context
+  File "sqlalchemy\engine\base.py", line 2352, in _handle_dbapi_exception
+  File "sqlalchemy\engine\base.py", line 1964, in _exec_single_context
+  File "sqlalchemy\engine\default.py", line 945, in do_execute
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: document
+[SQL: SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.upload_date AS document_upload_date, document.category AS document_category, document.tags AS document_tags, document.processed AS document_processed, document.file_hash AS document_file_hash, document.user_id AS document_user_id 
+FROM document ORDER BY document.upload_date DESC
+ LIMIT ? OFFSET ?]
+[parameters: (10, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-05-10 13:20:43,414 ERROR: Exception on / [GET] [in flask\app.py:875]
+Traceback (most recent call last):
+  File "sqlalchemy\engine\base.py", line 1964, in _exec_single_context
+  File "sqlalchemy\engine\default.py", line 945, in do_execute
+sqlite3.OperationalError: no such table: document
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "flask\app.py", line 1511, in wsgi_app
+  File "flask\app.py", line 919, in full_dispatch_request
+  File "flask_cors\extension.py", line 176, in wrapped_function
+  File "flask\app.py", line 917, in full_dispatch_request
+  File "flask\app.py", line 902, in dispatch_request
+  File "app.py", line 71, in index
+    recent_files = Document.query.order_by(Document.upload_date.desc()).limit(10).all()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "sqlalchemy\orm\query.py", line 2704, in all
+  File "sqlalchemy\orm\query.py", line 2858, in _iter
+  File "sqlalchemy\orm\session.py", line 2365, in execute
+  File "sqlalchemy\orm\session.py", line 2251, in _execute_internal
+  File "sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+  File "sqlalchemy\engine\base.py", line 1416, in execute
+  File "sqlalchemy\sql\elements.py", line 523, in _execute_on_connection
+  File "sqlalchemy\engine\base.py", line 1638, in _execute_clauseelement
+  File "sqlalchemy\engine\base.py", line 1843, in _execute_context
+  File "sqlalchemy\engine\base.py", line 1983, in _exec_single_context
+  File "sqlalchemy\engine\base.py", line 2352, in _handle_dbapi_exception
+  File "sqlalchemy\engine\base.py", line 1964, in _exec_single_context
+  File "sqlalchemy\engine\default.py", line 945, in do_execute
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: document
+[SQL: SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.upload_date AS document_upload_date, document.category AS document_category, document.tags AS document_tags, document.processed AS document_processed, document.file_hash AS document_file_hash, document.user_id AS document_user_id 
+FROM document ORDER BY document.upload_date DESC
+ LIMIT ? OFFSET ?]
+[parameters: (10, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-05-10 13:20:45,388 ERROR: Exception on /converter [GET] [in flask\app.py:875]
+Traceback (most recent call last):
+  File "sqlalchemy\engine\base.py", line 1964, in _exec_single_context
+  File "sqlalchemy\engine\default.py", line 945, in do_execute
+sqlite3.OperationalError: no such table: document
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "flask\app.py", line 1511, in wsgi_app
+  File "flask\app.py", line 919, in full_dispatch_request
+  File "flask_cors\extension.py", line 176, in wrapped_function
+  File "flask\app.py", line 917, in full_dispatch_request
+  File "flask\app.py", line 902, in dispatch_request
+  File "app.py", line 80, in converter
+    user_files = Document.query.order_by(Document.upload_date.desc()).all()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "sqlalchemy\orm\query.py", line 2704, in all
+  File "sqlalchemy\orm\query.py", line 2858, in _iter
+  File "sqlalchemy\orm\session.py", line 2365, in execute
+  File "sqlalchemy\orm\session.py", line 2251, in _execute_internal
+  File "sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+  File "sqlalchemy\engine\base.py", line 1416, in execute
+  File "sqlalchemy\sql\elements.py", line 523, in _execute_on_connection
+  File "sqlalchemy\engine\base.py", line 1638, in _execute_clauseelement
+  File "sqlalchemy\engine\base.py", line 1843, in _execute_context
+  File "sqlalchemy\engine\base.py", line 1983, in _exec_single_context
+  File "sqlalchemy\engine\base.py", line 2352, in _handle_dbapi_exception
+  File "sqlalchemy\engine\base.py", line 1964, in _exec_single_context
+  File "sqlalchemy\engine\default.py", line 945, in do_execute
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: document
+[SQL: SELECT document.id AS document_id, document.filename AS document_filename, document.original_filename AS document_original_filename, document.file_type AS document_file_type, document.file_size AS document_file_size, document.upload_date AS document_upload_date, document.category AS document_category, document.tags AS document_tags, document.processed AS document_processed, document.file_hash AS document_file_hash, document.user_id AS document_user_id 
+FROM document ORDER BY document.upload_date DESC]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)

@@ -27,14 +27,17 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
 # Criar pasta de uploads se não existir
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Adicionar contexto global com a data atual
+@app.context_processor
+def inject_now():
+    return {'now': datetime.datetime.now()}
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
-    # Passar o ano atual para o template para exibir no rodapé
-    now = datetime.datetime.now()
-    return render_template('index.html', now=now)
+    return render_template('index.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -97,9 +100,7 @@ def result():
         flash('Nenhuma análise encontrada. Por favor, envie um currículo.', 'error')
         return redirect(url_for('index'))
     
-    # Adicionar a variável now para o template
-    now = datetime.datetime.now()
-    return render_template('result.html', analysis=analysis_result, now=now)
+    return render_template('result.html', analysis=analysis_result)
 
 @app.errorhandler(413)
 def too_large(e):

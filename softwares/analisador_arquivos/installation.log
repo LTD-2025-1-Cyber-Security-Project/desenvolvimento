@@ -25,3 +25,35 @@
 2025-05-05 11:10:05,784 - INFO - Iniciando aplicação na porta 5000...
 2025-05-05 11:10:05,785 - INFO - Abrindo navegador em http://127.0.0.1:5000
 2025-05-05 11:15:14,287 - INFO - Aplicação encerrada pelo usuário
+2025-05-10 11:17:26,028 - INFO - Iniciando instala��o do DocMaster Pro
+2025-05-10 11:17:26,031 - INFO - Verificando vers�o do Python...
+2025-05-10 11:17:26,061 - INFO - Instalando depend�ncias...
+2025-05-10 11:17:36,188 - ERROR - Erro durante a instala��o: Command '['F:\\ltdestacio\\desenvolvimento\\softwares\\analisador_arquivos\\venv\\Scripts\\pip.exe', 'install', '--upgrade', 'pip']' returned non-zero exit status 1.
+2025-05-10 11:31:49,814 - INFO - Iniciando instala��o do DocMaster Pro
+2025-05-10 11:31:49,820 - INFO - Verificando vers�o do Python...
+2025-05-10 11:31:49,840 - INFO - Instalando depend�ncias...
+2025-05-10 11:32:00,825 - ERROR - Erro durante a instala��o: Command '['F:\\ltdestacio\\desenvolvimento\\softwares\\analisador_arquivos\\venv\\Scripts\\pip.exe', 'install', '--upgrade', 'pip']' returned non-zero exit status 1.
+2025-05-10 12:02:24,231 - INFO - Iniciando instalação do DocMaster Pro
+2025-05-10 12:02:24,254 - INFO - Iniciando DocMaster Pro a partir do executável...
+2025-05-10 12:02:24,254 - INFO - Arquivo .env criado a partir do .env.example [OK]
+2025-05-10 12:02:24,254 - INFO - Diretório uploads criado [OK]
+2025-05-10 12:02:24,261 - INFO - Diretório processed criado [OK]
+2025-05-10 12:02:24,261 - INFO - Diretório backups criado [OK]
+2025-05-10 12:02:24,263 - INFO - Diretório logs criado [OK]
+2025-05-10 12:02:24,263 - INFO - Diretório quarantine criado [OK]
+2025-05-10 12:02:24,263 - INFO - Abrindo navegador em http://127.0.0.1:5000
+2025-05-10 12:02:24,408 - WARNING - Aviso: Não foi possível inicializar o banco de dados: 'init-db'
+2025-05-10 12:02:24,408 - INFO - Iniciando aplicação na porta 5000...
+2025-05-10 12:02:24,408 - ERROR - Erro ao executar aplicação: No module named 'app'
+2025-05-10 12:40:52,885 - INFO - Iniciando instalação do DocMaster Pro
+2025-05-10 12:40:52,897 - INFO - Iniciando DocMaster Pro a partir do executável...
+2025-05-10 12:40:52,899 - INFO - Arquivo .env criado a partir do .env.example [OK]
+2025-05-10 12:40:52,899 - INFO - Diretório uploads criado [OK]
+2025-05-10 12:40:52,899 - INFO - Diretório processed criado [OK]
+2025-05-10 12:40:52,899 - INFO - Diretório backups criado [OK]
+2025-05-10 12:40:52,899 - INFO - Diretório logs criado [OK]
+2025-05-10 12:40:52,899 - INFO - Diretório quarantine criado [OK]
+2025-05-10 12:40:52,899 - INFO - Abrindo navegador em http://127.0.0.1:5000
+2025-05-10 12:40:53,030 - WARNING - Aviso: Não foi possível inicializar o banco de dados: 'init-db'
+2025-05-10 12:40:53,030 - INFO - Iniciando aplicação na porta 5000...
+2025-05-10 12:40:53,030 - ERROR - Erro ao executar aplicação: No module named 'app'

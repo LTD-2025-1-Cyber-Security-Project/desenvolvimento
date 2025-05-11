@@ -1,10 +1,8 @@
 flask
-Werkzeug
-PyPDF2
 python-dotenv
-langchain
+werkzeug
+PyPDF2
 google-generativeai
+langchain
+pyinstaller
 nltk
-pdfminer.six
-scikit-learn
-gunicorn

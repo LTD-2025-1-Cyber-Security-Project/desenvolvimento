@@ -1,51 +1,25 @@
-
 # -*- mode: python ; coding: utf-8 -*-
 
-block_cipher = None
 
 a = Analysis(
-    ['app.py'],
+    ['C:\\Users\\RESTAU~1\\AppData\\Local\\Temp\\docmaster_bootstrap.py'],
     pathex=[],
     binaries=[],
-    datas=[
-        ('templates', 'templates'),
-        ('static', 'static'),
-        ('utils', 'utils'),
-        ('.env', '.'),
-    ],
-    hiddenimports=[
-        'flask',
-        'flask_cors',
-        'flask_sqlalchemy',
-        'flask_limiter',
-        'werkzeug',
-        'PyPDF2',
-        'pdfminer',
-        'docx',
-        'openpyxl',
-        'PIL',
-        'pytesseract',
-        'google.generativeai',
-        'nltk',
-        'reportlab',
-    ],
+    datas=[('templates', 'templates'), ('static', 'static'), ('utils', 'utils'), ('.env.example', '.'), ('app.py', '.'), ('config.py', '.'), ('fix_nltk_ssl.py', '.'), ('setup_db.py', '.'), ('DocMasterInitializerFixed.py', '.')],
+    hiddenimports=['flask', 'werkzeug', 'jinja2', 'itsdangerous', 'click', 'importlib', 'sqlite3', 'flask_sqlalchemy', 'PIL', 'email', 'json', 'urllib', 'datetime', 'flask_cors', 'flask_limiter'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
     noarchive=False,
+    optimize=0,
 )
-
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+pyz = PYZ(a.pure)
 
 exe = EXE(
     pyz,
     a.scripts,
     a.binaries,
-    a.zipfiles,
     a.datas,
     [],
     name='DocMaster',
@@ -55,10 +29,11 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,
+    console=True,
     disable_windowed_traceback=False,
+    argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='static/images/icon.ico' if os.path.exists('static/images/icon.ico') else None
+    icon=['static\\images\\icon.ico'],
 )

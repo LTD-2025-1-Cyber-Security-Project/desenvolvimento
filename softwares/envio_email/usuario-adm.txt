@@ -1,0 +1,4 @@
+Usuário Administrador
+
+Email: admin@admin.com
+Senha: admin

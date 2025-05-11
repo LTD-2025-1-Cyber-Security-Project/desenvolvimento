@@ -201,40 +201,331 @@ class SistemaEmail:
 
     # 2. Inicialização do banco de dados com usuários separados para cada prefeitura
     def inicializar_banco_dados(self):
-        """Inicializa o banco de dados SQLite."""
+        """Inicializa o banco de dados SQLite com verificação mais segura."""
         try:
+            # Verifica se o diretório do banco existe
+            db_dir = os.path.dirname(DB_FILE)
+            if not os.path.exists(db_dir):
+                os.makedirs(db_dir)
+                logger.info(f"Diretório do banco de dados criado: {db_dir}")
+            
             conn = sqlite3.connect(DB_FILE)
             cursor = conn.cursor()
             
-            # [Código existente para criação de tabelas...]
-            
-            # Verifica se existem usuários administradores para cada prefeitura
-            # Admin São José
-            cursor.execute("SELECT COUNT(*) FROM usuarios WHERE nivel_acesso = 3 AND prefeitura = 'sj'")
-            if cursor.fetchone()[0] == 0:
-                # Cria usuário admin para São José
-                senha_hash = hashlib.sha256('admin'.encode()).hexdigest()
-                cursor.execute('''
-                INSERT INTO usuarios (nome, email, senha, prefeitura, cargo, departamento, nivel_acesso)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', ('Administrador SJ', 'admin.sj@saojose.sc.gov.br', senha_hash, 'sj', 'Administrador', 'TI', 3))
-            
-            # Admin Florianópolis
-            cursor.execute("SELECT COUNT(*) FROM usuarios WHERE nivel_acesso = 3 AND prefeitura = 'floripa'")
-            if cursor.fetchone()[0] == 0:
-                # Cria usuário admin para Florianópolis
-                senha_hash = hashlib.sha256('admin'.encode()).hexdigest()
-                cursor.execute('''
-                INSERT INTO usuarios (nome, email, senha, prefeitura, cargo, departamento, nivel_acesso)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', ('Administrador Floripa', 'admin.floripa@pmf.sc.gov.br', senha_hash, 'floripa', 'Administrador', 'TI', 3))
+            # Primeiro verifica se a tabela principal existe
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'")
+            if not cursor.fetchone():
+                logger.info("Tabela 'usuarios' não encontrada. Criando esquema do banco de dados...")
                 
+                # Tabela de usuários
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS usuarios (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome TEXT NOT NULL,
+                    email TEXT NOT NULL UNIQUE,
+                    senha TEXT NOT NULL,
+                    prefeitura TEXT NOT NULL,
+                    cargo TEXT,
+                    departamento TEXT,
+                    telefone TEXT,
+                    nivel_acesso INTEGER NOT NULL DEFAULT 1,
+                    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    ultimo_acesso TIMESTAMP
+                )
+                ''')
+                
+                # Tabela de funcionários
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS funcionarios (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome TEXT NOT NULL,
+                    email TEXT NOT NULL UNIQUE,
+                    cargo TEXT,
+                    departamento TEXT,
+                    telefone TEXT,
+                    prefeitura TEXT NOT NULL,
+                    ativo INTEGER NOT NULL DEFAULT 1
+                )
+                ''')
+                
+                # Tabela de grupos
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS grupos (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome TEXT NOT NULL,
+                    descricao TEXT,
+                    prefeitura TEXT NOT NULL
+                )
+                ''')
+                
+                # Tabela de relacionamento entre grupos e funcionários
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS grupo_funcionario (
+                    grupo_id INTEGER,
+                    funcionario_id INTEGER,
+                    PRIMARY KEY (grupo_id, funcionario_id),
+                    FOREIGN KEY (grupo_id) REFERENCES grupos (id),
+                    FOREIGN KEY (funcionario_id) REFERENCES funcionarios (id)
+                )
+                ''')
+                
+                # Tabela de templates
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS templates (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome TEXT NOT NULL,
+                    assunto TEXT NOT NULL,
+                    conteudo TEXT NOT NULL,
+                    prefeitura TEXT NOT NULL,
+                    departamento TEXT,
+                    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    ultima_modificacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                ''')
+                
+                # Tabela de e-mails enviados
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS emails_enviados (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario_id INTEGER NOT NULL,
+                    assunto TEXT NOT NULL,
+                    conteudo TEXT NOT NULL,
+                    destinatarios TEXT NOT NULL,
+                    data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    status TEXT NOT NULL,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+                )
+                ''')
+                
+                # Tabela de e-mails agendados
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS emails_agendados (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario_id INTEGER NOT NULL,
+                    assunto TEXT NOT NULL,
+                    conteudo TEXT NOT NULL,
+                    destinatarios TEXT NOT NULL,
+                    data_agendada TIMESTAMP NOT NULL,
+                    recorrencia TEXT,
+                    anexos TEXT,
+                    recorrencia_opcoes TEXT,
+                    status TEXT NOT NULL DEFAULT 'pendente',
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+                )
+                ''')
+                
+                # Tabela de logs
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario_id INTEGER,
+                    acao TEXT NOT NULL,
+                    descricao TEXT,
+                    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+                )
+                ''')
+                
+                conn.commit()
+                logger.info("Esquema do banco de dados criado com sucesso")
+            
+            # Agora, independentemente se as tabelas já existiam ou acabaram de ser criadas,
+            # verifica se existe um usuário administrador e cria se necessário
+            cursor.execute("SELECT COUNT(*) FROM usuarios WHERE nivel_acesso = 3")
+            if cursor.fetchone()[0] == 0:
+                # Cria usuário admin com senha padrão 'admin'
+                import hashlib
+                senha_hash = hashlib.sha256('admin'.encode()).hexdigest()
+                cursor.execute('''
+                INSERT INTO usuarios (nome, email, senha, prefeitura, cargo, departamento, nivel_acesso)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', ('Administrador', 'admin@admin.com', senha_hash, 'sj', 'Administrador', 'TI', 3))
+                
+                logger.info("Usuário administrador criado com sucesso")
+                
+                # Registra a criação inicial no log
+                cursor.execute('''
+                INSERT INTO logs (acao, descricao)
+                VALUES (?, ?)
+                ''', ('INICIALIZACAO', 'Banco de dados inicializado com sucesso'))
+            
             conn.commit()
             conn.close()
             logger.info("Banco de dados inicializado com sucesso")
+            
+        except sqlite3.Error as e:
+            logger.error(f"Erro SQLite ao inicializar banco de dados: {e}")
+            messagebox.showerror("Erro de Banco de Dados", 
+                            f"Não foi possível inicializar o banco de dados: {e}\n\n"
+                            f"Verifique as permissões de escrita do diretório ou se o arquivo "
+                            f"está sendo usado por outro programa.")
+            
         except Exception as e:
             logger.error(f"Erro ao inicializar banco de dados: {e}")
             messagebox.showerror("Erro", f"Não foi possível inicializar o banco de dados: {e}")
+
+    def criar_banco_dados_manualmente():
+        """Cria o banco de dados manualmente, para ser executado diretamente em caso de problemas."""
+        import os
+        import sqlite3
+        import hashlib
+        
+        # Define o caminho do arquivo de banco de dados
+        db_file = "prefeituras_email.db"
+        
+        # Verifica se o arquivo já existe
+        if os.path.exists(db_file):
+            print(f"O arquivo {db_file} já existe.")
+            resposta = input("Deseja recriá-lo? (s/n): ")
+            if resposta.lower() != 's':
+                print("Operação cancelada.")
+                return
+            
+        # Cria uma conexão com o banco de dados
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+        
+        print("Criando tabelas...")
+        
+        # Tabela de usuários
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            senha TEXT NOT NULL,
+            prefeitura TEXT NOT NULL,
+            cargo TEXT,
+            departamento TEXT,
+            telefone TEXT,
+            nivel_acesso INTEGER NOT NULL DEFAULT 1,
+            data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            ultimo_acesso TIMESTAMP
+        )
+        ''')
+        
+        # Tabela de funcionários
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS funcionarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            cargo TEXT,
+            departamento TEXT,
+            telefone TEXT,
+            prefeitura TEXT NOT NULL,
+            ativo INTEGER NOT NULL DEFAULT 1
+        )
+        ''')
+        
+        # Tabela de grupos
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS grupos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            descricao TEXT,
+            prefeitura TEXT NOT NULL
+        )
+        ''')
+        
+        # Tabela de relacionamento entre grupos e funcionários
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS grupo_funcionario (
+            grupo_id INTEGER,
+            funcionario_id INTEGER,
+            PRIMARY KEY (grupo_id, funcionario_id),
+            FOREIGN KEY (grupo_id) REFERENCES grupos (id),
+            FOREIGN KEY (funcionario_id) REFERENCES funcionarios (id)
+        )
+        ''')
+        
+        # Tabela de templates
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS templates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            assunto TEXT NOT NULL,
+            conteudo TEXT NOT NULL,
+            prefeitura TEXT NOT NULL,
+            departamento TEXT,
+            data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            ultima_modificacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        ''')
+        
+        # Tabela de e-mails enviados
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS emails_enviados (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            assunto TEXT NOT NULL,
+            conteudo TEXT NOT NULL,
+            destinatarios TEXT NOT NULL,
+            data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            status TEXT NOT NULL,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+        )
+        ''')
+        
+        # Tabela de e-mails agendados
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS emails_agendados (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            assunto TEXT NOT NULL,
+            conteudo TEXT NOT NULL,
+            destinatarios TEXT NOT NULL,
+            data_agendada TIMESTAMP NOT NULL,
+            recorrencia TEXT,
+            anexos TEXT,
+            recorrencia_opcoes TEXT,
+            status TEXT NOT NULL DEFAULT 'pendente',
+            FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+        )
+        ''')
+        
+        # Tabela de logs
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER,
+            acao TEXT NOT NULL,
+            descricao TEXT,
+            data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+        )
+        ''')
+        
+        print("Tabelas criadas com sucesso.")
+        
+        # Cria usuário administrador padrão
+        print("Criando usuário administrador...")
+        senha_hash = hashlib.sha256('admin'.encode()).hexdigest()
+        
+        try:
+            cursor.execute('''
+            INSERT INTO usuarios (nome, email, senha, prefeitura, cargo, departamento, nivel_acesso)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('Administrador', 'admin@admin.com', senha_hash, 'sj', 'Administrador', 'TI', 3))
+            
+            # Registra a criação inicial no log
+            cursor.execute('''
+            INSERT INTO logs (acao, descricao)
+            VALUES (?, ?)
+            ''', ('INICIALIZACAO', 'Banco de dados inicializado manualmente'))
+            
+            print("Usuário administrador criado com sucesso.")
+        except sqlite3.IntegrityError:
+            print("O usuário administrador já existe. Ignorando a criação.")
+        
+        conn.commit()
+        conn.close()
+        
+        print("\nOperação concluída com sucesso!")
+        print(f"Banco de dados criado em: {os.path.abspath(db_file)}")
+        print("Usuário administrador:")
+        print("  Email: admin@admin.com")
+        print("  Senha: admin")
 
     # Script para atualizar o banco de dados existente
     def atualizar_banco_dados(self):
@@ -9338,6 +9629,7 @@ def main():
     app = SistemaEmail(root)
     root.mainloop()
 
-
 if __name__ == "__main__":
+    # print("=== Criação Manual do Banco de Dados ===")
+    # criar_banco_dados_manualmente()
     main()
