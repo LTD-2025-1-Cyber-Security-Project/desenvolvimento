@@ -45,8 +45,8 @@ CORES = {
         'destaque': '#F39200',  # Laranja
         'texto': '#FFFFFF',  # Branco
         'texto_secundario': '#CCCCCC',  # Cinza claro
-        'fundo': '#333333',  # Preto
-        'fundo_input': '#333333',  # Cinza escuro
+        'fundo': '#F39200',  # Preto
+        'fundo_input': '#F39200',  # Cinza escuro
     },
     'floripa': {
         'primaria': '#00529B',  # Azul escuro
@@ -54,8 +54,8 @@ CORES = {
         'destaque': '#FF6B00',  # Laranja
         'texto': '#FFFFFF',  # Branco
         'texto_secundario': '#CCCCCC',  # Cinza claro
-        'fundo': '#333333',  # Preto
-        'fundo_input': '#333333',  # Cinza escuro
+        'fundo': '#F39200',  # Preto
+        'fundo_input': '#F39200',  # Cinza escuro
     }
 }
 
@@ -731,7 +731,7 @@ class SistemaEmail:
         style = ttk.Style()
         style.configure('TFrame', background=self.cores['fundo'])
         style.configure('TLabel', background=self.cores['fundo'], foreground=self.cores['texto'])
-        style.configure('TButton', background=self.cores['primaria'], foreground='white')
+        style.configure('TButton', background=self.cores['primaria'], foreground='black')
         
         # Frame de login
         frame_login = ttk.Frame(self.frame_principal, padding=20)
@@ -991,12 +991,12 @@ class SistemaEmail:
         style = ttk.Style()
         style.configure('TFrame', background=self.cores['fundo'])
         style.configure('TLabel', background=self.cores['fundo'], foreground=self.cores['texto'])
-        style.configure('TButton', background=self.cores['primaria'], foreground='white')
+        style.configure('TButton', background=self.cores['primaria'], foreground='black')
         style.configure('TNotebook', background=self.cores['fundo'])
         style.configure('TNotebook.Tab', background=self.cores['secundaria'], 
                         foreground=self.cores['texto'], padding=[10, 5])
         style.map('TNotebook.Tab', background=[('selected', self.cores['primaria'])],
-                    foreground=[('selected', 'white')])
+                    foreground=[('selected', 'black')])
         
         # Cria o menu superior
         self.criar_menu_superior()
@@ -1097,7 +1097,7 @@ class SistemaEmail:
             
             # Configuração para Treeview (tabelas)
             style.configure('Treeview', foreground='black')
-            style.map('Treeview', foreground=[('selected', 'white')])
+            style.map('Treeview', foreground=[('selected', 'black')])
             
             # Configuração para as abas
             style.configure('TNotebook.Tab', foreground='black')
@@ -1116,8 +1116,8 @@ class SistemaEmail:
         # Configura estilo
         style = ttk.Style()
         style.configure('Menu.TFrame', background=self.cores['primaria'])
-        style.configure('Menu.TLabel', background=self.cores['primaria'], foreground='white')
-        style.configure('Menu.TButton', background=self.cores['destaque'], foreground='white')
+        style.configure('Menu.TLabel', background=self.cores['primaria'], foreground='black')
+        style.configure('Menu.TButton', background=self.cores['destaque'], foreground='black')
         
         # Logo
         try:

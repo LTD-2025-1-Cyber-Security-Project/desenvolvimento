@@ -7,3 +7,9 @@ Senha: admin@sj123
 Fpolis
 Email: admin.floripa@pmf.sc.gov.br
 Senha: admin@fpolis2505
+
+---
+
+Usuário Administrador
+Email: admin@admin.com
+Senha: admin

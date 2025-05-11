@@ -1,0 +1,23 @@
+CONSULTA: Previsao do tempo em florianopolis
+DATA/HORA: 11/05/2025 09:32:34
+
+==================================================
+
+RESPOSTA:
+
+A previsão do tempo para Florianópolis, SC:
+
+*   **Hoje, 11 de maio:** Céu com sol e muitas nuvens à tarde. À noite, ainda haverá muita nebulosidade, mas sem chuva. A temperatura deve variar entre 14°C e 22°C. Não há chance de chuva.
+*   **Amanhã, 12 de maio:** Parcialmente nublado, com temperatura entre 15°C e 22°C.
+*   **Terça-feira, 13 de maio:** Chuva fraca, com 60% de probabilidade e 0.8 mm de precipitação.
+*   **Quarta-feira, 14 de maio:** Chuva fraca, com 80% de probabilidade e 1 mm de precipitação.
+
+
+
+==================================================
+
+FONTES:
+
+[1] climatempo.com.br - https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXEbkHY5IP3dWlN8uNuTrLvKbCbcKOGn3M4d-ZDR4cf5SQBJxT35yhpPCb9ux3OJvdtSOViw3eNyDmONeDQwwfm-Kxfug2a8tbhgmWvNutNHfKzw7-FVHAdy6-Y82JvqTNJfSvhp2LeFsYawhsS4ZRuTxTD3eBLdFdUyw1cndjz5ElvvDXjWVQ==
+[2] uol.com.br - https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXFEV7Zu2-Qm-FiSCzMoDGeB_gNU1yOoCMBMOTp-mowOj4axZj2CmtM07GIg0CcVnWAdGTBthLvCy-BKBN5ft_xius_fh_0yd8sX6YkKdJXBKzTtpEDjSx8iJZWu91-D6iUqcnV3NpXWTqdOEFbt0Kpk1ApOf5_Rv6KIig3R3yPp7PUfBmyhWA==
+[3] tempo.com - https://vertexaisearch.cloud.google.com/grounding-api-redirect/AbF9wXGEeUeqcq0I-ImKhw29K9VyxP4AIH9bXYQBLiMQetGpTMV40ZDx849CxezCmeT2IRAUDlkX3TgOXE51pUqDFLeJ6HQGq3g8S1sofv_QBHHdAXQMOCwXYYFGC2ltyc5AQK5t2g==

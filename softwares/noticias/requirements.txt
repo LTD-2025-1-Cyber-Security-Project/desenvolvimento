@@ -1,0 +1,13 @@
+# Dependências principais
+ttkbootstrap>=1.10.1
+# Pillow>=9.0.0
+
+# Cliente API Gemini
+# google-genai>=1.0.0
+
+# Bibliotecas de suporte
+requests>=2.28.0
+python-dotenv>=1.0.0
+
+# Dependências opcionais (para desenvolvimento)
+# pyinstaller>=6.0.0
