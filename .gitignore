@@ -1,0 +1,8 @@
+softwares/analisador_arquivos/build/app/app.pkg
+softwares/analisador_arquivos/dist/app.exe
+softwares/analisador_curriculo/build/app/app.pkg
+softwares/analisador_curriculo/dist/app.exe
+softwares/analisador_arquivos/venv/Lib/site-packages/cv2/cv2.pyd
+softwares/*/build/
+softwares/*/dist/
+softwares/*/venv/
