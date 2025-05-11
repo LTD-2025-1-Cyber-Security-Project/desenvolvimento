@@ -6,3 +6,9 @@ softwares/analisador_arquivos/venv/Lib/site-packages/cv2/cv2.pyd
 softwares/*/build/
 softwares/*/dist/
 softwares/*/venv/
+*.pkg
+*.exe
+*.pyd
+softwares/*/build/
+softwares/*/dist/
+softwares/*/venv/
