@@ -1,0 +1,1 @@
+python -m venv venv && source venv/Scripts/activate && pip install -r requirements.txt && pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" app.py && python app.py

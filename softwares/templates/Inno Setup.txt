@@ -1,7 +1,7 @@
-OutputDir=F:\Documents\LTD\templates\email\app
+OutputDir=F:\ltdestacio\desenvolvimento\softwares\templates\email\app
 templates de email
 My LTD
-https://www.ltdcybersec.com/
+https://www.ltdestacio.com.br/
 
 Aplication Files -> Deve procurar o arquivo executavel
 

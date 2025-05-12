@@ -1,5 +1,5 @@
 OutputDir=F:\ltdestacio\desenvolvimento\softwares\encurtador_url\app
-Gerador Curriculo
+Encurtador url
 My LTD
 https://www.ltdestacio.com.br/
 

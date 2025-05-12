@@ -1,5 +1,5 @@
 OutputDir=F:\ltdestacio\desenvolvimento\softwares\oficio\app
-Gerador Curriculo
+Oficio
 My LTD
 https://www.ltdestacio.com.br/
 

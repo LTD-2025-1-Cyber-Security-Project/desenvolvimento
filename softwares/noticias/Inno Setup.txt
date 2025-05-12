@@ -1,0 +1,9 @@
+OutputDir=F:\ltdestacio\desenvolvimento\softwares\noticias\app
+templates de email
+My LTD
+https://www.ltdcybersec.com/
+
+Aplication Files -> Deve procurar o arquivo executavel
+
+Custom Compiler output folder:
+C:\Program Files

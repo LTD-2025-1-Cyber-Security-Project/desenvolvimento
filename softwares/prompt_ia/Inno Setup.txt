@@ -1,5 +1,5 @@
 OutputDir=F:\ltdestacio\desenvolvimento\softwares\prompt_ia\app
-Gerador Curriculo
+Gerador de Prompts
 My LTD
 https://www.ltdestacio.com.br/
 

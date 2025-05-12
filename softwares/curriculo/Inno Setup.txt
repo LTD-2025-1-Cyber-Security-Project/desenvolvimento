@@ -1,7 +1,7 @@
-OutputDir=F:\Documents\LTD\curriculo\app
+OutputDir=F:\ltdestacio\desenvolvimento\softwares\curriculo\app
 Gerador Curriculo
 My LTD
-https://www.ltdcybersec.com/
+https://www.ltdestacio.com.br/
 
 Aplication Files -> Deve procurar o arquivo executavel
 

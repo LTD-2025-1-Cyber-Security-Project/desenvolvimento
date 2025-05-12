@@ -1,0 +1,9 @@
+OutputDir=F:\ltdestacio\desenvolvimento\softwares\analisador_curriculo\app
+Analisador de Curriculo
+My LTD
+https://www.ltdestacio.com.br/
+
+Aplication Files -> Deve procurar o arquivo executavel
+
+Custom Compiler output folder:
+C:\Program Files
