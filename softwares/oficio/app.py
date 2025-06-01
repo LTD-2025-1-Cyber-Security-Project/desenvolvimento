@@ -19,6 +19,7 @@ from reportlab.lib.colors import black, grey
 from PIL import Image, ImageTk
 import webbrowser
 import io
+import sys
 
 class SistemaGeradorDeOficios:
     def __init__(self, root):
@@ -38,6 +39,9 @@ class SistemaGeradorDeOficios:
         self.fonte_texto = ("Calibri", 11)
         self.fonte_rotulo = ("Calibri", 11, "bold")
         
+        # Configurar diretório de dados
+        self.configurar_diretorio_dados()
+        
         # Configuração do banco de dados
         self.inicializar_banco_dados()
         
@@ -51,13 +55,100 @@ class SistemaGeradorDeOficios:
         # Carregar tela de login
         self.mostrar_tela_login()
 
+    def configurar_diretorio_dados(self):
+        """
+        Configura o diretório onde os dados do sistema serão armazenados.
+        Tenta diferentes localizações dependendo do sistema operacional e contexto de execução.
+        """
+        try:
+            # Se executando como executável PyInstaller
+            if getattr(sys, 'frozen', False):
+                # Executável PyInstaller
+                if hasattr(sys, '_MEIPASS'):
+                    # Diretório temporário do PyInstaller
+                    base_dir = os.path.dirname(sys.executable)
+                else:
+                    base_dir = os.path.dirname(os.path.abspath(sys.executable))
+            else:
+                # Executando como script Python
+                base_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            # Tentar criar diretório de dados no mesmo local do executável
+            self.diretorio_dados = os.path.join(base_dir, "dados_sistema")
+            
+            # Se não conseguir escrever no diretório do executável, usar diretório do usuário
+            if not self.verificar_permissao_escrita(base_dir):
+                # Usar diretório do usuário como fallback
+                import tempfile
+                user_data_dir = os.path.expanduser("~")
+                
+                # Criar diretório específico para o sistema
+                self.diretorio_dados = os.path.join(user_data_dir, "SistemaGeradorOficios", "dados")
+            
+            # Criar diretório se não existir
+            os.makedirs(self.diretorio_dados, exist_ok=True)
+            
+            # Definir caminho do banco de dados
+            self.caminho_banco = os.path.join(self.diretorio_dados, "oficios_sistema.db")
+            
+            print(f"Diretório de dados configurado: {self.diretorio_dados}")
+            print(f"Caminho do banco de dados: {self.caminho_banco}")
+            
+        except Exception as e:
+            # Em caso de erro, usar diretório temporário
+            import tempfile
+            self.diretorio_dados = tempfile.gettempdir()
+            self.caminho_banco = os.path.join(self.diretorio_dados, "oficios_sistema.db")
+            print(f"Usando diretório temporário: {self.diretorio_dados}")
+            print(f"Erro na configuração: {str(e)}")
+
+    def verificar_permissao_escrita(self, diretorio):
+        """
+        Verifica se o diretório tem permissão de escrita.
+        """
+        try:
+            # Tentar criar um arquivo temporário
+            arquivo_teste = os.path.join(diretorio, "teste_permissao.tmp")
+            with open(arquivo_teste, 'w') as f:
+                f.write("teste")
+            os.remove(arquivo_teste)
+            return True
+        except:
+            return False
+
+    def obter_conexao_banco(self):
+        """
+        Obtém uma conexão com o banco de dados SQLite de forma segura.
+        """
+        try:
+            # Criar o diretório pai se não existir
+            os.makedirs(os.path.dirname(self.caminho_banco), exist_ok=True)
+            
+            # Conectar ao banco de dados
+            conn = sqlite3.connect(self.caminho_banco, timeout=30.0)
+            
+            # Configurar WAL mode para melhor concorrência
+            conn.execute('PRAGMA journal_mode=WAL;')
+            conn.execute('PRAGMA synchronous=NORMAL;')
+            conn.execute('PRAGMA temp_store=MEMORY;')
+            conn.execute('PRAGMA mmap_size=268435456;')  # 256MB
+            
+            return conn
+        except Exception as e:
+            print(f"Erro ao conectar com o banco de dados: {str(e)}")
+            messagebox.showerror("Erro de Banco de Dados", 
+                               f"Não foi possível conectar com o banco de dados.\n\n"
+                               f"Erro: {str(e)}\n\n"
+                               f"Caminho: {self.caminho_banco}")
+            raise
+
     def atualizar_estrutura_banco_dados(self):
         """
         Atualiza a estrutura do banco de dados para incluir as novas colunas no modelo de ofício.
         Esta função deve ser chamada em inicializar_banco_dados() após a criação das tabelas.
         """
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Verificar quais colunas existem na tabela de ofícios
@@ -92,94 +183,108 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             print(f"Erro ao atualizar estrutura do banco de dados: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def inicializar_banco_dados(self):
         """
         Inicializa o banco de dados do sistema, criando as tabelas necessárias
         e um usuário administrador padrão, se não existirem.
         """
-        conn = sqlite3.connect('oficios_sistema.db')
-        cursor = conn.cursor()
-        
-        # Tabela de Usuários
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            senha TEXT NOT NULL,
-            municipio TEXT NOT NULL,
-            departamento TEXT,
-            cargo TEXT,
-            perfil TEXT NOT NULL,
-            data_cadastro TEXT NOT NULL,
-            ultimo_acesso TEXT
-        )
-        ''')
-        
-        # Tabela de Oficios com todas as colunas necessárias
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS oficios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            numero TEXT NOT NULL,
-            protocolo TEXT,
-            assunto TEXT NOT NULL,
-            destinatario TEXT NOT NULL,
-            cargo_destinatario TEXT,
-            orgao_destinatario TEXT,
-            conteudo TEXT NOT NULL,
-            cumprimentos TEXT,
-            despedida TEXT,
-            remetente TEXT,
-            cargo_remetente TEXT,
-            tem_logotipo INTEGER DEFAULT 0,
-            caminho_logotipo TEXT,
-            tem_assinatura INTEGER DEFAULT 0,
-            caminho_assinatura TEXT,
-            data_criacao TEXT NOT NULL,
-            data_modificacao TEXT,
-            status TEXT NOT NULL,
-            usuario_id INTEGER NOT NULL,
-            caminho_arquivo TEXT,
-            FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
-        )
-        ''')
-        
-        # Verificar se já existe um administrador, se não, criar um
-        cursor.execute("SELECT COUNT(*) FROM usuarios WHERE perfil = 'admin'")
-        if cursor.fetchone()[0] == 0:
-            # Criar administrador padrão
-            agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            senha_hash = self.hash_senha("admin123")
+        try:
+            conn = self.obter_conexao_banco()
+            cursor = conn.cursor()
             
+            # Tabela de Usuários
             cursor.execute('''
-            INSERT INTO usuarios (nome, email, senha, municipio, departamento, cargo, perfil, data_cadastro)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', ("Administrador", "admin@sistema.gov.br", senha_hash, "Ambos", 
-                "TI", "Administrador do Sistema", "admin", agora))
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                senha TEXT NOT NULL,
+                municipio TEXT NOT NULL,
+                departamento TEXT,
+                cargo TEXT,
+                perfil TEXT NOT NULL,
+                data_cadastro TEXT NOT NULL,
+                ultimo_acesso TEXT
+            )
+            ''')
             
-            # Criar um usuário de Florianópolis para teste
-            senha_hash = self.hash_senha("floripa123")
+            # Tabela de Oficios com todas as colunas necessárias
             cursor.execute('''
-            INSERT INTO usuarios (nome, email, senha, municipio, departamento, cargo, perfil, data_cadastro)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', ("Usuário Florianópolis", "usuario@floripa.sc.gov.br", senha_hash, "Florianópolis", 
-                "Administração", "Assistente Administrativo", "usuario", agora))
+            CREATE TABLE IF NOT EXISTS oficios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                numero TEXT NOT NULL,
+                protocolo TEXT,
+                assunto TEXT NOT NULL,
+                destinatario TEXT NOT NULL,
+                cargo_destinatario TEXT,
+                orgao_destinatario TEXT,
+                conteudo TEXT NOT NULL,
+                cumprimentos TEXT,
+                despedida TEXT,
+                remetente TEXT,
+                cargo_remetente TEXT,
+                tem_logotipo INTEGER DEFAULT 0,
+                caminho_logotipo TEXT,
+                tem_assinatura INTEGER DEFAULT 0,
+                caminho_assinatura TEXT,
+                data_criacao TEXT NOT NULL,
+                data_modificacao TEXT,
+                status TEXT NOT NULL,
+                usuario_id INTEGER NOT NULL,
+                caminho_arquivo TEXT,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+            )
+            ''')
             
-            # Criar um usuário de São José para teste
-            senha_hash = self.hash_senha("saojose123")
-            cursor.execute('''
-            INSERT INTO usuarios (nome, email, senha, municipio, departamento, cargo, perfil, data_cadastro)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', ("Usuário São José", "usuario@saojose.sc.gov.br", senha_hash, "São José", 
-                "Recursos Humanos", "Analista", "usuario", agora))
-        
-        # Verificar se é necessário atualizar a estrutura de tabelas existentes
-        self.atualizar_estrutura_banco_dados()
-        
-        conn.commit()
-        conn.close()
+            # Verificar se já existe um administrador, se não, criar um
+            cursor.execute("SELECT COUNT(*) FROM usuarios WHERE perfil = 'admin'")
+            if cursor.fetchone()[0] == 0:
+                # Criar administrador padrão
+                agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                senha_hash = self.hash_senha("admin123")
+                
+                cursor.execute('''
+                INSERT INTO usuarios (nome, email, senha, municipio, departamento, cargo, perfil, data_cadastro)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', ("Administrador", "admin@sistema.gov.br", senha_hash, "Ambos", 
+                    "TI", "Administrador do Sistema", "admin", agora))
+                
+                # Criar um usuário de Florianópolis para teste
+                senha_hash = self.hash_senha("floripa123")
+                cursor.execute('''
+                INSERT INTO usuarios (nome, email, senha, municipio, departamento, cargo, perfil, data_cadastro)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', ("Usuário Florianópolis", "usuario@floripa.sc.gov.br", senha_hash, "Florianópolis", 
+                    "Administração", "Assistente Administrativo", "usuario", agora))
+                
+                # Criar um usuário de São José para teste
+                senha_hash = self.hash_senha("saojose123")
+                cursor.execute('''
+                INSERT INTO usuarios (nome, email, senha, municipio, departamento, cargo, perfil, data_cadastro)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', ("Usuário São José", "usuario@saojose.sc.gov.br", senha_hash, "São José", 
+                    "Recursos Humanos", "Analista", "usuario", agora))
+                
+                print("Usuários padrão criados com sucesso.")
+            
+            # Verificar se é necessário atualizar a estrutura de tabelas existentes
+            self.atualizar_estrutura_banco_dados()
+            
+            conn.commit()
+            print("Banco de dados inicializado com sucesso.")
+            
+        except Exception as e:
+            print(f"Erro ao inicializar banco de dados: {str(e)}")
+            messagebox.showerror("Erro de Inicialização", 
+                               f"Não foi possível inicializar o banco de dados.\n\n"
+                               f"Erro: {str(e)}")
+            raise
+        finally:
+            if 'conn' in locals():
+                conn.close()
 
     def hash_senha(self, senha):
         # Criar hash da senha usando SHA-256
@@ -247,10 +352,15 @@ class SistemaGeradorDeOficios:
         link_registrar.grid(row=3, column=0, columnspan=2, pady=5)
         link_registrar.bind("<Button-1>", lambda e: self.mostrar_tela_registro())
         
+        # Informações sobre o banco de dados
+        info_bd = tk.Label(frame_login, text=f"BD: {os.path.basename(self.caminho_banco)}", 
+                         font=("Calibri", 8), bg=self.cor_bg, fg="gray")
+        info_bd.grid(row=4, column=0, columnspan=2, pady=5)
+        
         # Rodapé com informações do sistema
         rodape = tk.Label(frame_login, text="© 2025 - Sistema Gerador de Ofícios v1.0", 
                          font=("Calibri", 9), bg=self.cor_bg, fg="gray")
-        rodape.grid(row=4, column=0, columnspan=2, pady=20)
+        rodape.grid(row=5, column=0, columnspan=2, pady=20)
     
     def fazer_login(self):
         email = self.email_var.get().strip()
@@ -261,7 +371,7 @@ class SistemaGeradorDeOficios:
             return
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Buscar usuário pelo email
@@ -289,7 +399,8 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao fazer login: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def mostrar_tela_registro(self):
         # Limpar a tela atual
@@ -418,14 +529,13 @@ class SistemaGeradorDeOficios:
             return
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Verificar se o email já existe
             cursor.execute("SELECT COUNT(*) FROM usuarios WHERE email = ?", (email,))
             if cursor.fetchone()[0] > 0:
                 messagebox.showerror("Erro", "Este email já está registrado.")
-                conn.close()
                 return
             
             # Inserir novo usuário
@@ -444,7 +554,8 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao registrar usuário: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     # ================ DASHBOARD E NAVEGAÇÃO PRINCIPAL ================
     
@@ -500,7 +611,6 @@ class SistemaGeradorDeOficios:
         # Mostrar a tela inicial por padrão
         self.mostrar_tela_inicio()
     
-    # Versão aprimorada da função com efeito hover
     def criar_botao_menu(self, texto, comando):
         """
         Cria um botão padronizado para o menu lateral com efeito hover.
@@ -533,9 +643,6 @@ class SistemaGeradorDeOficios:
         
         btn.pack(fill=tk.X, padx=0, pady=1)
         return btn
-
-    # Exemplo de definição da cor_texto na classe (caso não esteja definida)
-    # self.cor_texto = "#333333"  # Quase preto
     
     def limpar_frame_conteudo(self):
         # Limpar o frame de conteúdo para exibir nova tela
@@ -616,6 +723,11 @@ class SistemaGeradorDeOficios:
                               padx=15, pady=8, cursor="hand2", command=self.mostrar_tela_perfil)
         btn_perfil.grid(row=0, column=2, padx=10)
         
+        # Informações do sistema
+        info_sistema = tk.Label(frame_bv, text=f"Banco de dados: {os.path.basename(self.caminho_banco)}", 
+                               font=("Calibri", 9), bg="white", fg="gray")
+        info_sistema.pack(side=tk.BOTTOM, pady=(5, 0))
+        
         # Rodapé com informações do sistema
         rodape = tk.Label(frame_bv, text="© 2025 - Sistema Gerador de Ofícios v1.0", 
                          font=("Calibri", 9), bg="white", fg="gray")
@@ -638,7 +750,7 @@ class SistemaGeradorDeOficios:
     
     def contar_oficios_usuario(self, status=None):
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             if status:
@@ -658,7 +770,8 @@ class SistemaGeradorDeOficios:
             print(f"Erro ao contar ofícios: {str(e)}")
             return 0
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     # ================ TELA DE NOVO OFÍCIO ================
     
@@ -886,7 +999,7 @@ class SistemaGeradorDeOficios:
             self.cargo_remetente_var.set(dados_oficio['cargo_remetente'])
         else:
             # Obter cargo do usuário do banco de dados
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             cursor.execute("SELECT cargo FROM usuarios WHERE id = ?", (self.id_usuario_atual,))
             cargo_usuario = cursor.fetchone()
@@ -1036,7 +1149,7 @@ class SistemaGeradorDeOficios:
 
     def gerar_proximo_numero_oficio(self):
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Obter o ano atual
@@ -1078,11 +1191,12 @@ class SistemaGeradorDeOficios:
             print(f"Erro ao gerar número de ofício: {str(e)}")
             return f"0001/{datetime.now().year}/ERRO"
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def obter_dados_oficio(self, oficio_id):
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             conn.row_factory = sqlite3.Row  # Para acessar resultados por nome de coluna
             cursor = conn.cursor()
             
@@ -1101,7 +1215,8 @@ class SistemaGeradorDeOficios:
             print(f"Erro ao obter dados do ofício: {str(e)}")
             return None
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def visualizar_previa_oficio(self):
         # Obter dados dos campos
@@ -1140,7 +1255,7 @@ class SistemaGeradorDeOficios:
         titulo_mun.pack(pady=(0, 5))
         
         # Secretaria/Departamento
-        conn = sqlite3.connect('oficios_sistema.db')
+        conn = self.obter_conexao_banco()
         cursor = conn.cursor()
         cursor.execute("SELECT departamento FROM usuarios WHERE id = ?", (self.id_usuario_atual,))
         departamento = cursor.fetchone()[0]
@@ -1254,7 +1369,7 @@ class SistemaGeradorDeOficios:
             return
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -1316,7 +1431,8 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao salvar ofício: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
 
     def selecionar_logotipo(self):
         """Permite ao usuário selecionar um arquivo de logotipo."""
@@ -1330,10 +1446,12 @@ class SistemaGeradorDeOficios:
             )
             if arquivo:
                 self.caminho_logotipo = arquivo
+                self.logotipo_label.config(text=os.path.basename(arquivo))
             else:
                 self.tem_logotipo_var.set(False)
         else:
             self.caminho_logotipo = None
+            self.logotipo_label.config(text="Nenhum arquivo selecionado")
 
     def selecionar_assinatura(self):
         """Permite ao usuário selecionar um arquivo de assinatura."""
@@ -1407,7 +1525,7 @@ class SistemaGeradorDeOficios:
                     logo_path = dados_oficio['caminho_logotipo']
                     if os.path.exists(logo_path):
                         # Calcular dimensões para o logotipo (tamanho máximo de 1.5 polegadas)
-                        img = PILImage.open(logo_path) # type: ignore
+                        img = Image.open(logo_path)
                         w, h = img.size
                         aspect = w / float(h)
                         max_width = 108  # 1.5 inches at 72 dpi
@@ -1433,7 +1551,7 @@ class SistemaGeradorDeOficios:
                 endereco = "Av. Acioni Souza Filho, 403 - Centro, São José - SC, 88103-790"
             
             # Consultar departamento do usuário
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             cursor.execute("SELECT departamento FROM usuarios WHERE id = ?", (self.id_usuario_atual,))
             departamento = cursor.fetchone()
@@ -1539,7 +1657,7 @@ class SistemaGeradorDeOficios:
                     assinatura_path = dados_oficio['caminho_assinatura']
                     if os.path.exists(assinatura_path):
                         # Calcular dimensões para a assinatura
-                        img = PILImage.open(assinatura_path) # type: ignore
+                        img = Image.open(assinatura_path)
                         w, h = img.size
                         aspect = w / float(h)
                         max_width = 100
@@ -1577,7 +1695,7 @@ class SistemaGeradorDeOficios:
             c.save()
             
             # Atualizar o caminho do arquivo no banco de dados
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             cursor.execute(
                 "UPDATE oficios SET caminho_arquivo = ? WHERE id = ?",
@@ -1596,7 +1714,7 @@ class SistemaGeradorDeOficios:
                         os.startfile(arquivo_saida)
                     else:  # macOS e Linux
                         import subprocess
-                        subprocess.call(['open', arquivo_saida] if sys.platform == 'darwin' else ['xdg-open', arquivo_saida]) # type: ignore
+                        subprocess.call(['open', arquivo_saida] if sys.platform == 'darwin' else ['xdg-open', arquivo_saida])
                 except Exception as e:
                     messagebox.showerror("Erro", f"Não foi possível abrir o arquivo: {str(e)}")
                     
@@ -1725,7 +1843,7 @@ class SistemaGeradorDeOficios:
         status_filtro = self.filtro_status_var.get()
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Construir consulta SQL base
@@ -1779,7 +1897,8 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao carregar ofícios: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def abrir_oficio_selecionado(self, event):
         # Pegar o item selecionado
@@ -1826,7 +1945,7 @@ class SistemaGeradorDeOficios:
             return
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Excluir ofício
@@ -1842,7 +1961,8 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao excluir ofício: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     # ================ TELA DE PERFIL ================
     
@@ -1985,7 +2105,7 @@ class SistemaGeradorDeOficios:
     
     def obter_dados_usuario(self):
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             
@@ -2000,7 +2120,8 @@ class SistemaGeradorDeOficios:
             print(f"Erro ao obter dados do usuário: {str(e)}")
             return None
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def salvar_perfil(self):
         # Obter dados dos campos
@@ -2014,7 +2135,7 @@ class SistemaGeradorDeOficios:
             return
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Atualizar dados do usuário
@@ -2033,7 +2154,8 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao atualizar perfil: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def alterar_senha(self):
         # Obter dados dos campos
@@ -2055,7 +2177,7 @@ class SistemaGeradorDeOficios:
             return
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Verificar senha atual
@@ -2083,7 +2205,8 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao alterar senha: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     # ================ TELA DE GERENCIAR USUÁRIOS (ADMIN) ================
     
@@ -2212,7 +2335,7 @@ class SistemaGeradorDeOficios:
         municipio_filtro = self.filtro_municipio_var.get()
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Construir consulta SQL base
@@ -2275,11 +2398,12 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao carregar usuários: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def contar_usuarios(self):
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             cursor.execute("SELECT COUNT(*) FROM usuarios")
@@ -2289,7 +2413,8 @@ class SistemaGeradorDeOficios:
             print(f"Erro ao contar usuários: {str(e)}")
             return 0
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def mostrar_tela_adicionar_usuario(self, usuario_id=None):
         # Criar uma janela modal
@@ -2433,7 +2558,7 @@ class SistemaGeradorDeOficios:
                                   command=lambda: self.adicionar_usuario(janela), cursor="hand2")
         else:
             btn_salvar = tk.Button(frame_botoes, text="Salvar Alterações", font=self.fonte_texto,
-                                  bg="light gray", fg=self.cor_texto, padx=15, pady=5,
+                                   bg="light gray", fg=self.cor_texto, padx=15, pady=5,
                                   command=lambda: self.atualizar_usuario(janela, usuario_id), 
                                   cursor="hand2")
             
@@ -2441,7 +2566,7 @@ class SistemaGeradorDeOficios:
     
     def obter_dados_usuario_por_id(self, usuario_id):
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             
@@ -2456,7 +2581,8 @@ class SistemaGeradorDeOficios:
             print(f"Erro ao obter dados do usuário: {str(e)}")
             return None
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def adicionar_usuario(self, janela):
         # Obter dados dos campos
@@ -2489,7 +2615,7 @@ class SistemaGeradorDeOficios:
             return
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Verificar se o email já existe
@@ -2516,7 +2642,8 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao adicionar usuário: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def atualizar_usuario(self, janela, usuario_id):
         # Obter dados dos campos
@@ -2532,7 +2659,7 @@ class SistemaGeradorDeOficios:
             return
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Atualizar usuário
@@ -2551,7 +2678,8 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao atualizar usuário: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def editar_usuario_selecionado(self, event):
         # Pegar o item selecionado
@@ -2592,7 +2720,7 @@ class SistemaGeradorDeOficios:
             return
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Atualizar senha
@@ -2606,7 +2734,8 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao resetar senha: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     
     def excluir_usuario_selecionado(self):
         # Pegar o item selecionado
@@ -2640,7 +2769,7 @@ class SistemaGeradorDeOficios:
             return
         
         try:
-            conn = sqlite3.connect('oficios_sistema.db')
+            conn = self.obter_conexao_banco()
             cursor = conn.cursor()
             
             # Excluir ofícios do usuário
@@ -2658,15 +2787,28 @@ class SistemaGeradorDeOficios:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao excluir usuário: {str(e)}")
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
 
 
 # ================ INICIALIZAÇÃO DA APLICAÇÃO ================
 
 def main():
-    root = tk.Tk()
-    app = SistemaGeradorDeOficios(root)
-    root.mainloop()
+    try:
+        root = tk.Tk()
+        app = SistemaGeradorDeOficios(root)
+        root.mainloop()
+    except Exception as e:
+        import traceback
+        error_msg = f"Erro fatal na inicialização:\n\n{str(e)}\n\nDetalhes técnicos:\n{traceback.format_exc()}"
+        print(error_msg)
+        
+        # Tentar mostrar o erro em uma janela se possível
+        try:
+            import tkinter.messagebox as msgbox
+            msgbox.showerror("Erro Fatal", error_msg)
+        except:
+            pass
 
 if __name__ == "__main__":
     main()
